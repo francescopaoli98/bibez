@@ -110,15 +110,18 @@ Le fasi 1-3 sono circa metà del lavoro totale. Conviene consumarle in sessioni 
 - Cartella: radice di `bibez`.
 - Vista: 3D, terza persona.
 - Stile: voxel a colori vivaci e piatti.
-- Personaggio: proporzioni Cube World (testa grande), classe iniziale guerriero.
+- Personaggio: proporzioni Cube World (testa grande).
+- Classi: solo guerriero nella prima versione.
+- Comandi: tastiera + mouse (WASD, salto, mouse per camera e attacco).
+- Mondo: seed casuale a ogni partita, salvato nel file di salvataggio.
+- Nome: provvisorio, da decidere più avanti.
 - Multiplayer: escluso.
 
 ## 9. Decisioni aperte
 
-- Nome del gioco e della mascotte/personaggio.
-- Tutte e tre le classi o solo il guerriero all'inizio?
-- Comandi: tastiera + mouse, oppure anche touch?
-- Seed del mondo fisso o scelto dal giocatore?
+- Nome definitivo del gioco e del personaggio.
+- Aggiunta di ranger e mago dopo la fase 4.
+- Supporto touch/gamepad in una fase successiva.
 
 ## 10. Come riprendere
 
