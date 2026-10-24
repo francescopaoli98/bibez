@@ -50,6 +50,7 @@ Il ki è energia che il giocatore plasma. Lo shuriken è solo l'aspetto di parte
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
 | Effetto all'impatto | **Cambia con la forma** |
+| Scia | Dipende dalla forma: uno **shuriken non ha scia**. La scia o il raggio ci sono solo se la forma è un raggio (regola da completare) |
 | Usi | **Lancio** (proiettile) e **melee** (corpo a corpo) |
 | Costo | Più è grande, più consuma. C'è un **limite massimo** |
 | Carica | Vedi sotto |
@@ -107,6 +108,7 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
 - Dettagli della ricarica: velocità col sole, velocità vicino alle fonti, cosa succede al buio.
+- Regola completa di scia/raggio: oltre allo shuriken, quali forme hanno scia o raggio e come si vedono.
 - Come funziona l'assistente di forma (aggancia ai bordi, suggerisce forme simili, correzione automatica?).
 - Mondo: livello chiuso, stanze o mondo aperto.
 - Animazioni delle mani necessarie.
