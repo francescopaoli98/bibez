@@ -72,6 +72,11 @@ Il ki è energia che il giocatore plasma. Lo shuriken è solo l'aspetto di parte
 - Durante la storia il giocatore **scopre i poteri solarpunk**.
 - Il ki e il pannello solare si sbloccano e crescono con la trama.
 
+### HUD
+
+- **Indicatore di carica** del ki, sul bracciale (a forma di foglia) e/o sullo schermo (misuratore circolare minimale).
+- Il bracciale è più **pianta** (viticci, muschio, foglie, fiori) che metallo.
+
 ## 4. Immagini di riferimento
 
 Concept generati con Canva (IA), non render di Unreal. Servono come riferimento di stile.
@@ -83,11 +88,6 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - **v5, attuale:** bracciale quasi tutto pianta, indicatore di carica sul bracciale (foglia) e sullo schermo: https://www.canva.com/M/MAHY9r8p7N0
 - Menu di creazione del ki (4 slot, forma, colori): https://www.canva.com/M/MAHY9rHvIsY
 - Momento del lancio dello shuriken: https://www.canva.com/M/MAHY9o6H6I4
-
-### HUD
-
-- **Indicatore di carica** del ki, sul bracciale (a forma di foglia) e/o sullo schermo (misuratore circolare minimale).
-- Il bracciale è più **pianta** (viticci, muschio, foglie, fiori) che metallo.
 
 ## 5. Decisioni prese
 
