@@ -33,7 +33,9 @@ città verde, piante sospese, turbine eoliche, architettura bianca e curva, luce
 ### Mani
 
 - **Mano destra:** palmo aperto verso l'alto. Sopra il palmo galleggia lo **shuriken di ki**, fatto di pura luce.
-- **Mano sinistra:** un piccolo **pannello solare** agganciato sul **dorso** della mano (lato nocche, non palmo), legato con cinghie in cuoio e cornice in ottone, come un bracciale.
+- **Mano sinistra:** un piccolo **pannello solare** agganciato sul **dorso** della mano (lato nocche, non palmo), come un bracciale.
+  - **Funzione:** **ricarica il ki**.
+  - **Design:** deve essere un oggetto ancora **più solarpunk** del concept v3 (da rifare: più organico, con piante, legno, vetro, fiori).
 
 ### Il ki (sistema centrale)
 
@@ -43,7 +45,7 @@ Il ki è energia che il giocatore plasma. Lo shuriken è solo l'aspetto di parte
 |---|---|
 | Scelta | In un **menu prima della partita** |
 | Quantità | Massimo **3-4 ki diversi** salvati |
-| Forma | **Libera** (non solo forme predefinite) |
+| Forma | **Libera**: si disegna a mano oppure si uniscono forme base. Un **assistente** aiuta a ottenere una forma vicina a quello che il giocatore ha fatto, senza stravolgerla |
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
 | Effetto all'impatto | **Cambia con la forma** |
@@ -51,9 +53,9 @@ Il ki è energia che il giocatore plasma. Lo shuriken è solo l'aspetto di parte
 | Costo | Più è grande, più consuma. C'è un **limite massimo** |
 | Carica | Vedi sotto |
 
-**Carica (da confermare):**
-- Se il ki è già grande: caricare aumenta solo l'**intensità**.
-- Se il ki è piccolo: caricare aumenta solo l'**intensità e gli effetti particellari**, non la dimensione.
+**Carica (confermato):**
+- Caricare aumenta **intensità ed effetti particellari**, sia per ki grande sia per ki piccolo.
+- La dimensione la decide il menu, non la carica.
 - Esiste un tetto massimo.
 
 ### Idea di implementazione in Godot (da validare)
@@ -62,6 +64,12 @@ Il ki è energia che il giocatore plasma. Lo shuriken è solo l'aspetto di parte
 - Una sola energia con due comportamenti: lancio (proiettile con scia e impatto) e melee (lama/aura attorno alla mano).
 - Danno, raggio e consumo derivano dai parametri.
 - Forma libera: da decidere come si disegna nel menu (vedi domande aperte).
+
+### Storia e struttura
+
+- Il gioco **narra una storia**.
+- Durante la storia il giocatore **scopre i poteri solarpunk**.
+- Il ki e il pannello solare si sbloccano e crescono con la trama.
 
 ## 4. Immagini di riferimento
 
@@ -79,21 +87,25 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - Destra: shuriken di luce sul palmo aperto. Sinistra: pannello solare sul dorso.
 - Ki personalizzabile dal menu, 3-4 profili, forma libera, colori scelti dal giocatore.
 - Effetto del ki legato alla forma, sia in lancio sia in melee.
+- Pannello solare: ricarica il ki, design più solarpunk.
+- Gioco narrativo: storia + scoperta dei poteri solarpunk.
+- Editor della forma: disegno libero **e** forme base unibili, con assistente che guida verso una forma coerente.
+- Carica: aumenta intensità e particelle (grande e piccolo), con tetto massimo.
 
 ## 6. Decisioni aperte
 
-- Genere e loop base del gioco (cosa si fa nei primi 5 minuti).
+- Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
-- Cosa fa il pannello solare nel gameplay (ricarica il ki? scudo? luce?).
-- Come si disegna la forma libera nel menu (disegno a mano, punti e curve, forme combinabili).
+- Come si ricarica il ki con il pannello (stare alla luce, fonti di luce nel mondo, ricarica lenta o a scatti?).
+- Nuovo concept del pannello, più solarpunk.
+- Come funziona l'assistente di forma (aggancia ai bordi, suggerisce forme simili, correzione automatica?).
 - Mondo: livello chiuso, stanze o mondo aperto.
 - Animazioni delle mani necessarie.
 - Fonte degli asset (gratis: Quixel, Poly Haven, Kenney; oppure creati a mano).
-- Conferma delle regole di carica (sezione 3).
 
 ## 7. Prossimi passi
 
-1. Rispondere alle decisioni aperte.
+1. Rispondere alle decisioni aperte e rifare il concept del pannello.
 2. Piano a fasi con criteri di completamento, come in `PROGETTO.md`.
 3. Prototipo minimo in Godot sul PC: muoversi, mani visibili, shuriken sul palmo.
 4. Confronto del prototipo con il concept v3.
