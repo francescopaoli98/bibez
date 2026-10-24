@@ -34,7 +34,8 @@ città verde, piante sospese, turbine eoliche, architettura bianca e curva, luce
 
 - **Mano destra:** palmo aperto verso l'alto. Sopra il palmo galleggia lo **shuriken di ki**, fatto di pura luce.
 - **Mano sinistra:** un piccolo **pannello solare** agganciato sul **dorso** della mano (lato nocche, non palmo), come un bracciale.
-  - **Funzione:** **ricarica il ki**.
+  - **Funzione:** **ricarica il ki**, stando alla luce del **sole** e vicino a **fonti di energia** sparse nel mondo.
+  - **Materiali:** misto (ottone, legno intagliato, vetro, muschio e fiori vivi).
   - **Design:** deve essere un oggetto ancora **più solarpunk** del concept v3 (da rifare: più organico, con piante, legno, vetro, fiori).
 
 ### Il ki (sistema centrale)
@@ -77,7 +78,8 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 
 - v1, fucina buia con sfera di ki: https://www.canva.com/M/MAHY70-gLuU
 - v2, solarpunk, pannello e shuriken: https://www.canva.com/M/MAHY8EQEfQ8
-- **v3, attuale:** palmo destro aperto con shuriken verde e arancione, pannello sul dorso della sinistra: https://www.canva.com/M/MAHY8LNnk7g
+- v3, palmo destro aperto con shuriken verde e arancione, pannello sul dorso della sinistra: https://www.canva.com/M/MAHY8LNnk7g
+- **v4, attuale:** come v3, con il bracciale solare più solarpunk (ottone, legno, vetro, muschio): https://www.canva.com/M/MAHY9suEnhQ
 
 ## 5. Decisioni prese
 
@@ -96,8 +98,7 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
-- Come si ricarica il ki con il pannello (stare alla luce, fonti di luce nel mondo, ricarica lenta o a scatti?).
-- Nuovo concept del pannello, più solarpunk.
+- Dettagli della ricarica: velocità col sole, velocità vicino alle fonti, cosa succede al buio.
 - Come funziona l'assistente di forma (aggancia ai bordi, suggerisce forme simili, correzione automatica?).
 - Mondo: livello chiuso, stanze o mondo aperto.
 - Animazioni delle mani necessarie.
