@@ -79,7 +79,15 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - v1, fucina buia con sfera di ki: https://www.canva.com/M/MAHY70-gLuU
 - v2, solarpunk, pannello e shuriken: https://www.canva.com/M/MAHY8EQEfQ8
 - v3, palmo destro aperto con shuriken verde e arancione, pannello sul dorso della sinistra: https://www.canva.com/M/MAHY8LNnk7g
-- **v4, attuale:** come v3, con il bracciale solare più solarpunk (ottone, legno, vetro, muschio): https://www.canva.com/M/MAHY9suEnhQ
+- v4, come v3, con il bracciale solare più solarpunk (ottone, legno, vetro, muschio): https://www.canva.com/M/MAHY9suEnhQ
+- **v5, attuale:** bracciale quasi tutto pianta, indicatore di carica sul bracciale (foglia) e sullo schermo: https://www.canva.com/M/MAHY9r8p7N0
+- Menu di creazione del ki (4 slot, forma, colori): https://www.canva.com/M/MAHY9rHvIsY
+- Momento del lancio dello shuriken: https://www.canva.com/M/MAHY9o6H6I4
+
+### HUD
+
+- **Indicatore di carica** del ki, sul bracciale (a forma di foglia) e/o sullo schermo (misuratore circolare minimale).
+- Il bracciale è più **pianta** (viticci, muschio, foglie, fiori) che metallo.
 
 ## 5. Decisioni prese
 
