@@ -159,7 +159,7 @@ Due modi di difendersi:
 
 **Slot (deciso):** due gruppi **separati**.
 - **Attacco:** 3 slot, fino a 5 con i fiori di cristallo. Tasti 1-5.
-- **Difesa:** 4 tipi creabili, sbloccati con la storia (1 all'inizio). In gioco solo **2 selezionabili** alla volta.
+- **Difesa:** 4 tipi creabili, sbloccati con la storia (1 all'inizio). In gioco solo **2 equipaggiati** alla volta, scelti nel menu (confermato).
 - Il menu del ki ha **due schede**: attacco e difesa.
 
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (WASD, salto, lancio, melee).
@@ -175,7 +175,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Pannello solare: ricarica il ki, design più solarpunk.
 - Tipo di utilizzo del ki (lancio o melee) scelto nel menu per ogni ki, non dipende dalla distanza.
 - Ki melee: con **manico** se impugnabile, **yo-yo** se è un oggetto da lancio.
-- Slot separati: attacco (3, fino a 5) e difesa. Difesa: si possono **creare 4** tipi, ma solo **2 equipaggiati** in gioco, e R passa dall'uno all'altro (da confermare). Menu con due schede.
+- Slot separati: attacco (3, fino a 5) e difesa. Difesa: si possono **creare 4** tipi, ma solo **2 equipaggiati** in gioco, e R passa dall'uno all'altro (confermato). Menu con due schede.
 - Riflesso (parry): clic destro premuto al momento giusto, nessun tasto a parte.
 - Comandi: clic sinistro per usare il ki (lancio o melee secondo il tipo) (tenuto premuto carica), clic destro per la difesa base.
 - Cambio ki in gioco: Q attacco successivo, E difesa successivo, 1-5 scelta diretta dell'attacco, rotella del mouse.
@@ -187,6 +187,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
+- Attacco: stesso principio della difesa (si creano più ki di quelli equipaggiati)? Quanti ne servono all'inizio e cosa aumentano i fiori di cristallo: i ki creabili o quelli equipaggiati?
 - Bonus e malus precisi della difesa con e senza ki.
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
