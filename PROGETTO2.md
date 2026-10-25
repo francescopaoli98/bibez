@@ -106,9 +106,28 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 |---|---|
 | **Clic sinistro** | Usa il ki. Se il ki è di tipo **lancio**, lo lancia anche da vicino. Se è di tipo **melee**, tira il pugno anche da lontano |
 | **Tieni premuto il clic sinistro** | Carica il ki |
-| **Clic destro** | Difesa base |
+| **Clic destro** | Difesa (vedi sezione Difesa) |
 
 Gamepad: rimandato a dopo.
+
+### Difesa (clic destro)
+
+Due modi di difendersi:
+
+| Modo | Effetto |
+|---|---|
+| **Difesa con ki** | Protezione migliore, con **bonus** (parry e simili) |
+| **Difesa senza ki** | Protegge il giocatore al minimo, ma con **malus** |
+
+**Perché:** i malus senza ki servono a spingere il giocatore a usare il ki anche per difendersi. Altrimenti si attacca soltanto e si para sempre senza ki.
+
+**Ki di difesa:**
+- Sono un tipo di ki a parte, diverso da quello d'attacco.
+- All'inizio c'è **un solo tipo di difesa**. Altri si sbloccano più avanti.
+- La difesa può avere **forme e comportamenti diversi**: attaccata al corpo, spostabile, ancorata al terreno e così via.
+- Deve essere progettata in modo **molto intelligente** (bilanciamento e varietà).
+
+**Slot (da chiarire):** 3 ki d'attacco. Per la difesa, 3-4 utilizzi al massimo con gli sblocchi successivi.
 
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (WASD, salto, lancio, melee).
 
@@ -132,6 +151,10 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
+- Struttura esatta degli slot: i 5 slot (3 + 2 fiori di cristallo) sono solo d'attacco o includono la difesa? I ki di difesa hanno slot separati?
+- Come si sbloccano i ki di difesa successivi.
+- Come si seleziona il ki di difesa in gioco (tasti diversi da 1-5?).
+- Bonus e malus precisi della difesa con e senza ki.
 - Come il gioco rende impugnabile una forma melee: aggiunge un manico, sceglie lui tra impugnatura e yo-yo, o lo decide il giocatore?
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
