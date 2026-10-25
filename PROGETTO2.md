@@ -51,7 +51,7 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 | Dimensione | Scelta dal giocatore |
 | Effetto all'impatto | **Cambia con la forma** |
 | Scia | Dipende dalla forma del ki: la forma shuriken non ha scia. La scia o il raggio compaiono solo se la forma è un raggio. Ogni forma ha il suo comportamento |
-| Usi | **Lancio** (proiettile) e **melee** (corpo a corpo) |
+| Usi | Ogni ki ha un **tipo di utilizzo**: **lancio** (proiettile) oppure **melee** (pugno di ki). Il tipo decide cosa fa il clic sinistro, **non la distanza dal bersaglio** |
 | Costo | Più è grande, più consuma. C'è un **limite massimo** |
 | Carica | Vedi sotto |
 
@@ -103,7 +103,7 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 
 | Tasto | Azione |
 |---|---|
-| **Clic sinistro** | Lancio e melee |
+| **Clic sinistro** | Usa il ki. Se il ki è di tipo **lancio**, lo lancia anche da vicino. Se è di tipo **melee**, tira il pugno anche da lontano |
 | **Tieni premuto il clic sinistro** | Carica il ki |
 | **Clic destro** | Difesa base |
 
@@ -120,7 +120,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Ki personalizzabile solo dal menu prima della partita, 3 profili (fino a 5 con powerup), forma libera, colori scelti dal giocatore.
 - Effetto del ki legato alla forma, sia in lancio sia in melee.
 - Pannello solare: ricarica il ki, design più solarpunk.
-- Comandi: clic sinistro per lancio e melee (tenuto premuto carica), clic destro per la difesa base.
+- Tipo di utilizzo del ki (lancio o melee) deciso dal ki stesso, non dalla distanza.
+- Comandi: clic sinistro per usare il ki (lancio o melee secondo il tipo) (tenuto premuto carica), clic destro per la difesa base.
 - Cambio ki in gioco: tasti 1-5, Q/E e rotella del mouse.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
 - Gioco narrativo: storia + scoperta dei poteri solarpunk.
@@ -129,7 +130,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
-- Come il clic sinistro distingue lancio e melee (distanza dal bersaglio? clic rapido contro clic tenuto?).
+- Il tipo lancio o melee si sceglie nel menu per ogni ki, oppure dipende dalla forma disegnata?
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
