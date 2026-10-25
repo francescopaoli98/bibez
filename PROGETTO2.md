@@ -106,11 +106,10 @@ La mano sinistra sta su WASD, quindi i tasti devono essere **veloci da raggiunge
 | Tasto | Azione |
 |---|---|
 | **Q** | Ki d'**attacco** successivo |
-| **E** | Ki di **difesa** successivo |
-| **Shift + Q / Shift + E** | Indietro (attacco / difesa) |
+| **R** | Ki di **difesa**: passa all'altro dei 2 equipaggiati |
+| **Shift + Q** | Ki d'attacco precedente |
 | **1 2 3 4 5** | Scelta diretta del ki d'attacco (4 e 5 solo se sbloccati con i fiori di cristallo) |
 | **Rotella del mouse** | Ki d'attacco precedente / successivo (alternativa) |
-| **Z X C V** | Scelta diretta del ki di difesa (proposta, da confermare) |
 
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (salto, melee, interazione).
 
@@ -124,7 +123,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 | **Ctrl** | Accovacciarsi |
 | **E** | Interagire (preferenza di Francesco) |
 
-**Conflitto da risolvere:** E era assegnata alla difesa successiva. Proposta: **R** per la difesa successiva (Shift + R indietro) e **E** per interagire.
+**Risolto:** **E** interagisce, **R** cambia ki di difesa.
 
 ### Comandi di combattimento
 
@@ -154,13 +153,13 @@ Due modi di difendersi:
   1. **Aura:** attaccata al corpo. È il tipo di partenza.
   2. **Scudo mobile:** lo sposti e lo orienti con la mano.
   3. **Cupola o muro:** ancorato al terreno, copre un'area.
-  4. **Riflesso:** finestra di parry che rimanda indietro l'attacco.
+  4. **Riflesso:** finestra di parry che rimanda indietro l'attacco. Scatta col **clic destro** premuto al momento giusto.
 - Si sbloccano con la **storia**.
 - Deve essere progettata in modo **molto intelligente** (bilanciamento e varietà).
 
 **Slot (deciso):** due gruppi **separati**.
 - **Attacco:** 3 slot, fino a 5 con i fiori di cristallo. Tasti 1-5.
-- **Difesa:** 1 tipo all'inizio, fino a 3-4 con gli sblocchi successivi.
+- **Difesa:** 4 tipi creabili, sbloccati con la storia (1 all'inizio). In gioco solo **2 selezionabili** alla volta.
 - Il menu del ki ha **due schede**: attacco e difesa.
 
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (WASD, salto, lancio, melee).
@@ -176,7 +175,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Pannello solare: ricarica il ki, design più solarpunk.
 - Tipo di utilizzo del ki (lancio o melee) scelto nel menu per ogni ki, non dipende dalla distanza.
 - Ki melee: con **manico** se impugnabile, **yo-yo** se è un oggetto da lancio.
-- Slot separati: attacco (3, fino a 5) e difesa (1, fino a 3-4). Menu con due schede.
+- Slot separati: attacco (3, fino a 5) e difesa. Difesa: si possono **creare 4** tipi, ma solo **2 equipaggiati** in gioco, e R passa dall'uno all'altro (da confermare). Menu con due schede.
+- Riflesso (parry): clic destro premuto al momento giusto, nessun tasto a parte.
 - Comandi: clic sinistro per usare il ki (lancio o melee secondo il tipo) (tenuto premuto carica), clic destro per la difesa base.
 - Cambio ki in gioco: Q attacco successivo, E difesa successivo, 1-5 scelta diretta dell'attacco, rotella del mouse.
 - Ki di difesa: 4 tipi (aura, scudo mobile, cupola/muro, riflesso), sbloccati con la storia.
@@ -187,14 +187,12 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
-- Scelta diretta del ki di difesa (oltre a E): serve un tasto per ciascuno?
 - Bonus e malus precisi della difesa con e senza ki.
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
 - Dettagli della ricarica: velocità col sole, velocità nelle zone di ricarica, cosa succede al buio.
-- Conferma dei tasti: E per interagire e R per la difesa successiva (vedi Comandi di movimento).
 - Come funziona l'assistente di forma (aggancia ai bordi, suggerisce forme simili, correzione automatica?).
 - Mondo: livello chiuso, stanze o mondo aperto.
 - Animazioni delle mani necessarie.
