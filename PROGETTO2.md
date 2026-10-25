@@ -50,8 +50,9 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
 | Effetto all'impatto | **Cambia con la forma** |
+| Melee | Il ki melee deve essere **impugnabile** (come un'arma). Se la forma non si può impugnare (es. uno shuriken), funziona **a corto raggio con un'animazione tipo yo-yo**: parte vicino e torna alla mano |
 | Scia | Dipende dalla forma del ki: la forma shuriken non ha scia. La scia o il raggio compaiono solo se la forma è un raggio. Ogni forma ha il suo comportamento |
-| Usi | Ogni ki ha un **tipo di utilizzo**: **lancio** (proiettile) oppure **melee** (pugno di ki). Il tipo decide cosa fa il clic sinistro, **non la distanza dal bersaglio** |
+| Usi | Ogni ki ha un **tipo di utilizzo**: **lancio** (proiettile) oppure **melee** (pugno di ki). Il tipo si sceglie **nel menu**, per ogni ki. Decide cosa fa il clic sinistro, **non la distanza dal bersaglio** |
 | Costo | Più è grande, più consuma. C'è un **limite massimo** |
 | Carica | Vedi sotto |
 
@@ -120,7 +121,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Ki personalizzabile solo dal menu prima della partita, 3 profili (fino a 5 con powerup), forma libera, colori scelti dal giocatore.
 - Effetto del ki legato alla forma, sia in lancio sia in melee.
 - Pannello solare: ricarica il ki, design più solarpunk.
-- Tipo di utilizzo del ki (lancio o melee) deciso dal ki stesso, non dalla distanza.
+- Tipo di utilizzo del ki (lancio o melee) scelto nel menu per ogni ki, non dipende dalla distanza.
+- Ki melee: impugnabile, oppure yo-yo a corto raggio se la forma non si impugna.
 - Comandi: clic sinistro per usare il ki (lancio o melee secondo il tipo) (tenuto premuto carica), clic destro per la difesa base.
 - Cambio ki in gioco: tasti 1-5, Q/E e rotella del mouse.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
@@ -130,7 +132,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
-- Il tipo lancio o melee si sceglie nel menu per ogni ki, oppure dipende dalla forma disegnata?
+- Come il gioco rende impugnabile una forma melee: aggiunge un manico, sceglie lui tra impugnatura e yo-yo, o lo decide il giocatore?
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
