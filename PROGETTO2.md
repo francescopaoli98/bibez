@@ -91,6 +91,16 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - Momento del lancio, v1 (scia da togliere): https://www.canva.com/M/MAHY9o6H6I4
 - Momento del lancio, v2 (shuriken senza scia): https://www.canva.com/M/MAHY9rfp-ZU
 
+### Comandi per cambiare ki
+
+| Tasto | Azione |
+|---|---|
+| **1 2 3 4 5** | Scelta diretta dello slot (4 e 5 solo se sbloccati con i fiori di cristallo) |
+| **Q / E** | Ki precedente / successivo |
+| **Rotella del mouse** | Ki precedente / successivo (alternativa a Q/E) |
+
+Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (WASD, salto, lancio, melee).
+
 ## 5. Decisioni prese
 
 - Motore Godot 4, GDScript, Forward+.
@@ -100,6 +110,8 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - Ki personalizzabile solo dal menu prima della partita, 3 profili (fino a 5 con powerup), forma libera, colori scelti dal giocatore.
 - Effetto del ki legato alla forma, sia in lancio sia in melee.
 - Pannello solare: ricarica il ki, design più solarpunk.
+- Cambio ki in gioco: tasti 1-5, Q/E e rotella del mouse.
+- Ordine delle fasi: menu del ki (5) prima del mondo (7).
 - Gioco narrativo: storia + scoperta dei poteri solarpunk.
 - Editor della forma: disegno libero **e** forme base unibili, con assistente che guida verso una forma coerente.
 - Carica: aumenta intensità e particelle (grande e piccolo), con tetto massimo.
@@ -107,7 +119,6 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 ## 6. Decisioni aperte
 
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
-- Come si passa da un ki all'altro durante il gioco (tasto che scorre o ruota di selezione).
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
 - Dettagli della ricarica: velocità col sole, velocità vicino alle fonti, cosa succede al buio.
