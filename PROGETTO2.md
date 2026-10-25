@@ -44,8 +44,8 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 
 | Regola | Decisione |
 |---|---|
-| Scelta | Solo nel **menu prima della partita**. La forma **non si cambia durante il gioco** |
-| Quantità | **3 ki** di base. Si sale fino a **5** con certi **powerup**, che sono **oggetti nascosti nel mondo** da trovare |
+| Scelta | Solo nel **menu prima della partita**. La forma **non si cambia durante il gioco**, ma si può **passare da un ki all'altro** |
+| Quantità | **3 ki** di base. Si sale fino a **5** con certi **powerup**, che sono **fiori di cristallo nascosti nel mondo** da trovare |
 | Forma | **Libera**: si disegna a mano oppure si uniscono forme base. Un **assistente** aiuta a ottenere una forma vicina a quello che il giocatore ha fatto, senza stravolgerla |
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
@@ -106,8 +106,8 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 
 ## 6. Decisioni aperte
 
-- Dove sono nascosti i powerup degli slot 4 e 5, e che aspetto hanno (semi, cristalli, reliquie solarpunk?).
-- Durante il gioco si può passare da un ki all'altro? Come (tasto, ruota)?
+- Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
+- Come si passa da un ki all'altro durante il gioco (tasto che scorre o ruota di selezione).
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
 - Dettagli della ricarica: velocità col sole, velocità vicino alle fonti, cosa succede al buio.
@@ -116,12 +116,23 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - Animazioni delle mani necessarie.
 - Fonte degli asset (gratis: Quixel, Poly Haven, Kenney; oppure creati a mano).
 
-## 7. Prossimi passi
+## 7. Piano a fasi (bozza)
 
-1. Rispondere alle decisioni aperte e rifare il concept del pannello.
-2. Piano a fasi con criteri di completamento, come in `PROGETTO.md`.
-3. Prototipo minimo in Godot sul PC: muoversi, mani visibili, ki sul palmo (forma di partenza shuriken, poi modificabile).
-4. Confronto del prototipo con il concept v3.
+Una fase alla volta, verificando ciascuna prima di passare alla successiva.
+
+| Fase | Contenuto | Fatto quando |
+|---|---|---|
+| 1 | Progetto Godot, prima persona, camera, movimento, mani visibili | Ti muovi e vedi le mani in una scena di prova |
+| 2 | Ki sul palmo destro: forma di partenza shuriken, luce e particelle | Il ki galleggia e brilla in verde e arancione |
+| 3 | Lancio e melee, effetto che cambia con la forma | Lanci e colpisci, e forme diverse si comportano in modo diverso |
+| 4 | Pannello solare, carica del ki, HUD (foglia sul bracciale, misuratore) | Il ki si ricarica col sole e l'HUD mostra la carica |
+| 5 | Menu del ki: 3 slot, forme libere o unite, assistente, colori | Crei 3 ki, li salvi e li ritrovi in gioco |
+| 6 | Cambio ki in gioco e slot 4-5 con i fiori di cristallo | Trovi un fiore e sblocchi uno slot |
+| 7 | Mondo solarpunk, fonti di energia, storia | C'è un percorso narrato con poteri da scoprire |
+| 8 | Salvataggio e rifiniture | La partita si riprende dopo la chiusura |
+
+**Traguardo consigliato:** fasi 1-3, il nucleo giocabile.
+Prototipo da confrontare con il concept v5.
 
 ## 8. Come riprendere
 
