@@ -101,11 +101,17 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 
 ### Comandi per cambiare ki
 
+La mano sinistra sta su WASD, quindi i tasti devono essere **veloci da raggiungere**.
+
 | Tasto | Azione |
 |---|---|
-| **1 2 3 4 5** | Scelta diretta dello slot (4 e 5 solo se sbloccati con i fiori di cristallo) |
-| **Q / E** | Ki precedente / successivo |
-| **Rotella del mouse** | Ki precedente / successivo (alternativa a Q/E) |
+| **Q** | Ki d'**attacco** successivo |
+| **E** | Ki di **difesa** successivo |
+| **Shift + Q / Shift + E** | Indietro (attacco / difesa) |
+| **1 2 3 4 5** | Scelta diretta del ki d'attacco (4 e 5 solo se sbloccati con i fiori di cristallo) |
+| **Rotella del mouse** | Ki d'attacco precedente / successivo (alternativa) |
+
+Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (salto, melee, interazione).
 
 ### Comandi di combattimento
 
@@ -131,7 +137,12 @@ Due modi di difendersi:
 **Ki di difesa:**
 - Sono un tipo di ki a parte, diverso da quello d'attacco.
 - All'inizio c'è **un solo tipo di difesa**. Altri si sbloccano più avanti.
-- La difesa può avere **forme e comportamenti diversi**: attaccata al corpo, spostabile, ancorata al terreno e così via.
+- La difesa ha **4 tipi** (confermati):
+  1. **Aura:** attaccata al corpo. È il tipo di partenza.
+  2. **Scudo mobile:** lo sposti e lo orienti con la mano.
+  3. **Cupola o muro:** ancorato al terreno, copre un'area.
+  4. **Riflesso:** finestra di parry che rimanda indietro l'attacco.
+- Si sbloccano con la **storia**.
 - Deve essere progettata in modo **molto intelligente** (bilanciamento e varietà).
 
 **Slot (deciso):** due gruppi **separati**.
@@ -154,7 +165,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Ki melee: con **manico** se impugnabile, **yo-yo** se è un oggetto da lancio.
 - Slot separati: attacco (3, fino a 5) e difesa (1, fino a 3-4). Menu con due schede.
 - Comandi: clic sinistro per usare il ki (lancio o melee secondo il tipo) (tenuto premuto carica), clic destro per la difesa base.
-- Cambio ki in gioco: tasti 1-5, Q/E e rotella del mouse.
+- Cambio ki in gioco: Q attacco successivo, E difesa successivo, 1-5 scelta diretta dell'attacco, rotella del mouse.
+- Ki di difesa: 4 tipi (aura, scudo mobile, cupola/muro, riflesso), sbloccati con la storia.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
 - Gioco narrativo: storia + scoperta dei poteri solarpunk.
 - Editor della forma: disegno libero **e** forme base unibili, con assistente che guida verso una forma coerente.
@@ -162,8 +174,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
-- Come si sbloccano i ki di difesa successivi.
-- Come si seleziona il ki di difesa in gioco (tasti diversi da 1-5?).
+- Scelta diretta del ki di difesa (oltre a E): serve un tasto per ciascuno?
 - Bonus e malus precisi della difesa con e senza ki.
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
