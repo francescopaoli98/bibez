@@ -1,0 +1,16 @@
+# Unreal Engine: cartelle e file generati, non vanno nel repo
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.idea/
+*.sln
+*.suo
+*.VC.db
+*.opensdf
+*.sdf
+*.xcodeproj
+*.xcworkspace
+*.VC.opendb
