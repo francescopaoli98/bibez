@@ -99,6 +99,16 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 | **Q / E** | Ki precedente / successivo |
 | **Rotella del mouse** | Ki precedente / successivo (alternativa a Q/E) |
 
+### Comandi di combattimento
+
+| Tasto | Azione |
+|---|---|
+| **Clic sinistro** | Lancio e melee |
+| **Tieni premuto il clic sinistro** | Carica il ki |
+| **Clic destro** | Difesa base |
+
+Gamepad: rimandato a dopo.
+
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (WASD, salto, lancio, melee).
 
 ## 5. Decisioni prese
@@ -110,6 +120,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Ki personalizzabile solo dal menu prima della partita, 3 profili (fino a 5 con powerup), forma libera, colori scelti dal giocatore.
 - Effetto del ki legato alla forma, sia in lancio sia in melee.
 - Pannello solare: ricarica il ki, design più solarpunk.
+- Comandi: clic sinistro per lancio e melee (tenuto premuto carica), clic destro per la difesa base.
 - Cambio ki in gioco: tasti 1-5, Q/E e rotella del mouse.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
 - Gioco narrativo: storia + scoperta dei poteri solarpunk.
@@ -118,6 +129,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
+- Come il clic sinistro distingue lancio e melee (distanza dal bersaglio? clic rapido contro clic tenuto?).
+- Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
