@@ -2,6 +2,7 @@
 
 Gioco per PC, costi il più possibile a zero. Questo file è il piano del progetto.
 Il vecchio piano (RPG voxel nel browser) resta in `PROGETTO.md`, non toccato.
+Il progetto Unreal sta nella cartella `KiForge/` (nome provvisorio, senza spazio per Unreal).
 
 ## 1. Come lavorare insieme
 

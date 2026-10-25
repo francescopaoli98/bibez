@@ -32,7 +32,7 @@ Poi scrivi: "riprendiamo da PROGETTO2.md, fase 1".
 
 ## 4. Creare il progetto Unreal (lo facciamo insieme)
 
-Nella fase 1 creiamo il progetto C++ **dentro `Keyforge/`**: modello **Prima persona**, linguaggio **C++**, qualità Massima, senza contenuti iniziali non necessari.
+Nella fase 1 creiamo il progetto C++ **dentro `KiForge/`**: modello **Prima persona**, linguaggio **C++**, qualità Massima, senza contenuti iniziali non necessari.
 
 ## Controlli finali
 

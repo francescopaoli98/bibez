@@ -13,11 +13,11 @@ Francesco, aspirante doppiatore, ha studiato programmazione. Parlare sempre in *
 
 ## Progetti nel repo
 
-- **Keyforge / Ki Forge** (attivo): gioco Unreal Engine 5 in prima persona, solarpunk. Piano e decisioni in `PROGETTO2.md`. Il progetto Unreal sta in `Keyforge/`. Logica in C++.
+- **Ki Forge** (nome provvisorio) (attivo): gioco Unreal Engine 5 in prima persona, solarpunk. Piano e decisioni in `PROGETTO2.md`. Il progetto Unreal sta in `KiForge/`. Logica in C++.
 - `PROGETTO.md`: vecchio piano di un RPG voxel nel browser. Non toccare.
 
 ## Unreal
 
 - I Blueprint sono file binari: non si scrivono a mano. La logica va in C++.
 - Non committare `Binaries/`, `Intermediate/`, `Saved/`, `DerivedDataCache/`.
-- File binari su Git LFS (vedi `Keyforge/.gitattributes`).
+- File binari su Git LFS (vedi `KiForge/.gitattributes`).

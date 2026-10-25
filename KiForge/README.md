@@ -1,4 +1,4 @@
-# Keyforge (Ki Forge)
+# Ki Forge
 
 Progetto Unreal Engine 5 del gioco. Il piano completo è in `../PROGETTO2.md`.
 
