@@ -44,8 +44,8 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 
 | Regola | Decisione |
 |---|---|
-| Scelta | In un **menu prima della partita** |
-| Quantità | Massimo **3-4 ki diversi** salvati |
+| Scelta | Solo nel **menu prima della partita**. La forma **non si cambia durante il gioco** |
+| Quantità | **3 ki** di base. Si sale fino a **5** con certi **powerup** (supplemento) |
 | Forma | **Libera**: si disegna a mano oppure si uniscono forme base. Un **assistente** aiuta a ottenere una forma vicina a quello che il giocatore ha fatto, senza stravolgerla |
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
@@ -97,7 +97,7 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - Prima persona, solo le mani visibili.
 - Stile solarpunk, atmosfera luminosa.
 - Destra: ki sul palmo aperto (forma di partenza: shuriken). Sinistra: pannello solare sul dorso.
-- Ki personalizzabile dal menu, 3-4 profili, forma libera, colori scelti dal giocatore.
+- Ki personalizzabile solo dal menu prima della partita, 3 profili (fino a 5 con powerup), forma libera, colori scelti dal giocatore.
 - Effetto del ki legato alla forma, sia in lancio sia in melee.
 - Pannello solare: ricarica il ki, design più solarpunk.
 - Gioco narrativo: storia + scoperta dei poteri solarpunk.
@@ -106,6 +106,8 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 
 ## 6. Decisioni aperte
 
+- Quali powerup sbloccano gli slot 4 e 5, e come si ottengono (storia, esplorazione, sfide).
+- Durante il gioco si può passare da un ki all'altro? Come (tasto, ruota)?
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
 - Dettagli della ricarica: velocità col sole, velocità vicino alle fonti, cosa succede al buio.
