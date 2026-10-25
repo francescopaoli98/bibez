@@ -15,15 +15,21 @@ Il vecchio piano (RPG voxel nel browser) resta in `PROGETTO.md`, non toccato.
 
 | Voce | Scelta |
 |---|---|
-| Motore | Godot 4.x stabile (Unreal valutato, non scelto per ora) |
-| Linguaggio | GDScript |
-| Renderer | Forward+ |
+| Motore | **Unreal Engine 5** (stabile). Godot valutato, scartato per il realismo |
+| Linguaggio | **C++** (scritto da Claude, file di testo). Gli asset binari (mappe, materiali, Niagara) li crea Claude con script Python dell'editor o li fai tu |
+| Renderer | Lumen, Nanite (default di UE5) |
 | PC di sviluppo | RTX 3060, 16 GB RAM |
 | Pubblicazione | prima itch.io (gratis), poi eventualmente Steam |
 | Grafica | realistica, prima persona, si vedono solo le mani |
 | Piattaforma | PC (non Android) |
 
-Nota: il container cloud dove lavora Claude non ha GPU. I render veri si fanno sul PC di Francesco.
+Nota: il container cloud dove lavora Claude non ha GPU né Unreal. Compilazione e prova si fanno sul PC di Francesco.
+
+**Metodo di lavoro con Unreal:**
+- Claude scrive C++ e script Python dell'editor, e li pusha nel repo.
+- Francesco compila, apre il progetto e prova. Manda screenshot ed errori.
+- Gli asset realistici (mani, ambiente) si prendono gratis da Fab e Quixel.
+- Git: serve Git LFS per i file binari di Unreal.
 
 ## 3. Idea di gioco
 
@@ -61,7 +67,7 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 - La dimensione la decide il menu, non la carica.
 - Esiste un tetto massimo.
 
-### Idea di implementazione in Godot (da validare)
+### Idea di implementazione in Unreal (da validare)
 
 - Un oggetto dati per ogni ki: `forma`, `dimensione`, `colori`, `intensità`.
 - Una sola energia con due comportamenti: lancio (proiettile con scia e impatto) e melee (lama/aura attorno alla mano).
@@ -133,7 +139,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 5. Decisioni prese
 
-- Motore Godot 4, GDScript, Forward+.
+- Motore Unreal Engine 5, gameplay in C++. Claude gestisce il progetto.
 - Prima persona, solo le mani visibili.
 - Stile solarpunk, atmosfera luminosa.
 - Destra: ki sul palmo aperto (forma di partenza: shuriken). Sinistra: pannello solare sul dorso.
@@ -172,7 +178,7 @@ Una fase alla volta, verificando ciascuna prima di passare alla successiva.
 
 | Fase | Contenuto | Fatto quando |
 |---|---|---|
-| 1 | Progetto Godot, prima persona, camera, movimento, mani visibili | Ti muovi e vedi le mani in una scena di prova |
+| 1 | Progetto Unreal, prima persona, camera, movimento, mani visibili | Ti muovi e vedi le mani in una scena di prova |
 | 2 | Ki sul palmo destro: forma di partenza shuriken, luce e particelle | Il ki galleggia e brilla in verde e arancione |
 | 3 | Lancio e melee, effetto che cambia con la forma | Lanci e colpisci, e forme diverse si comportano in modo diverso |
 | 4 | Pannello solare, carica del ki, HUD (foglia sul bracciale, misuratore) | Il ki si ricarica col sole e l'HUD mostra la carica |
