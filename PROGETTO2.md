@@ -57,7 +57,7 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
 | Effetto all'impatto | **Cambia con la forma** |
-| Melee | Il ki melee deve essere **impugnabile** (come un'arma). Se la forma non si può impugnare (es. uno shuriken), funziona **a corto raggio con un'animazione tipo yo-yo**: parte vicino e torna alla mano |
+| Melee | Il ki melee deve essere **impugnabile** (come un'arma). Se la forma è impugnabile, il gioco aggiunge un **manico**. Se è un oggetto da lancio (es. uno shuriken), funziona a **yo-yo**: parte vicino e torna alla mano |
 | Scia | Dipende dalla forma del ki: la forma shuriken non ha scia. La scia o il raggio compaiono solo se la forma è un raggio. Ogni forma ha il suo comportamento |
 | Usi | Ogni ki ha un **tipo di utilizzo**: **lancio** (proiettile) oppure **melee** (pugno di ki). Il tipo si sceglie **nel menu**, per ogni ki. Decide cosa fa il clic sinistro, **non la distanza dal bersaglio** |
 | Costo | Più è grande, più consuma. C'è un **limite massimo** |
@@ -134,7 +134,10 @@ Due modi di difendersi:
 - La difesa può avere **forme e comportamenti diversi**: attaccata al corpo, spostabile, ancorata al terreno e così via.
 - Deve essere progettata in modo **molto intelligente** (bilanciamento e varietà).
 
-**Slot (da chiarire):** 3 ki d'attacco. Per la difesa, 3-4 utilizzi al massimo con gli sblocchi successivi.
+**Slot (deciso):** due gruppi **separati**.
+- **Attacco:** 3 slot, fino a 5 con i fiori di cristallo. Tasti 1-5.
+- **Difesa:** 1 tipo all'inizio, fino a 3-4 con gli sblocchi successivi.
+- Il menu del ki ha **due schede**: attacco e difesa.
 
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (WASD, salto, lancio, melee).
 
@@ -148,7 +151,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Effetto del ki legato alla forma, sia in lancio sia in melee.
 - Pannello solare: ricarica il ki, design più solarpunk.
 - Tipo di utilizzo del ki (lancio o melee) scelto nel menu per ogni ki, non dipende dalla distanza.
-- Ki melee: impugnabile, oppure yo-yo a corto raggio se la forma non si impugna.
+- Ki melee: con **manico** se impugnabile, **yo-yo** se è un oggetto da lancio.
+- Slot separati: attacco (3, fino a 5) e difesa (1, fino a 3-4). Menu con due schede.
 - Comandi: clic sinistro per usare il ki (lancio o melee secondo il tipo) (tenuto premuto carica), clic destro per la difesa base.
 - Cambio ki in gioco: tasti 1-5, Q/E e rotella del mouse.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
@@ -158,11 +162,9 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
-- Struttura esatta degli slot: i 5 slot (3 + 2 fiori di cristallo) sono solo d'attacco o includono la difesa? I ki di difesa hanno slot separati?
 - Come si sbloccano i ki di difesa successivi.
 - Come si seleziona il ki di difesa in gioco (tasti diversi da 1-5?).
 - Bonus e malus precisi della difesa con e senza ki.
-- Come il gioco rende impugnabile una forma melee: aggiunge un manico, sceglie lui tra impugnatura e yo-yo, o lo decide il giocatore?
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
