@@ -41,7 +41,7 @@ città verde, piante sospese, turbine eoliche, architettura bianca e curva, luce
 
 - **Mano destra:** palmo aperto verso l'alto. Sopra il palmo galleggia il **ki**, fatto di pura luce. La forma di partenza è uno shuriken, ma può cambiare.
 - **Mano sinistra:** un piccolo **pannello solare** agganciato sul **dorso** della mano (lato nocche, non palmo), come un bracciale.
-  - **Funzione:** **ricarica il ki**, stando alla luce del **sole** e vicino a **fonti di energia** sparse nel mondo.
+  - **Funzione:** **ricarica il ki** in automatico, senza tasto: stando alla luce del **sole** o in **zone di ricarica** sparse nel mondo.
   - **Materiali:** misto (ottone, legno intagliato, vetro, muschio e fiori vivi).
   - **Design:** deve essere un oggetto ancora **più solarpunk** del concept v3 (da rifare: più organico, con piante, legno, vetro, fiori).
 
@@ -110,8 +110,21 @@ La mano sinistra sta su WASD, quindi i tasti devono essere **veloci da raggiunge
 | **Shift + Q / Shift + E** | Indietro (attacco / difesa) |
 | **1 2 3 4 5** | Scelta diretta del ki d'attacco (4 e 5 solo se sbloccati con i fiori di cristallo) |
 | **Rotella del mouse** | Ki d'attacco precedente / successivo (alternativa) |
+| **Z X C V** | Scelta diretta del ki di difesa (proposta, da confermare) |
 
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (salto, melee, interazione).
+
+### Comandi di movimento
+
+| Tasto | Azione |
+|---|---|
+| **WASD** | Movimento |
+| **Spazio** | Salto |
+| **Shift sinistro** | Corsa |
+| **Ctrl** | Accovacciarsi |
+| **E** | Interagire (preferenza di Francesco) |
+
+**Conflitto da risolvere:** E era assegnata alla difesa successiva. Proposta: **R** per la difesa successiva (Shift + R indietro) e **E** per interagire.
 
 ### Comandi di combattimento
 
@@ -180,7 +193,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
-- Dettagli della ricarica: velocità col sole, velocità vicino alle fonti, cosa succede al buio.
+- Dettagli della ricarica: velocità col sole, velocità nelle zone di ricarica, cosa succede al buio.
+- Conferma dei tasti: E per interagire e R per la difesa successiva (vedi Comandi di movimento).
 - Come funziona l'assistente di forma (aggancia ai bordi, suggerisce forme simili, correzione automatica?).
 - Mondo: livello chiuso, stanze o mondo aperto.
 - Animazioni delle mani necessarie.
