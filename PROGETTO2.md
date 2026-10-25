@@ -45,7 +45,7 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 | Regola | Decisione |
 |---|---|
 | Scelta | Solo nel **menu prima della partita**. La forma **non si cambia durante il gioco** |
-| Quantità | **3 ki** di base. Si sale fino a **5** con certi **powerup** (supplemento) |
+| Quantità | **3 ki** di base. Si sale fino a **5** con certi **powerup**, che sono **oggetti nascosti nel mondo** da trovare |
 | Forma | **Libera**: si disegna a mano oppure si uniscono forme base. Un **assistente** aiuta a ottenere una forma vicina a quello che il giocatore ha fatto, senza stravolgerla |
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
@@ -106,7 +106,7 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 
 ## 6. Decisioni aperte
 
-- Quali powerup sbloccano gli slot 4 e 5, e come si ottengono (storia, esplorazione, sfide).
+- Dove sono nascosti i powerup degli slot 4 e 5, e che aspetto hanno (semi, cristalli, reliquie solarpunk?).
 - Durante il gioco si può passare da un ki all'altro? Come (tasto, ruota)?
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
