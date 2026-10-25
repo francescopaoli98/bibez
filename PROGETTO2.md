@@ -32,7 +32,7 @@ città verde, piante sospese, turbine eoliche, architettura bianca e curva, luce
 
 ### Mani
 
-- **Mano destra:** palmo aperto verso l'alto. Sopra il palmo galleggia lo **shuriken di ki**, fatto di pura luce.
+- **Mano destra:** palmo aperto verso l'alto. Sopra il palmo galleggia il **ki**, fatto di pura luce. La forma di partenza è uno shuriken, ma può cambiare.
 - **Mano sinistra:** un piccolo **pannello solare** agganciato sul **dorso** della mano (lato nocche, non palmo), come un bracciale.
   - **Funzione:** **ricarica il ki**, stando alla luce del **sole** e vicino a **fonti di energia** sparse nel mondo.
   - **Materiali:** misto (ottone, legno intagliato, vetro, muschio e fiori vivi).
@@ -40,7 +40,7 @@ città verde, piante sospese, turbine eoliche, architettura bianca e curva, luce
 
 ### Il ki (sistema centrale)
 
-Il ki è energia che il giocatore plasma. Lo shuriken è solo l'aspetto di partenza.
+Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modificare**. Lo shuriken è solo la forma di partenza (default), non un oggetto fisso.
 
 | Regola | Decisione |
 |---|---|
@@ -50,7 +50,7 @@ Il ki è energia che il giocatore plasma. Lo shuriken è solo l'aspetto di parte
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
 | Effetto all'impatto | **Cambia con la forma** |
-| Scia | Dipende dalla forma: uno **shuriken non ha scia**. La scia o il raggio compaiono solo se la forma è un raggio |
+| Scia | Dipende dalla forma del ki: la forma shuriken non ha scia. La scia o il raggio compaiono solo se la forma è un raggio. Ogni forma ha il suo comportamento |
 | Usi | **Lancio** (proiettile) e **melee** (corpo a corpo) |
 | Costo | Più è grande, più consuma. C'è un **limite massimo** |
 | Carica | Vedi sotto |
@@ -96,7 +96,7 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - Motore Godot 4, GDScript, Forward+.
 - Prima persona, solo le mani visibili.
 - Stile solarpunk, atmosfera luminosa.
-- Destra: shuriken di luce sul palmo aperto. Sinistra: pannello solare sul dorso.
+- Destra: ki sul palmo aperto (forma di partenza: shuriken). Sinistra: pannello solare sul dorso.
 - Ki personalizzabile dal menu, 3-4 profili, forma libera, colori scelti dal giocatore.
 - Effetto del ki legato alla forma, sia in lancio sia in melee.
 - Pannello solare: ricarica il ki, design più solarpunk.
@@ -118,7 +118,7 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 
 1. Rispondere alle decisioni aperte e rifare il concept del pannello.
 2. Piano a fasi con criteri di completamento, come in `PROGETTO.md`.
-3. Prototipo minimo in Godot sul PC: muoversi, mani visibili, shuriken sul palmo.
+3. Prototipo minimo in Godot sul PC: muoversi, mani visibili, ki sul palmo (forma di partenza shuriken, poi modificabile).
 4. Confronto del prototipo con il concept v3.
 
 ## 8. Come riprendere
