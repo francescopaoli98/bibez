@@ -81,6 +81,18 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 - Durante la storia il giocatore **scopre i poteri solarpunk**.
 - Il ki e il pannello solare si sbloccano e crescono con la trama.
 
+### Elementi del ki (idea per dopo la fase 3)
+
+Un'idea per la rigiocabilità, da fare **solo dopo** il nucleo giocabile (fasi 1-3).
+
+- Ogni ki ha **un elemento**, scelto nel menu, che cambia il tipo di danno.
+- Elementi proposti (da decidere): fuoco, terra, aria, erba, oppure la lista più solarpunk **sole, vento, terra, pianta, acqua**.
+- I nemici hanno **debolezze e resistenze**, quindi conviene cambiare ki secondo la situazione.
+- Un **effetto semplice** per ciascun elemento (esempio: la pianta rallenta, il sole acceca).
+- Colori di default legati all'elemento, ma modificabili dal giocatore.
+- **Rischi:** troppe combinazioni da bilanciare (forma × tipo × elemento) e menu troppo pieno.
+- Da decidere: l'elemento vale solo per l'attacco o anche per la difesa.
+
 ### HUD
 
 - **Indicatore di carica** del ki, sul bracciale (a forma di foglia) e/o sullo schermo (misuratore circolare minimale).
@@ -187,6 +199,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
+- Elementi del ki: quali elementi, e se valgono anche per la difesa (dopo la fase 3).
 - Bonus e malus precisi della difesa con e senza ki.
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
 - Dove sono nascosti i fiori di cristallo (che aggiungono ki creabili) e quanto sono difficili da trovare.
@@ -214,6 +227,7 @@ Una fase alla volta, verificando ciascuna prima di passare alla successiva.
 | 8 | Salvataggio e rifiniture | La partita si riprende dopo la chiusura |
 
 **Traguardo consigliato:** fasi 1-3, il nucleo giocabile.
+**Dopo la fase 3:** valutare gli elementi del ki (sezione 3).
 Prototipo da confrontare con il concept v5.
 
 ## 8. Come riprendere
