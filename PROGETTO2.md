@@ -52,7 +52,7 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 | Regola | Decisione |
 |---|---|
 | Scelta | Solo nel **menu prima della partita**. La forma **non si cambia durante il gioco**, ma si può **passare da un ki all'altro** |
-| Quantità | **3 ki** di base. Si sale fino a **5** con certi **powerup**, che sono **fiori di cristallo nascosti nel mondo** da trovare |
+| Quantità | Si **creano** 3 ki di base, fino a **5** trovando i **fiori di cristallo** nascosti nel mondo. In gioco se ne **equipaggiano sempre 3** (scelti nel menu) |
 | Forma | **Libera**: si disegna a mano oppure si uniscono forme base. Un **assistente** aiuta a ottenere una forma vicina a quello che il giocatore ha fatto, senza stravolgerla |
 | Colori | **Scelti dal giocatore** (verde e arancione sono solo il default) |
 | Dimensione | Scelta dal giocatore |
@@ -108,7 +108,7 @@ La mano sinistra sta su WASD, quindi i tasti devono essere **veloci da raggiunge
 | **Q** | Ki d'**attacco** successivo |
 | **R** | Ki di **difesa**: passa all'altro dei 2 equipaggiati |
 | **Shift + Q** | Ki d'attacco precedente |
-| **1 2 3 4 5** | Scelta diretta del ki d'attacco (4 e 5 solo se sbloccati con i fiori di cristallo) |
+| **1 2 3** | Scelta diretta del ki d'attacco equipaggiato |
 | **Rotella del mouse** | Ki d'attacco precedente / successivo (alternativa) |
 
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (salto, melee, interazione).
@@ -158,7 +158,7 @@ Due modi di difendersi:
 - Deve essere progettata in modo **molto intelligente** (bilanciamento e varietà).
 
 **Slot (deciso):** due gruppi **separati**.
-- **Attacco:** 3 slot, fino a 5 con i fiori di cristallo. Tasti 1-5.
+- **Attacco:** 3 slot equipaggiati. Si possono **creare** fino a 5 ki (i fiori di cristallo aggiungono scelta nel menu, non slot in gioco). Tasti 1-3.
 - **Difesa:** 4 tipi creabili, sbloccati con la storia (1 all'inizio). In gioco solo **2 equipaggiati** alla volta, scelti nel menu (confermato).
 - Il menu del ki ha **due schede**: attacco e difesa.
 
@@ -178,7 +178,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Slot separati: attacco (3, fino a 5) e difesa. Difesa: si possono **creare 4** tipi, ma solo **2 equipaggiati** in gioco, e R passa dall'uno all'altro (confermato). Menu con due schede.
 - Riflesso (parry): clic destro premuto al momento giusto, nessun tasto a parte.
 - Comandi: clic sinistro per usare il ki (lancio o melee secondo il tipo) (tenuto premuto carica), clic destro per la difesa base.
-- Cambio ki in gioco: Q attacco successivo, E difesa successivo, 1-5 scelta diretta dell'attacco, rotella del mouse.
+- Cambio ki in gioco: Q attacco successivo, E difesa successivo, 1-3 scelta diretta dell'attacco, rotella del mouse.
 - Ki di difesa: 4 tipi (aura, scudo mobile, cupola/muro, riflesso), sbloccati con la storia.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
 - Gioco narrativo: storia + scoperta dei poteri solarpunk.
@@ -187,10 +187,9 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
-- Attacco: stesso principio della difesa (si creano più ki di quelli equipaggiati)? Quanti ne servono all'inizio e cosa aumentano i fiori di cristallo: i ki creabili o quelli equipaggiati?
 - Bonus e malus precisi della difesa con e senza ki.
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
-- Dove sono nascosti i fiori di cristallo degli slot 4 e 5 e quanto sono difficili da trovare.
+- Dove sono nascosti i fiori di cristallo (che aggiungono ki creabili) e quanto sono difficili da trovare.
 - Struttura della storia e del gameplay tra un momento narrativo e l'altro (combattimento, esplorazione, puzzle?).
 - Nome definitivo.
 - Dettagli della ricarica: velocità col sole, velocità nelle zone di ricarica, cosa succede al buio.
@@ -210,7 +209,7 @@ Una fase alla volta, verificando ciascuna prima di passare alla successiva.
 | 3 | Lancio e melee, effetto che cambia con la forma | Lanci e colpisci, e forme diverse si comportano in modo diverso |
 | 4 | Pannello solare, carica del ki, HUD (foglia sul bracciale, misuratore) | Il ki si ricarica col sole e l'HUD mostra la carica |
 | 5 | Menu del ki: 3 slot, forme libere o unite, assistente, colori | Crei 3 ki, li salvi e li ritrovi in gioco |
-| 6 | Cambio ki in gioco e slot 4-5 con i fiori di cristallo | Trovi un fiore e sblocchi uno slot |
+| 6 | Cambio ki in gioco e fiori di cristallo | Cambi ki con i tasti e, trovando un fiore, puoi creare un ki in più nel menu |
 | 7 | Mondo solarpunk, fonti di energia, storia | C'è un percorso narrato con poteri da scoprire |
 | 8 | Salvataggio e rifiniture | La partita si riprende dopo la chiusura |
 
