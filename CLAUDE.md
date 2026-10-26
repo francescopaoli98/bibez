@@ -21,3 +21,10 @@ Francesco, aspirante doppiatore, ha studiato programmazione. Parlare sempre in *
 - I Blueprint sono file binari: non si scrivono a mano. La logica va in C++.
 - Non committare `Binaries/`, `Intermediate/`, `Saved/`, `DerivedDataCache/`.
 - File binari su Git LFS (vedi `KiForge/.gitattributes`).
+
+## Scelta del modello
+
+Francesco usa Sonnet di solito e Opus per i lavori difficili. Claude non può cambiare modello da solo: avvisare con una riga ("Qui conviene Opus" / "Si può tornare a Sonnet"), e Francesco cambia con `/model`.
+
+- **Consigliare Opus:** architettura del sistema del ki (forme, tipi, difesa, slot), editor delle forme con assistente, errori di compilazione o crash non risolti dopo 2-3 tentativi.
+- **Basta Sonnet:** creazione del progetto, fasi 1-2, modifiche a file e documenti, piccoli bug.
