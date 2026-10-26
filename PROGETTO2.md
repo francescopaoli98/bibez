@@ -225,6 +225,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - **Template Prima persona** di Unreal: ha già mani e braccia segnaposto.
 - Altri siti: Poly Haven (CC0), Sketchfab (licenze varie), Mixamo (animazioni).
 - I droni e i robot cyberpunk gratuiti compaiono a rotazione: **nessuno confermato** al momento.
+- **Regola decisa:** si cercano prima asset già fatti (Fab e altri). Se non ce ne sono di adatti, si usano **modelli 3D generati con l'IA**, da ripulire e importare in Unreal. Da verificare al PC quali strumenti gratuiti usare e che qualità hanno.
 
 ## 5. Decisioni prese
 
@@ -267,7 +268,6 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Dettagli della ricarica: velocità col sole, velocità nelle zone di ricarica, cosa succede al buio.
 - Come funziona l'assistente di forma (aggancia ai bordi, suggerisce forme simili, correzione automatica?).
 - Animazioni delle mani necessarie.
-- Fonte degli asset (gratis: Quixel, Poly Haven, Kenney; oppure creati a mano).
 
 ## 7. Piano a fasi (bozza)
 
