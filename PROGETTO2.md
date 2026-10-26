@@ -104,7 +104,7 @@ Durante la storia si scoprono i poteri solarpunk, e le difese si sbloccano con l
 - **Robot cyberpunk**, a tema **nero e viola**.
 - Devono essere **diversi tra loro** (tipi con comportamenti e aspetto distinti).
 
-**Proposta di tipi (da approvare):** ognuno mette alla prova una parte del sistema del ki.
+**Tipi (confermati):** ognuno mette alla prova una parte del sistema del ki.
 
 | Tipo | Cosa fa | Cosa mette alla prova |
 |---|---|---|
@@ -231,6 +231,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Mondo a zone, prima versione con 1 zona (demo).
 - **Demo:** solo la parte solarpunk, con un accenno alla svolta nel finale. La parte cyberpunk dopo, se la demo funziona.
 - Nodo = zona di ricarica.
+- Potere del cyberpunk: stesso sistema del ki, aspetto viola fatto di dati, ricarica da cavi e rete elettrica.
+- Robot: Sentinella, Falena, Segugio, Disturbatore, Guardiano del nodo (demo: tutti tranne il Disturbatore).
 - Cielo e mondo che cambiano (con glitch) tra solarpunk e cyberpunk secondo i nodi conquistati.
 - Nemici: robot cyberpunk nero e viola, tutti diversi.
 - Storia a due punti di vista (solarpunk poi cyberpunk) ispirata a The Last of Us 2, con un cattivo terzo.
@@ -240,9 +242,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
-- Potere del protagonista cyberpunk: **idea** = stesso sistema del ki con aspetto diverso (energia viola fatta di dati), e ricarica diversa (da cavi e rete elettrica invece che dal sole). Dice che vivono la stessa scelta, e costa meno lavoro. Da confermare.
 - Chi è il vero cattivo (il "qualcun altro")?
-- Conferma dei tipi di robot proposti.
 - Elementi del ki: quali elementi, e se valgono anche per la difesa (dopo la fase 3).
 - Bonus e malus precisi della difesa con e senza ki.
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
