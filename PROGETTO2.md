@@ -75,6 +75,13 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 - Danno, raggio e consumo derivano dai parametri.
 - Forma libera: da decidere come si disegna nel menu (vedi domande aperte).
 
+### Mondo
+
+- **Mondo a zone**, non open world: ogni zona è un livello grande e curato, con un tema solarpunk diverso.
+- La storia porta da una zona all'altra, in ordine. Dentro la zona si esplora liberamente (segreti, fiori di cristallo, zone di ricarica) e si può tornare indietro.
+- **Prima versione: 1 sola zona**, una demo giocabile. Le altre vengono dopo.
+- Un open world vero resta possibile più avanti, unendo le zone (World Partition di Unreal).
+
 ### Storia e struttura
 
 - Il gioco **narra una storia**.
@@ -193,6 +200,7 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Cambio ki in gioco: Q attacco successivo, E difesa successivo, 1-3 scelta diretta dell'attacco, rotella del mouse.
 - Ki di difesa: 4 tipi (aura, scudo mobile, cupola/muro, riflesso), sbloccati con la storia.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
+- Mondo a zone, prima versione con 1 zona (demo).
 - Gioco narrativo: storia + scoperta dei poteri solarpunk.
 - Editor della forma: disegno libero **e** forme base unibili, con assistente che guida verso una forma coerente.
 - Carica: aumenta intensità e particelle (grande e piccolo), con tetto massimo.
@@ -207,7 +215,6 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Nome definitivo.
 - Dettagli della ricarica: velocità col sole, velocità nelle zone di ricarica, cosa succede al buio.
 - Come funziona l'assistente di forma (aggancia ai bordi, suggerisce forme simili, correzione automatica?).
-- Mondo: livello chiuso, stanze o mondo aperto.
 - Animazioni delle mani necessarie.
 - Fonte degli asset (gratis: Quixel, Poly Haven, Kenney; oppure creati a mano).
 
@@ -223,7 +230,7 @@ Una fase alla volta, verificando ciascuna prima di passare alla successiva.
 | 4 | Pannello solare, carica del ki, HUD (foglia sul bracciale, misuratore) | Il ki si ricarica col sole e l'HUD mostra la carica |
 | 5 | Menu del ki: 3 slot, forme libere o unite, assistente, colori | Crei 3 ki, li salvi e li ritrovi in gioco |
 | 6 | Cambio ki in gioco e fiori di cristallo | Cambi ki con i tasti e, trovando un fiore, puoi creare un ki in più nel menu |
-| 7 | Mondo solarpunk, fonti di energia, storia | C'è un percorso narrato con poteri da scoprire |
+| 7 | **Una zona** solarpunk giocabile: zone di ricarica, fiori di cristallo, nemici, un momento di storia | La demo si gioca dall'inizio alla fine |
 | 8 | Salvataggio e rifiniture | La partita si riprende dopo la chiusura |
 
 **Traguardo consigliato:** fasi 1-3, il nucleo giocabile.
