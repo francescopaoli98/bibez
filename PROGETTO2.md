@@ -145,6 +145,9 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - Menu di creazione del ki (4 slot, forma, colori): https://www.canva.com/M/MAHY9rHvIsY
 - Momento del lancio, v1 (scia da togliere): https://www.canva.com/M/MAHY9o6H6I4
 - Momento del lancio, v2 (shuriken senza scia): https://www.canva.com/M/MAHY9rfp-ZU
+- **Mondo, zona solarpunk (tetto-giardino):** https://www.canva.com/M/MAHZF1FjUF4
+- **Mondo, stessa zona cyberpunk (nero e viola):** https://www.canva.com/M/MAHZF6IN4uQ
+- **Mondo, glitch tra i due mondi:** https://www.canva.com/M/MAHZFyYIuG0
 
 ### Comandi per cambiare ki
 
