@@ -84,9 +84,26 @@ Il ki è energia che il giocatore plasma, quindi **qualsiasi forma si può modif
 
 ### Storia e struttura
 
-- Il gioco **narra una storia**.
-- Durante la storia il giocatore **scopre i poteri solarpunk**.
-- Il ki e il pannello solare si sbloccano e crescono con la trama.
+Ispirata a **The Last of Us 2**: due punti di vista, e il "cattivo" non è chi sembra.
+
+1. **Prima parte:** il giocatore è il protagonista **solarpunk**. Deve **conquistare i nodi** e le zone prese dai **cyberpunk**. Piano piano scopre che **non è tutto come sembrava**.
+2. **Seconda parte:** cambia il punto di vista. Il giocatore veste i panni del **cyberpunk** e capisce che vive **la stessa scelta obbligata** del solarpunk.
+3. **Verità:** né il solarpunk né il cyberpunk sono il vero cattivo. Il nemico è **qualcun altro** (da definire).
+
+Durante la storia si scoprono i poteri solarpunk, e le difese si sbloccano con la trama.
+
+### Nodi e cielo
+
+- Il mondo ha dei **nodi** da conquistare.
+- Il **cielo cambia** in base ai nodi presi da solarpunk o cyberpunk.
+- Quando cambia, il mondo fa un **glitch per un istante** e passa da solarpunk a cyberpunk (o il contrario).
+- Tecnicamente fattibile in Unreal con effetti di post-processing e materiali, lo facciamo dopo i sistemi base.
+
+### Nemici
+
+- **Robot cyberpunk**, a tema **nero e viola**.
+- Devono essere **diversi tra loro** (tipi con comportamenti e aspetto distinti).
+- Da valutare: **animali meccanici** e **droni**.
 
 ### Elementi del ki (idea per dopo la fase 3)
 
@@ -201,12 +218,20 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Ki di difesa: 4 tipi (aura, scudo mobile, cupola/muro, riflesso), sbloccati con la storia.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
 - Mondo a zone, prima versione con 1 zona (demo).
+- Cielo e mondo che cambiano (con glitch) tra solarpunk e cyberpunk secondo i nodi conquistati.
+- Nemici: robot cyberpunk nero e viola, tutti diversi.
+- Storia a due punti di vista (solarpunk poi cyberpunk) ispirata a The Last of Us 2, con un cattivo terzo.
 - Gioco narrativo: storia + scoperta dei poteri solarpunk.
 - Editor della forma: disegno libero **e** forme base unibili, con assistente che guida verso una forma coerente.
 - Carica: aumenta intensità e particelle (grande e piccolo), con tetto massimo.
 
 ## 6. Decisioni aperte
 
+- **Scope della storia:** due protagonisti e due punti di vista raddoppiano il lavoro (nemici, ki, zone). La demo include solo la parte solarpunk, con un accenno alla svolta?
+- Il protagonista cyberpunk ha un suo tipo di potere (diverso dal ki solarpunk)?
+- Cos'è esattamente un **nodo**: coincide con le zone di ricarica, o sono punti di conquista a parte?
+- Chi è il vero cattivo (il "qualcun altro")?
+- Tipi di robot e se aggiungere animali meccanici e droni.
 - Elementi del ki: quali elementi, e se valgono anche per la difesa (dopo la fase 3).
 - Bonus e malus precisi della difesa con e senza ki.
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
