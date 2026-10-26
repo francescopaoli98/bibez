@@ -94,7 +94,7 @@ Durante la storia si scoprono i poteri solarpunk, e le difese si sbloccano con l
 
 ### Nodi e cielo
 
-- Il mondo ha dei **nodi** da conquistare.
+- Il mondo ha dei **nodi** da conquistare. Un nodo conquistato diventa una **zona di ricarica** del giocatore e il cielo si schiarisce.
 - Il **cielo cambia** in base ai nodi presi da solarpunk o cyberpunk.
 - Quando cambia, il mondo fa un **glitch per un istante** e passa da solarpunk a cyberpunk (o il contrario).
 - Tecnicamente fattibile in Unreal con effetti di post-processing e materiali, lo facciamo dopo i sistemi base.
@@ -103,7 +103,18 @@ Durante la storia si scoprono i poteri solarpunk, e le difese si sbloccano con l
 
 - **Robot cyberpunk**, a tema **nero e viola**.
 - Devono essere **diversi tra loro** (tipi con comportamenti e aspetto distinti).
-- Da valutare: **animali meccanici** e **droni**.
+
+**Proposta di tipi (da approvare):** ognuno mette alla prova una parte del sistema del ki.
+
+| Tipo | Cosa fa | Cosa mette alla prova |
+|---|---|---|
+| **Sentinella** | Robot pesante e lento, colpi potenti e annunciati, piastra frontale | Parry col riflesso, ki melee, carica alta |
+| **Falena** | Drone volante, spara dardi viola, si muove a scatti | Ki da lancio, mira |
+| **Segugio** | Animale meccanico veloce che si avvicina e salta | Difesa mobile, yo-yo, reazione |
+| **Disturbatore** | Supporto: crea interferenze che bloccano la ricarica del pannello solare e provocano glitch | Gestione della carica, priorità dei bersagli |
+| **Guardiano del nodo** | Mini-boss che difende un nodo, usa più abilità | Tutto il sistema |
+
+La demo usa 3 tipi (Sentinella, Falena, Segugio) più il Guardiano del nodo. Il Disturbatore si aggiunge dopo.
 
 ### Elementi del ki (idea per dopo la fase 3)
 
@@ -218,6 +229,8 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 - Ki di difesa: 4 tipi (aura, scudo mobile, cupola/muro, riflesso), sbloccati con la storia.
 - Ordine delle fasi: menu del ki (5) prima del mondo (7).
 - Mondo a zone, prima versione con 1 zona (demo).
+- **Demo:** solo la parte solarpunk, con un accenno alla svolta nel finale. La parte cyberpunk dopo, se la demo funziona.
+- Nodo = zona di ricarica.
 - Cielo e mondo che cambiano (con glitch) tra solarpunk e cyberpunk secondo i nodi conquistati.
 - Nemici: robot cyberpunk nero e viola, tutti diversi.
 - Storia a due punti di vista (solarpunk poi cyberpunk) ispirata a The Last of Us 2, con un cattivo terzo.
@@ -227,11 +240,9 @@ Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli
 
 ## 6. Decisioni aperte
 
-- **Scope della storia:** due protagonisti e due punti di vista raddoppiano il lavoro (nemici, ki, zone). La demo include solo la parte solarpunk, con un accenno alla svolta?
-- Il protagonista cyberpunk ha un suo tipo di potere (diverso dal ki solarpunk)?
-- Cos'è esattamente un **nodo**: coincide con le zone di ricarica, o sono punti di conquista a parte?
+- Potere del protagonista cyberpunk: **idea** = stesso sistema del ki con aspetto diverso (energia viola fatta di dati), e ricarica diversa (da cavi e rete elettrica invece che dal sole). Dice che vivono la stessa scelta, e costa meno lavoro. Da confermare.
 - Chi è il vero cattivo (il "qualcun altro")?
-- Tipi di robot e se aggiungere animali meccanici e droni.
+- Conferma dei tipi di robot proposti.
 - Elementi del ki: quali elementi, e se valgono anche per la difesa (dopo la fase 3).
 - Bonus e malus precisi della difesa con e senza ki.
 - Come funziona la difesa base (scudo di ki, pannello solare, parata) e se consuma ki.
