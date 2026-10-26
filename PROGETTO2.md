@@ -148,6 +148,9 @@ Concept generati con Canva (IA), non render di Unreal. Servono come riferimento 
 - **Mondo, zona solarpunk (tetto-giardino):** https://www.canva.com/M/MAHZF1FjUF4
 - **Mondo, stessa zona cyberpunk (nero e viola):** https://www.canva.com/M/MAHZF6IN4uQ
 - **Mondo, glitch tra i due mondi:** https://www.canva.com/M/MAHZFyYIuG0
+- **Robot, Sentinella:** https://www.canva.com/M/MAHZF1cI9QE
+- **Robot, Falena:** https://www.canva.com/M/MAHZF3nSpGw
+- **Robot, Segugio:** https://www.canva.com/M/MAHZFzxO-zQ
 
 ### Comandi per cambiare ki
 
@@ -213,6 +216,15 @@ Due modi di difendersi:
 - Il menu del ki ha **due schede**: attacco e difesa.
 
 Gli slot non sbloccati vengono saltati. Tasti da rivedere quando si decidono gli altri comandi (WASD, salto, lancio, melee).
+
+### Asset: dove cercare (da verificare al PC)
+
+- **Fab** (fab.com): il negozio di contenuti di Epic. Ha una sezione di asset gratuiti e ogni mese Epic ne regala alcuni da tenere. I pacchetti sci-fi regalati cambiano e scadono, quindi da controllare di volta in volta.
+- **Megascans** (vegetazione, rocce, superfici): dal 2025 non risulta più gratis come prima. Controllare le condizioni attuali su Fab.
+- **Progetti di esempio di Epic, gratis:** **Lyra** (base di gioco) e **City Sample** (città di Matrix Awakens, utile come ispirazione cyberpunk).
+- **Template Prima persona** di Unreal: ha già mani e braccia segnaposto.
+- Altri siti: Poly Haven (CC0), Sketchfab (licenze varie), Mixamo (animazioni).
+- I droni e i robot cyberpunk gratuiti compaiono a rotazione: **nessuno confermato** al momento.
 
 ## 5. Decisioni prese
 
