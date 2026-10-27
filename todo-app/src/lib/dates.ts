@@ -29,6 +29,25 @@ export function greeting(d: Date = new Date()): string {
   return 'Buonasera';
 }
 
+// "Oggi", "Domani", "Venerdì" (entro la settimana) oppure "5 nov" / "15 gen 2027"
+export function dayLabel(ms: number, now: Date = new Date()): string {
+  const days = Math.round((startOfDay(new Date(ms)) - startOfDay(now)) / 86400000);
+  if (days === 0) return 'Oggi';
+  if (days === 1) return 'Domani';
+  const d = new Date(ms);
+  if (days > 1 && days < 7) {
+    const name = GIORNI[d.getDay()];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+  const short = `${d.getDate()} ${MESI[d.getMonth()].slice(0, 3)}`;
+  return d.getFullYear() === now.getFullYear() ? short : `${short} ${d.getFullYear()}`;
+}
+
+// es. "Domani · 15:00" oppure solo "Domani" se non c'è l'ora
+export function dueLabel(ms: number, hasTime: boolean, now: Date = new Date()): string {
+  return hasTime ? `${dayLabel(ms, now)} · ${clock(ms)}` : dayLabel(ms, now);
+}
+
 // es. "15:00"
 export function clock(ms: number): string {
   const d = new Date(ms);

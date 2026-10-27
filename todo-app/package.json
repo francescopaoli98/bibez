@@ -28,7 +28,8 @@
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node src/lib/quickAdd.test.mjs"
   },
   "private": true
 }

@@ -1,15 +1,19 @@
 import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { addTaskForToday, listToday, setDone, setImportant, type Task } from './tasks';
+import type { ProjectRef, QuickAddResult } from '../lib/quickAdd';
+import { addTask, listProjects, listToday, setDone, setImportant, type Task } from './tasks';
 
 // Attività della vista "Oggi": si ricarica ogni volta che la schermata torna in primo piano
 export function useTodayTasks() {
   const db = useSQLiteContext();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<ProjectRef[]>([]);
 
   const reload = useCallback(async () => {
-    setTasks(await listToday(db));
+    const [t, p] = await Promise.all([listToday(db), listProjects(db)]);
+    setTasks(t);
+    setProjects(p);
   }, [db]);
 
   useFocusEffect(
@@ -19,8 +23,8 @@ export function useTodayTasks() {
   );
 
   const add = useCallback(
-    async (title: string) => {
-      await addTaskForToday(db, title);
+    async (parsed: QuickAddResult) => {
+      await addTask(db, parsed);
       await reload();
     },
     [db, reload],
@@ -45,5 +49,5 @@ export function useTodayTasks() {
   const open = tasks.filter((t) => t.doneAt === null);
   const done = tasks.filter((t) => t.doneAt !== null);
 
-  return { open, done, add, toggleDone, toggleImportant };
+  return { open, done, projects, add, toggleDone, toggleImportant };
 }

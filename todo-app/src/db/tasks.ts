@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { randomUUID } from 'expo-crypto';
 import { startOfDay, startOfNextDay } from '../lib/dates';
+import type { ProjectRef, QuickAddResult } from '../lib/quickAdd';
 
 export interface Task {
   id: string;
@@ -35,6 +36,12 @@ const toTask = (r: TaskRow): Task => ({
   doneAt: r.done_at,
 });
 
+export async function listProjects(db: SQLiteDatabase): Promise<ProjectRef[]> {
+  return db.getAllAsync<ProjectRef>(
+    'SELECT id, name, color FROM projects WHERE deleted_at IS NULL ORDER BY sort_order ASC, created_at ASC',
+  );
+}
+
 // Vista "Oggi": da fare per oggi (o in ritardo) + completate oggi
 export async function listToday(db: SQLiteDatabase): Promise<Task[]> {
   const rows = await db.getAllAsync<TaskRow>(
@@ -51,11 +58,22 @@ export async function listToday(db: SQLiteDatabase): Promise<Task[]> {
   return rows.map(toTask);
 }
 
-export async function addTaskForToday(db: SQLiteDatabase, title: string) {
+// Salva il risultato del quick add. Se non è stata scritta nessuna data,
+// l'attività è per oggi (si aggiunge dalla vista Oggi).
+export async function addTask(db: SQLiteDatabase, r: QuickAddResult) {
   const now = Date.now();
   await db.runAsync(
-    'INSERT INTO tasks (id, title, due_at, has_time, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?)',
-    randomUUID(), title.trim(), startOfDay(), now, now,
+    `INSERT INTO tasks (id, title, project_id, due_at, has_time, important, remind_minutes, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    randomUUID(),
+    r.title.trim(),
+    r.project?.id ?? null,
+    r.dueAt ?? startOfDay(),
+    r.hasTime ? 1 : 0,
+    r.important ? 1 : 0,
+    r.remindMinutes,
+    now,
+    now,
   );
 }
 

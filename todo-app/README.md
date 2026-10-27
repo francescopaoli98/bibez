@@ -15,6 +15,7 @@ Poi inquadra il QR code con **Expo Go** sul telefono Android (stessa rete Wi-Fi 
 
 ```bash
 npm run typecheck
+npm test            # prova del parser del quick add
 npx expo-doctor
 ```
 
@@ -27,7 +28,22 @@ npx expo-doctor
 
 ## Stato
 
-Step 1 completato: base, navigazione, temi, database locale, vista Oggi.
-Prossimi: quick add testuale, liste/calendario, promemoria, voce, login e sync con Supabase.
+Fatto: base, navigazione, temi con transizione a onda, database locale, vista Oggi, quick add testuale.
+Prossimi: liste/calendario, promemoria, voce, temi speciali, login e sync con Supabase.
+
+## Quick add
+
+Nella barra in basso si scrive una frase e l'app ricava da sola data, ora, lista e importanza:
+
+```
+Chiama Marco domani alle 15 #lavoro !importante
+```
+
+- data: oggi, domani, dopodomani, stasera, lunedì..domenica, 27 ottobre, 27/10, il 5, tra 2 ore, tra 3 giorni
+- ora: alle 15, alle 9:30, 15:30, mezzogiorno, di sera / pomeriggio / mattina
+- lista: `#lavoro` (basta l'inizio del nome)
+- importante: `!` oppure `!importante`
+
+Non ancora: ripetizioni ("ogni martedì"), promemoria reali (step 5).
 
 Da decidere prima della pubblicazione: nome definitivo, package id Android, icona.

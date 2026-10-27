@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
@@ -7,14 +7,30 @@ import { Banner, Progress } from '../../components/Banner';
 import { Icon } from '../../components/Icon';
 import { TaskCard } from '../../components/TaskCard';
 import { useTodayTasks } from '../../db/useTodayTasks';
-import { greeting, longDate } from '../../lib/dates';
+import { dueLabel, greeting, longDate, startOfNextDay } from '../../lib/dates';
+import type { QuickAddResult } from '../../lib/quickAdd';
 import { useTheme } from '../../theme/ThemeProvider';
 import { fonts } from '../../theme/themes';
 
 export default function OggiScreen() {
   const { colors } = useTheme();
-  const { open, done, add, toggleDone, toggleImportant } = useTodayTasks();
+  const { open, done, projects, add, toggleDone, toggleImportant } = useTodayTasks();
   const [showDone, setShowDone] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // L'attività è per un altro giorno: non comparirà qui, quindi lo si dice
+  const handleAdd = async (parsed: QuickAddResult) => {
+    await add(parsed);
+    if (parsed.dueAt !== null && parsed.dueAt >= startOfNextDay()) {
+      setNotice(`Aggiunta per ${dueLabel(parsed.dueAt, parsed.hasTime).toLowerCase()}`);
+    }
+  };
+
+  useEffect(() => {
+    if (!notice) return;
+    const id = setTimeout(() => setNotice(null), 3500);
+    return () => clearTimeout(id);
+  }, [notice]);
 
   const total = open.length + done.length;
   const now = new Date();
@@ -81,7 +97,17 @@ export default function OggiScreen() {
         }
       />
 
-      <AddBar onSubmit={add} />
+      {notice && (
+        <View
+          accessibilityLiveRegion="polite"
+          style={[styles.notice, { backgroundColor: colors.tint }]}
+        >
+          <Icon name="check" size={16} color={colors.onTint} strokeWidth={3} />
+          <Text style={[styles.noticeText, { color: colors.onTint }]}>{notice}</Text>
+        </View>
+      )}
+
+      <AddBar projects={projects} onSubmit={handleAdd} />
     </KeyboardAvoidingView>
   );
 }
@@ -102,6 +128,17 @@ const styles = StyleSheet.create({
   subtitle: { color: '#FFFFFF', fontSize: 14, fontFamily: fonts.medium },
   list: { padding: 16, gap: 8, flexGrow: 1 },
   empty: { textAlign: 'center', fontSize: 15, fontFamily: fonts.medium, marginTop: 40 },
+  notice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    gap: 6,
+    height: 34,
+    paddingHorizontal: 14,
+    borderRadius: 17,
+    marginBottom: 8,
+  },
+  noticeText: { fontSize: 13, fontFamily: fonts.bold },
   doneBlock: { gap: 8, marginTop: 4 },
   doneHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 44, alignSelf: 'flex-start' },
   doneLabel: { fontSize: 14, fontFamily: fonts.bold },
