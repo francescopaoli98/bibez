@@ -10,6 +10,7 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { DB_NAME, migrate } from '../db/schema';
 import { ThemeProvider } from '../theme/ThemeProvider';
+import { ThemeTransitionHost } from '../theme/ThemeTransition';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -25,7 +26,9 @@ export default function RootLayout() {
     <Suspense fallback={null}>
       <SQLiteProvider databaseName={DB_NAME} onInit={migrate} useSuspense>
         <ThemeProvider>
-          <Stack screenOptions={{ headerShown: false }} />
+          <ThemeTransitionHost>
+            <Stack screenOptions={{ headerShown: false }} />
+          </ThemeTransitionHost>
         </ThemeProvider>
       </SQLiteProvider>
     </Suspense>

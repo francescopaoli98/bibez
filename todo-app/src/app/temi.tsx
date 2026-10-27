@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Banner, Progress } from '../components/Banner';
 import { Icon } from '../components/Icon';
 import { useTheme } from '../theme/ThemeProvider';
+import { useThemeSwitcher } from '../theme/ThemeTransition';
 import { fonts, type Mode } from '../theme/themes';
 
 const MODES: { id: Mode; label: string }[] = [
@@ -14,7 +15,8 @@ const MODES: { id: Mode; label: string }[] = [
 ];
 
 export default function TemiScreen() {
-  const { colors, scheme, theme, themes, mode, setThemeId, setMode } = useTheme();
+  const { colors, scheme, theme, themes, mode } = useTheme();
+  const { switchTheme, switchMode } = useThemeSwitcher();
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>
@@ -42,7 +44,7 @@ export default function TemiScreen() {
             return (
               <Pressable
                 key={m.id}
-                onPress={() => setMode(m.id)}
+                onPress={() => switchMode(m.id)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
                 style={[styles.segment, on && { backgroundColor: colors.tint }]}
@@ -61,7 +63,7 @@ export default function TemiScreen() {
             return (
               <Pressable
                 key={t.id}
-                onPress={() => setThemeId(t.id)}
+                onPress={() => switchTheme(t.id)}
                 accessibilityRole="button"
                 accessibilityLabel={`Tema ${t.name}`}
                 accessibilityState={{ selected: on }}
