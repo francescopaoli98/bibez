@@ -22,11 +22,9 @@ export function longDate(d: Date = new Date()): string {
   return `${GIORNI[d.getDay()]} ${d.getDate()} ${MESI[d.getMonth()]}`;
 }
 
-export function greeting(d: Date = new Date()): string {
-  const h = d.getHours();
-  if (h < 13) return 'Buongiorno';
-  if (h < 18) return 'Buon pomeriggio';
-  return 'Buonasera';
+// es. "MAR 27 OTT" (per i temi che scrivono in maiuscolo)
+export function shortDate(d: Date = new Date()): string {
+  return `${GIORNI[d.getDay()].slice(0, 3)} ${d.getDate()} ${MESI[d.getMonth()].slice(0, 3)}`.toUpperCase();
 }
 
 // "Oggi", "Domani", "Venerdì" (entro la settimana) oppure "5 nov" / "15 gen 2027"

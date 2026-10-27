@@ -4,11 +4,12 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { getSettingSync, setSetting } from '../db/settings';
 import {
   DEFAULT_MODE,
-  DEFAULT_THEME,
   THEMES,
   buildColors,
   findTheme,
+  schemeFor,
   type Colors,
+  type Look,
   type Mode,
   type Scheme,
   type ThemeDef,
@@ -17,12 +18,15 @@ import {
 
 interface ThemeContextValue {
   colors: Colors;
+  look: Look;
   scheme: Scheme;
   theme: ThemeDef;
   mode: Mode;
   themes: ThemeDef[];
+  soundsOn: boolean;
   setThemeId: (id: ThemeId) => void;
   setMode: (mode: Mode) => void;
+  setSoundsOn: (on: boolean) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -39,6 +43,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const saved = getSettingSync(db, 'mode');
     return isMode(saved) ? saved : DEFAULT_MODE;
   });
+  const [soundsOn, setSoundsState] = useState<boolean>(() => getSettingSync(db, 'sounds') !== '0');
 
   const setThemeId = useCallback(
     (id: ThemeId) => {
@@ -54,12 +59,31 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     },
     [db],
   );
+  const setSoundsOn = useCallback(
+    (on: boolean) => {
+      setSoundsState(on);
+      void setSetting(db, 'sounds', on ? '1' : '0');
+    },
+    [db],
+  );
 
   const value = useMemo<ThemeContextValue>(() => {
-    const scheme: Scheme = mode === 'auto' ? (system === 'dark' ? 'dark' : 'light') : mode;
-    const theme = findTheme(themeId ?? DEFAULT_THEME);
-    return { colors: buildColors(theme, scheme), scheme, theme, mode, themes: THEMES, setThemeId, setMode };
-  }, [themeId, mode, system, setThemeId, setMode]);
+    const theme = findTheme(themeId);
+    const wanted: Scheme = mode === 'auto' ? (system === 'dark' ? 'dark' : 'light') : mode;
+    const scheme = schemeFor(theme, wanted);
+    return {
+      colors: buildColors(theme, scheme),
+      look: theme.look,
+      scheme,
+      theme,
+      mode,
+      themes: THEMES,
+      soundsOn,
+      setThemeId,
+      setMode,
+      setSoundsOn,
+    };
+  }, [themeId, mode, system, soundsOn, setThemeId, setMode, setSoundsOn]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

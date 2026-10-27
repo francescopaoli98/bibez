@@ -77,6 +77,40 @@ export async function addTask(db: SQLiteDatabase, r: QuickAddResult) {
   );
 }
 
+// Punti e serie di giorni, usati dal tema Arcade (20 XP per attività completata, 400 XP a livello)
+export interface GameStats {
+  level: number;
+  xp: number; // XP dentro il livello attuale
+  xpMax: number;
+  streak: number; // giorni consecutivi con almeno un'attività completata
+}
+const XP_PER_TASK = 20;
+const XP_PER_LEVEL = 400;
+
+export async function getStats(db: SQLiteDatabase): Promise<GameStats> {
+  const rows = await db.getAllAsync<{ done_at: number }>(
+    'SELECT done_at FROM tasks WHERE done_at IS NOT NULL AND deleted_at IS NULL',
+  );
+  const totalXp = rows.length * XP_PER_TASK;
+
+  const days = new Set(rows.map((r) => startOfDay(new Date(r.done_at))));
+  const cursor = new Date();
+  // se oggi non hai ancora completato nulla la serie non si spezza: si parte da ieri
+  if (!days.has(startOfDay(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let streak = 0;
+  while (days.has(startOfDay(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return {
+    level: Math.floor(totalXp / XP_PER_LEVEL) + 1,
+    xp: totalXp % XP_PER_LEVEL,
+    xpMax: XP_PER_LEVEL,
+    streak,
+  };
+}
+
 export async function setDone(db: SQLiteDatabase, id: string, done: boolean) {
   const now = Date.now();
   await db.runAsync(

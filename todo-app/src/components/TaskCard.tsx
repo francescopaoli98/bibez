@@ -2,114 +2,144 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Task } from '../db/tasks';
 import { clock, startOfDay } from '../lib/dates';
 import { useTheme } from '../theme/ThemeProvider';
-import { fonts } from '../theme/themes';
 import { Icon } from './Icon';
 
 interface Props {
   task: Task;
+  index: number; // posizione nella lista (serve a "TAKE 01" e all'inclinazione dell'Atelier)
   onToggle: () => void;
   onImportant: () => void;
 }
 
-export function TaskCard({ task, onToggle, onImportant }: Props) {
-  const { colors } = useTheme();
+export function TaskCard({ task, index, onToggle, onImportant }: Props) {
+  const { colors, look } = useTheme();
   const done = task.doneAt !== null;
   const overdue = !done && task.dueAt !== null && task.dueAt < startOfDay();
+  const r = look.cardRadii;
+  const hard = look.cardShadow === 'hard';
+  const tilt = look.cardTilt ? (index % 2 === 0 ? -0.4 : 0.3) : 0;
+  const square = look.check === 'square';
+  const upper = (s: string) => (look.upperMeta ? s.toUpperCase() : s);
+  const metaStyle = { color: colors.muted, fontFamily: look.fonts.meta, fontSize: look.sizes.meta };
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <Pressable
-        onPress={onToggle}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: done }}
-        accessibilityLabel={done ? `Riapri: ${task.title}` : `Segna come fatto: ${task.title}`}
-        style={styles.touch}
+    <View
+      style={[
+        hard && styles.hardGap,
+        tilt !== 0 && { transform: [{ rotate: `${tilt}deg` }] },
+      ]}
+    >
+      {hard && <View style={[StyleSheet.absoluteFill, styles.hardShadow]} />}
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.card,
+            borderColor: colors.border,
+            borderWidth: look.cardBorder,
+            borderTopLeftRadius: r[0],
+            borderTopRightRadius: r[1],
+            borderBottomRightRadius: r[2],
+            borderBottomLeftRadius: r[3],
+          },
+          look.cardShadow === 'paper' && { borderBottomWidth: look.cardBorder + 2 },
+        ]}
       >
-        <View
-          style={[
-            styles.circle,
-            done
-              ? { backgroundColor: colors.primary, borderColor: colors.primary }
-              : { borderColor: colors.ring },
-          ]}
+        <Pressable
+          onPress={onToggle}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: done }}
+          accessibilityLabel={done ? `Riapri: ${task.title}` : `Segna come fatto: ${task.title}`}
+          style={styles.touch}
         >
-          {done && <Icon name="check" size={14} color={colors.onPrimary} strokeWidth={3.2} />}
-        </View>
-      </Pressable>
-
-      <View style={styles.body}>
-        <Text
-          style={[
-            styles.title,
-            { color: done ? colors.muted : colors.text },
-            done && styles.strike,
-          ]}
-        >
-          {task.title}
-        </Text>
-        {(task.hasTime || task.projectName || overdue) && (
-          <View style={styles.meta}>
-            {overdue && (
-              <Text style={[styles.metaText, { color: colors.important }]}>In ritardo</Text>
-            )}
-            {task.hasTime && task.dueAt !== null && (
-              <View style={styles.metaItem}>
-                <Icon name="clock" size={13} color={colors.muted} />
-                <Text style={[styles.metaText, { color: colors.muted }]}>{clock(task.dueAt)}</Text>
-              </View>
-            )}
-            {task.projectName && (
-              <View style={styles.metaItem}>
-                <View style={[styles.dot, { backgroundColor: task.projectColor ?? colors.muted }]} />
-                <Text style={[styles.metaText, { color: colors.muted }]}>{task.projectName}</Text>
-              </View>
-            )}
+          <View
+            style={[
+              square ? styles.square : styles.circle,
+              done
+                ? { backgroundColor: colors.done, borderColor: colors.done }
+                : { borderColor: colors.ring },
+            ]}
+          >
+            {done && <Icon name="check" size={14} color={colors.onDone} strokeWidth={square ? 4 : 3.2} />}
           </View>
-        )}
-      </View>
+        </Pressable>
 
-      <Pressable
-        onPress={onImportant}
-        accessibilityRole="button"
-        accessibilityLabel={task.important ? 'Importante, tocca per toglierlo' : 'Segna come importante'}
-        style={styles.touch}
-      >
-        <Icon
-          name="star"
-          size={22}
-          color={task.important ? colors.important : colors.ring}
-          filled={task.important}
-          strokeWidth={1.8}
-        />
-      </Pressable>
+        <View style={styles.body}>
+          {look.tag && !done && (
+            <Text style={{ color: look.tag.color, fontFamily: look.fonts.label, fontSize: 11, letterSpacing: 1 }}>
+              {`TAKE ${String(index + 1).padStart(2, '0')}`}
+            </Text>
+          )}
+          <Text
+            style={[
+              {
+                color: done ? colors.muted : colors.text,
+                fontFamily: look.fonts.body,
+                fontSize: look.sizes.body,
+                lineHeight: Math.round(look.sizes.body * 1.15),
+              },
+              done && styles.strike,
+            ]}
+          >
+            {task.title}
+          </Text>
+          {(task.hasTime || task.projectName || overdue || look.reward) && (
+            <View style={styles.meta}>
+              {overdue && <Text style={[metaStyle, { color: colors.important }]}>{upper('In ritardo')}</Text>}
+              {task.hasTime && task.dueAt !== null && (
+                <View style={styles.metaItem}>
+                  <Icon name="clock" size={Math.min(look.sizes.meta, 14)} color={colors.muted} />
+                  <Text style={metaStyle}>{clock(task.dueAt)}</Text>
+                </View>
+              )}
+              {task.projectName && (
+                <View style={styles.metaItem}>
+                  <View style={[styles.dot, { backgroundColor: task.projectColor ?? colors.muted }]} />
+                  <Text style={metaStyle}>{upper(task.projectName)}</Text>
+                </View>
+              )}
+              {look.reward && (
+                <Text style={[metaStyle, { color: done ? colors.done : look.reward.color }]}>{look.reward.text}</Text>
+              )}
+            </View>
+          )}
+        </View>
+
+        <Pressable
+          onPress={onImportant}
+          accessibilityRole="button"
+          accessibilityLabel={task.important ? 'Importante, tocca per toglierlo' : 'Segna come importante'}
+          style={styles.touch}
+        >
+          <Icon
+            name="star"
+            size={22}
+            color={task.important ? colors.important : colors.ring}
+            filled={task.important}
+            strokeWidth={1.8}
+          />
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  hardGap: { marginRight: 4, marginBottom: 4 },
+  hardShadow: { backgroundColor: '#000000', transform: [{ translateX: 4 }, { translateY: 4 }] },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 14,
     paddingVertical: 4,
     paddingLeft: 6,
     paddingRight: 4,
   },
   touch: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  circle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  circle: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  square: { width: 22, height: 22, borderRadius: 0, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   body: { flex: 1, minWidth: 0, gap: 2, paddingVertical: 6 },
-  title: { fontSize: 16, fontFamily: fonts.semibold },
   strike: { textDecorationLine: 'line-through' },
-  meta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  meta: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  metaText: { fontSize: 13, fontFamily: fonts.medium },
   dot: { width: 8, height: 8, borderRadius: 4 },
 });

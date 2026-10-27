@@ -22,14 +22,28 @@ npx expo-doctor
 ## Struttura
 
 - `src/app/` schermate (expo-router): `(tabs)` con Oggi / In arrivo / Calendario / Liste, `temi.tsx`
-- `src/theme/` temi, modalità chiaro/scuro e transizione "a onda" tra un tema e l'altro
+- `src/theme/` temi, modalità chiaro/scuro e transizione "a onda" tra un tema e l'altro (`waves.ts` = forme delle onde)
+- `src/lib/` parser del quick add, date, suoni
+- `assets/sounds/` suoni dei temi, generati da `scripts/make-sounds.mjs`
 - `src/db/` database SQLite locale (liste, attività, impostazioni)
 - `src/components/` componenti riusabili
 
 ## Stato
 
-Fatto: base, navigazione, temi con transizione a onda, database locale, vista Oggi, quick add testuale.
-Prossimi: liste/calendario, promemoria, voce, temi speciali, login e sync con Supabase.
+Fatto: base, navigazione, temi con transizione a onda, database locale, vista Oggi, quick add testuale, temi speciali con suoni.
+Prossimi: liste/calendario, promemoria, voce, login e sync con Supabase.
+
+## Temi
+
+6 temi normali (Indaco, Oceano, Bosco, Tramonto, Lavanda, Grafite) con Chiaro/Scuro/Auto, più 3 **temi speciali** con aspetto fisso:
+
+| Tema | Aspetto | Onda quando ci si entra |
+|---|---|---|
+| Arcade | neon, font pixel, barra XP, serie di giorni, +20 XP | pixel che crescono e mangiano tutto |
+| Atelier | carta, acquerello, pennellata, scrittura a mano | macchie di colore che si fondono |
+| Studio | studio di registrazione, VU-meter, "take" | barre da equalizzatore |
+
+L'onda dipende dal tema di arrivo; la direzione (sinistra→destra o destra→sinistra) dalla posizione nella lista. Le onde disegnate usano `@shopify/react-native-skia`. I suoni si accendono/spengono dalla schermata Temi e si rigenerano con `node scripts/make-sounds.mjs`.
 
 ## Quick add
 
