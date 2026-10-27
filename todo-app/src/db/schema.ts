@@ -2,7 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { randomUUID } from 'expo-crypto';
 
 export const DB_NAME = 'todo.db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 // Liste create al primo avvio, l'utente potrà rinominarle o eliminarle
 const DEFAULT_PROJECTS = [
@@ -19,6 +19,7 @@ export async function migrate(db: SQLiteDatabase) {
   let version = row?.user_version ?? 0;
   if (version >= DB_VERSION) return;
 
+  // v1: liste, attività, impostazioni
   if (version === 0) {
     await db.execAsync(`
       PRAGMA journal_mode = WAL;
@@ -66,6 +67,24 @@ export async function migrate(db: SQLiteDatabase) {
       );
     }
     version = 1;
+  }
+
+  // v2: passi (checklist dentro un'attività)
+  if (version === 1) {
+    await db.execAsync(`
+      CREATE TABLE subtasks (
+        id TEXT PRIMARY KEY NOT NULL,
+        task_id TEXT NOT NULL REFERENCES tasks(id),
+        title TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        done_at INTEGER,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        deleted_at INTEGER
+      );
+      CREATE INDEX idx_subtasks_task ON subtasks(task_id);
+    `);
+    version = 2;
   }
 
   await db.execAsync(`PRAGMA user_version = ${DB_VERSION}`);

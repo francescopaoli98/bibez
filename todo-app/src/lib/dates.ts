@@ -22,6 +22,30 @@ export function longDate(d: Date = new Date()): string {
   return `${GIORNI[d.getDay()]} ${d.getDate()} ${MESI[d.getMonth()]}`;
 }
 
+// es. "Ottobre 2026"
+export function monthLabel(d: Date): string {
+  return `${MESI[d.getMonth()].charAt(0).toUpperCase()}${MESI[d.getMonth()].slice(1)} ${d.getFullYear()}`;
+}
+
+// Intestazione di un giorno nelle liste: "Domani · mercoledì 28 ottobre" oppure "Venerdì 30 ottobre"
+export function dayHeader(ms: number, now: Date = new Date()): string {
+  const d = new Date(ms);
+  const base = `${GIORNI[d.getDay()]} ${d.getDate()} ${MESI[d.getMonth()]}`;
+  const days = Math.round((startOfDay(d) - startOfDay(now)) / 86400000);
+  if (days === 1) return `Domani · ${base}`;
+  return base.charAt(0).toUpperCase() + base.slice(1);
+}
+
+// Stesso giorno, con l'ora che viene da un altro istante (per spostare un'attività senza perdere l'orario)
+export function moveToDay(ms: number | null, hasTime: boolean, dayStart: number): number {
+  const target = new Date(dayStart);
+  if (ms !== null && hasTime) {
+    const old = new Date(ms);
+    target.setHours(old.getHours(), old.getMinutes(), 0, 0);
+  }
+  return target.getTime();
+}
+
 // es. "MAR 27 OTT" (per i temi che scrivono in maiuscolo)
 export function shortDate(d: Date = new Date()): string {
   return `${GIORNI[d.getDay()].slice(0, 3)} ${d.getDate()} ${MESI[d.getMonth()].slice(0, 3)}`.toUpperCase();

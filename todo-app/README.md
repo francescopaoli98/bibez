@@ -21,7 +21,7 @@ npx expo-doctor
 
 ## Struttura
 
-- `src/app/` schermate (expo-router): `(tabs)` con Oggi / In arrivo / Calendario / Liste, `temi.tsx`
+- `src/app/` schermate (expo-router): `(tabs)` con Oggi / In arrivo / Calendario / Liste, `lista/[id]` (una lista), `attivita/[id]` (dettaglio), `temi.tsx`
 - `src/theme/` temi, modalità chiaro/scuro e transizione "a onda" tra un tema e l'altro (`waves.ts` = forme delle onde)
 - `src/lib/` parser del quick add, date, suoni
 - `assets/sounds/` suoni dei temi, generati da `scripts/make-sounds.mjs`
@@ -30,8 +30,8 @@ npx expo-doctor
 
 ## Stato
 
-Fatto: base, navigazione, temi con transizione a onda, database locale, vista Oggi, quick add testuale, temi speciali con suoni.
-Prossimi: liste/calendario, promemoria, voce, login e sync con Supabase.
+Fatto: base, navigazione, temi con transizione a onda, database locale, vista Oggi, quick add testuale, temi speciali con suoni, In arrivo / Calendario / Liste, dettaglio attività con passi (checklist).
+Prossimi: modelli (es. "Turno in sala"), promemoria, celebrazioni, condividi verso l'app, voce, login e sync con Supabase.
 
 ## Temi
 

@@ -2,7 +2,8 @@ import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import type { ProjectRef, QuickAddResult } from '../lib/quickAdd';
-import { addTask, getStats, listProjects, listToday, setDone, setImportant, type GameStats, type Task } from './tasks';
+import { useTaskActions } from './hooks';
+import { addTask, getStats, listProjects, listToday, type GameStats, type Task } from './tasks';
 
 const NO_STATS: GameStats = { level: 1, xp: 0, xpMax: 400, streak: 0 };
 
@@ -34,21 +35,7 @@ export function useTodayTasks() {
     [db, reload],
   );
 
-  const toggleDone = useCallback(
-    async (task: Task) => {
-      await setDone(db, task.id, task.doneAt === null);
-      await reload();
-    },
-    [db, reload],
-  );
-
-  const toggleImportant = useCallback(
-    async (task: Task) => {
-      await setImportant(db, task.id, !task.important);
-      await reload();
-    },
-    [db, reload],
-  );
+  const { toggleDone, toggleImportant } = useTaskActions(reload);
 
   const open = tasks.filter((t) => t.doneAt === null);
   const done = tasks.filter((t) => t.doneAt !== null);

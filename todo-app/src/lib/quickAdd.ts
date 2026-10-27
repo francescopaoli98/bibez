@@ -56,6 +56,12 @@ function nextDayMonth(now: Date, day: number, month: number, year?: number): Dat
 const DANGLING = /(?:^|\s)(?:il|lo|la|alle|ore|per|entro|di|a|ad|da|del|nel|in|e)$/i;
 const LEADING = /^(?:il|alle|ore|entro)\s+/i;
 
+// Solo la parte "quando": "venerdì alle 18" -> data e ora (null se non si capisce)
+export function parseWhen(input: string, now: Date = new Date()): { dueAt: number; hasTime: boolean } | null {
+  const r = parseQuickAdd(`x ${input}`, [], now);
+  return r.dueAt === null ? null : { dueAt: r.dueAt, hasTime: r.hasTime };
+}
+
 export function parseQuickAdd(input: string, projects: ProjectRef[], now: Date = new Date()): QuickAddResult {
   const raw = input;
   let work = fold(raw);

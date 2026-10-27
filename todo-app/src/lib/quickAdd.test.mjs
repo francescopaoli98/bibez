@@ -1,6 +1,6 @@
 // Prova del parser del quick add. Esegui con:  node src/lib/quickAdd.test.mjs
 import assert from 'node:assert/strict';
-import { parseQuickAdd } from './quickAdd.ts';
+import { parseQuickAdd, parseWhen } from './quickAdd.ts';
 
 // Martedì 27 ottobre 2026, ore 10:00
 const NOW = new Date(2026, 9, 27, 10, 0);
@@ -49,5 +49,23 @@ for (const [input, want] of cases) {
     console.log('FAIL', input, '\n     ', e.message, '\n      ottenuto:', JSON.stringify(flat));
   }
 }
+// parseWhen: solo la parte "quando"
+const whenCases = [
+  ['venerdì alle 18', { dueAt: at(2026, 10, 30, 18), hasTime: true }],
+  ['domani', { dueAt: at(2026, 10, 28), hasTime: false }],
+  ['alle 15', { dueAt: at(2026, 10, 27, 15), hasTime: true }],
+  ['boh', null],
+];
+for (const [input, want] of whenCases) {
+  const got = parseWhen(input, NOW);
+  try {
+    assert.deepEqual(got, want);
+    console.log('ok   quando:', input);
+  } catch (e) {
+    failed++;
+    console.log('FAIL quando:', input, JSON.stringify(got));
+  }
+}
+
 console.log(failed ? `\n${failed} test falliti` : '\nTutti i test passati');
 process.exit(failed ? 1 : 0);

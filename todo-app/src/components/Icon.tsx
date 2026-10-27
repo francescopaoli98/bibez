@@ -5,7 +5,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 export type IconName =
   | 'sun' | 'agenda' | 'calendar' | 'lists' | 'plus' | 'mic' | 'star' | 'clock'
   | 'chevronLeft' | 'chevronRight' | 'chevronDown' | 'check' | 'home' | 'list' | 'palette' | 'bell'
-  | 'pencil' | 'flame' | 'volume';
+  | 'pencil' | 'flame' | 'volume' | 'close';
 
 const SHAPES: Record<IconName, ReactNode> = {
   sun: (
@@ -41,6 +41,7 @@ const SHAPES: Record<IconName, ReactNode> = {
   chevronRight: <Path d="M9 5l7 7-7 7" />,
   chevronDown: <Path d="M5 9l7 7 7-7" />,
   bell: <Path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4" />,
+  close: <Path d="M6 6l12 12M18 6L6 18" />,
   pencil: (
     <>
       <Path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z" />

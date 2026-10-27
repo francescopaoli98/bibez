@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Ellipse, Path, Pattern, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
+import { Icon } from './Icon';
 
 // Altezze delle barre della "forma d'onda" del tema Studio
 const WAVE = [24, 48, 80, 40, 104, 60, 16, 72, 116, 52, 32, 92, 64, 20, 100, 56, 28, 84, 112, 44, 68, 20, 88, 48, 76, 28, 96, 40, 12];
@@ -150,6 +151,48 @@ export function BannerTitle({ greeting, subtitle }: TitleProps) {
   );
 }
 
+interface PageHeaderProps {
+  title: string;
+  subtitle?: string;
+  onBack?: () => void;
+}
+
+// Testata semplice delle schermate secondarie: titolo (e freccia indietro, se serve)
+export function PageHeader({ title, subtitle, onBack }: PageHeaderProps) {
+  const { colors, look } = useTheme();
+  return (
+    <Banner>
+      {onBack && (
+        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Indietro" style={styles.back}>
+          <Icon name="chevronLeft" size={24} color={colors.onBanner} strokeWidth={2.2} />
+        </Pressable>
+      )}
+      <View>
+        <Text
+          numberOfLines={2}
+          style={{
+            color: colors.onBanner,
+            fontFamily: look.fonts.title,
+            fontSize: Math.min(look.titleSize, 34),
+            letterSpacing: look.titleTracking,
+            paddingVertical: 2,
+            ...(look.titleShadow
+              ? { textShadowColor: look.titleShadow, textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 0 }
+              : null),
+          }}
+        >
+          {look.upperMeta ? title.toUpperCase() : title}
+        </Text>
+        {subtitle ? (
+          <Text style={{ color: colors.onBanner, fontFamily: look.fonts.meta, fontSize: look.sizes.meta + 1 }}>
+            {look.upperMeta ? subtitle.toUpperCase() : subtitle}
+          </Text>
+        ) : null}
+      </View>
+    </Banner>
+  );
+}
+
 interface ProgressProps {
   done: number;
   total: number;
@@ -237,6 +280,7 @@ const styles = StyleSheet.create({
   bottomLine: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   waveform: { position: 'absolute', left: 24, right: 24, top: 56 },
   flex: { flex: 1 },
+  back: { width: 44, height: 44, marginLeft: -10, alignItems: 'center', justifyContent: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   stack: { gap: 6 },
   segments: { flexDirection: 'row', gap: 3 },

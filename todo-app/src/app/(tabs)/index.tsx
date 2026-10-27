@@ -83,6 +83,7 @@ export default function OggiScreen() {
             index={index}
             onToggle={() => toggleDone(item)}
             onImportant={() => toggleImportant(item)}
+            onOpen={() => router.push(`/attivita/${item.id}`)}
           />
         )}
         ListEmptyComponent={
@@ -112,6 +113,7 @@ export default function OggiScreen() {
                     index={i}
                     onToggle={() => toggleDone(t)}
                     onImportant={() => toggleImportant(t)}
+                    onOpen={() => router.push(`/attivita/${t.id}`)}
                   />
                 ))}
             </View>

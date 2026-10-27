@@ -9,9 +9,10 @@ interface Props {
   index: number; // posizione nella lista (serve a "TAKE 01" e all'inclinazione dell'Atelier)
   onToggle: () => void;
   onImportant: () => void;
+  onOpen?: () => void; // tocco sul titolo: apre il dettaglio
 }
 
-export function TaskCard({ task, index, onToggle, onImportant }: Props) {
+export function TaskCard({ task, index, onToggle, onImportant, onOpen }: Props) {
   const { colors, look } = useTheme();
   const done = task.doneAt !== null;
   const overdue = !done && task.dueAt !== null && task.dueAt < startOfDay();
@@ -64,7 +65,13 @@ export function TaskCard({ task, index, onToggle, onImportant }: Props) {
           </View>
         </Pressable>
 
-        <View style={styles.body}>
+        <Pressable
+          onPress={onOpen}
+          disabled={!onOpen}
+          accessibilityRole="button"
+          accessibilityLabel={`Apri: ${task.title}`}
+          style={styles.body}
+        >
           {look.tag && !done && (
             <Text style={{ color: look.tag.color, fontFamily: look.fonts.label, fontSize: 11, letterSpacing: 1 }}>
               {`TAKE ${String(index + 1).padStart(2, '0')}`}
@@ -83,7 +90,7 @@ export function TaskCard({ task, index, onToggle, onImportant }: Props) {
           >
             {task.title}
           </Text>
-          {(task.hasTime || task.projectName || overdue || look.reward) && (
+          {(task.hasTime || task.projectName || overdue || look.reward || task.subTotal > 0) && (
             <View style={styles.meta}>
               {overdue && <Text style={[metaStyle, { color: colors.important }]}>{upper('In ritardo')}</Text>}
               {task.hasTime && task.dueAt !== null && (
@@ -98,12 +105,20 @@ export function TaskCard({ task, index, onToggle, onImportant }: Props) {
                   <Text style={metaStyle}>{upper(task.projectName)}</Text>
                 </View>
               )}
+              {task.subTotal > 0 && (
+                <View style={styles.metaItem}>
+                  <Icon name="list" size={Math.min(look.sizes.meta, 14)} color={colors.muted} />
+                  <Text style={metaStyle}>
+                    {task.subDone}/{task.subTotal}
+                  </Text>
+                </View>
+              )}
               {look.reward && (
                 <Text style={[metaStyle, { color: done ? colors.done : look.reward.color }]}>{look.reward.text}</Text>
               )}
             </View>
           )}
-        </View>
+        </Pressable>
 
         <Pressable
           onPress={onImportant}
