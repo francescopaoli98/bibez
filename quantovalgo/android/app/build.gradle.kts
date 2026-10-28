@@ -1,8 +1,19 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// Chiave di firma personale (android/key.properties + app/quantovalgo.jks).
+// I due file NON vanno su GitHub (sono già in .gitignore). Se mancano,
+// la build usa la chiave di debug e il login Google non funzionerà.
+val proprietaChiave = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val haChiave = proprietaChiave.containsKey("storeFile")
 
 android {
     namespace = "it.francesco.quantovalgo"
@@ -29,12 +40,22 @@ android {
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    signingConfigs {
+        if (haChiave) {
+            create("personale") {
+                storeFile = file(proprietaChiave.getProperty("storeFile"))
+                storePassword = proprietaChiave.getProperty("storePassword")
+                keyAlias = proprietaChiave.getProperty("keyAlias")
+                keyPassword = proprietaChiave.getProperty("keyPassword")
+            }
         }
+    }
+
+    buildTypes {
+        // Stessa chiave per debug e release: un'unica impronta SHA-1 da registrare.
+        val firma = if (haChiave) signingConfigs.getByName("personale") else signingConfigs.getByName("debug")
+        debug { signingConfig = firma }
+        release { signingConfig = firma }
     }
 }
 
