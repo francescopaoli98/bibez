@@ -1,4 +1,6 @@
+import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
+import '../modelli/costo.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/sottoprogetto.dart';
@@ -33,6 +35,8 @@ abstract interface class Archivio {
   Stream<List<Sottoprogetto>> sottoprogetti();
   Stream<List<Cliente>> clienti();
   Stream<List<PrezzoMercato>> prezziMercato();
+  Stream<List<Costo>> costi();
+  Stream<List<Categoria>> categorie();
 
   // --- Scrittura. Con id vuoto si crea; il metodo restituisce l'id. ---
   String salvaLavoro(Lavoro lavoro);
@@ -47,4 +51,10 @@ abstract interface class Archivio {
   void eliminaCliente(String id);
 
   void salvaPrezzoMercato(PrezzoMercato prezzo);
+
+  String salvaCosto(Costo costo);
+  void eliminaCosto(String id);
+
+  String salvaCategoria(Categoria categoria);
+  void eliminaCategoria(String id);
 }

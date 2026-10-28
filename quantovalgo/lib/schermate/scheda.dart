@@ -8,11 +8,13 @@ class Scheda extends StatelessWidget {
     super.key,
     required this.titolo,
     required this.figli,
+    this.sottotitolo,
     this.sinistra,
     this.destra,
   });
 
   final String titolo;
+  final String? sottotitolo;
   final List<Widget> figli;
   final Widget? sinistra;
   final Widget? destra;
@@ -24,7 +26,12 @@ class Scheda extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         children: [
-          Intestazione(titolo: titolo, sinistra: sinistra, destra: destra),
+          Intestazione(
+            titolo: titolo,
+            sottotitolo: sottotitolo,
+            sinistra: sinistra,
+            destra: destra,
+          ),
           const SizedBox(height: 16),
           ...figli,
         ],

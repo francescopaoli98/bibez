@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../logica/calcoli.dart';
 import '../logica/formato.dart';
+import '../logica/mesi.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/sottoprogetto.dart';
 import '../servizi/stato_dati.dart';
@@ -53,6 +54,8 @@ class ProgettoPagina extends StatelessWidget {
     final sconto = dati.parametri.sconto(lavoro.relazione);
     final regalato = scontoRegalato(lavoro.prezzoPieno, lavoro.prezzoFinale);
     final tema = Theme.of(context).textTheme;
+    final meseAttuale = primoDelMese(DateTime.now());
+    final quotaCosti = dati.quotaCostiDelLavoro(lavoro.id, meseAttuale);
 
     return PaginaSecondaria(
       titolo: lavoro.nome,
@@ -100,6 +103,42 @@ class ProgettoPagina extends StatelessWidget {
                   const SizedBox(width: 8),
                   _EtichettaRegalo(testo: 'Regali ${euro(regalato)}'),
                 ],
+              ],
+            ),
+          ),
+        ],
+        // Parte di abbonamenti e acquisti che tocca a questo progetto
+        if (quotaCosti > 0) ...[
+          const SizedBox(height: 12),
+          CartaVetro(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Costi condivisi di ${nomeMese(meseAttuale)}: ${euro(quotaCosti)}',
+                        style: tema.labelMedium?.copyWith(fontSize: 14),
+                      ),
+                      Text(
+                        'Utile dopo i costi condivisi',
+                        style: tema.labelMedium?.copyWith(
+                          color: ColoriLaguna.testoSecondario,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  euro(numeri.utile - quotaCosti, conSegno: true),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: coloreImporto(numeri.utile - quotaCosti),
+                  ),
+                ),
               ],
             ),
           ),

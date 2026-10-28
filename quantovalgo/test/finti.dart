@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quantovalgo/app.dart';
+import 'package:quantovalgo/modelli/categoria.dart';
 import 'package:quantovalgo/modelli/cliente.dart';
+import 'package:quantovalgo/modelli/costo.dart';
 import 'package:quantovalgo/modelli/lavoro.dart';
 import 'package:quantovalgo/modelli/prezzo_mercato.dart';
 import 'package:quantovalgo/modelli/sottoprogetto.dart';
@@ -87,6 +89,8 @@ class FintoArchivio implements Archivio {
   final tabellaSotto = _Tabella<Sottoprogetto>();
   final tabellaClienti = _Tabella<Cliente>();
   final tabellaPrezzi = _Tabella<PrezzoMercato>();
+  final tabellaCosti = _Tabella<Costo>();
+  final tabellaCategorie = _Tabella<Categoria>();
   int _contatore = 0;
 
   String _nuovoId(String id) => id.isEmpty ? 'id${++_contatore}' : id;
@@ -108,6 +112,10 @@ class FintoArchivio implements Archivio {
   Stream<List<Cliente>> clienti() => tabellaClienti.ascolta();
   @override
   Stream<List<PrezzoMercato>> prezziMercato() => tabellaPrezzi.ascolta();
+  @override
+  Stream<List<Costo>> costi() => tabellaCosti.ascolta();
+  @override
+  Stream<List<Categoria>> categorie() => tabellaCategorie.ascolta();
 
   // --- Scrittura ---
   @override
@@ -146,6 +154,26 @@ class FintoArchivio implements Archivio {
   @override
   void salvaPrezzoMercato(PrezzoMercato p) =>
       tabellaPrezzi.metti(p.id, PrezzoMercato.fromMap(p.id, p.toMap()));
+
+  @override
+  String salvaCosto(Costo c) {
+    final id = _nuovoId(c.id);
+    tabellaCosti.metti(id, Costo.fromMap(id, c.toMap()));
+    return id;
+  }
+
+  @override
+  void eliminaCosto(String id) => tabellaCosti.togli(id);
+
+  @override
+  String salvaCategoria(Categoria c) {
+    final id = _nuovoId(c.id);
+    tabellaCategorie.metti(id, Categoria.fromMap(id, c.toMap()));
+    return id;
+  }
+
+  @override
+  void eliminaCategoria(String id) => tabellaCategorie.togli(id);
 }
 
 /// Avvia l'app con servizi finti e aspetta che si assesti.

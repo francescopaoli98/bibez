@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
+import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
+import '../modelli/costo.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/sottoprogetto.dart';
@@ -118,6 +120,13 @@ class ArchivioFirestore implements Archivio {
   Stream<List<PrezzoMercato>> prezziMercato() =>
       _ascolta('prezziMercato', PrezzoMercato.fromMap);
 
+  @override
+  Stream<List<Costo>> costi() => _ascolta('costi', Costo.fromMap);
+
+  @override
+  Stream<List<Categoria>> categorie() =>
+      _ascolta('categorie', Categoria.fromMap);
+
   // --- Scrittura (senza aspettare il cloud) ---
 
   String _salva(String raccolta, String id, Map<String, Object?> dati) {
@@ -176,4 +185,17 @@ class ArchivioFirestore implements Archivio {
   @override
   void salvaPrezzoMercato(PrezzoMercato prezzo) =>
       _salva('prezziMercato', prezzo.id, prezzo.toMap());
+
+  @override
+  String salvaCosto(Costo costo) => _salva('costi', costo.id, costo.toMap());
+
+  @override
+  void eliminaCosto(String id) => _elimina('costi', id);
+
+  @override
+  String salvaCategoria(Categoria categoria) =>
+      _salva('categorie', categoria.id, categoria.toMap());
+
+  @override
+  void eliminaCategoria(String id) => _elimina('categorie', id);
 }

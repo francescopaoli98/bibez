@@ -28,7 +28,8 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 1. Progetto, tema Laguna, navigazione, schermate vuote
 - [x] 2. Login Google e database cloud (vedi sotto: serve l'SHA-1 su Firebase)
 - [x] 3. Lavori, sottoprogetti e clienti, con la forbice di prezzo a mano
-- [ ] 4–12. Vedi il brief
+- [x] 4. Costi: abbonamenti, una tantum, fissi, categorie colorate
+- [ ] 5–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
 
@@ -69,3 +70,19 @@ Il font Nunito è incluso in `assets/fonts` (licenza OFL).
   incassa tutto il prezzo; si divide poi in parti più piccole.
 - Sconti e fattori di competenza sono in `logica/calcoli.dart` (`ParametriPrezzo`):
   dal passo 8 si cambieranno da Impostazioni.
+
+## Costi (passo 4)
+
+- Tre tipi: **abbonamento** (mensile, diviso tra i progetti), **una tantum** (si sceglie
+  per ogni costo: tutto nel mese, oppure spalmato su N mesi, es. 90 € ÷ 6 = 15 €/mese),
+  **fisso** (mensile, non diviso).
+- La **divisione tra i progetti è automatica**: si dividono il costo i progetti attivi
+  nel mese, in proporzione alle ore lavorate (parti uguali se nessuno ha ore).
+  Es.: Claude 20 € con ore 11 / 7 / 2 → 11 + 7 + 2 €.
+  Dal passo 5 contano le ore registrate nel mese.
+- **Categorie** create da te, ognuna con un colore della tavolozza di 10 (`tema/palette_categorie.dart`).
+  Dalla scheda Costi → "Gestisci categorie" si può aggiungere un set di partenza.
+- **Da recuperare** = costi una tantum meno l'utile dei progetti incassati
+  (resta pieno finché i pagamenti non si segnano come incassati: passo 7).
+- Un abbonamento disdetto (interruttore "Ancora attivo") smette dal mese dopo.
+- Calcoli in `logica/costi.dart`, provati con i numeri del brief e del mockup.
