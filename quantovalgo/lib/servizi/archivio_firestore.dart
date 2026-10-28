@@ -46,12 +46,21 @@ class ArchivioFirestore implements Archivio {
   }
 
   @override
-  Stream<StatoSincronizzazione> statoSincronizzazione(String uid) {
-    return _profilo(uid).snapshots(includeMetadataChanges: true).map((s) {
-      final dalTelefono = s.metadata.isFromCache || s.metadata.hasPendingWrites;
-      return dalTelefono
-          ? StatoSincronizzazione.inAttesa
-          : StatoSincronizzazione.sincronizzato;
-    });
+  Stream<StatoSincronizzazione> statoSincronizzazione(String uid) async* {
+    try {
+      await for (final s in _profilo(
+        uid,
+      ).snapshots(includeMetadataChanges: true)) {
+        final dalTelefono =
+            s.metadata.isFromCache || s.metadata.hasPendingWrites;
+        yield dalTelefono
+            ? StatoSincronizzazione.inAttesa
+            : StatoSincronizzazione.sincronizzato;
+      }
+    } on FirebaseException catch (e) {
+      // Per esempio permission-denied: regole non pubblicate.
+      debugPrint('Firestore rifiuta la lettura: ${e.code}');
+      yield StatoSincronizzazione.problema;
+    }
   }
 }

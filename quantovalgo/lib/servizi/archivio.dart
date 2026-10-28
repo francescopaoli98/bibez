@@ -7,6 +7,10 @@ enum StatoSincronizzazione {
 
   /// Offline, oppure modifiche fatte sul telefono non ancora inviate.
   inAttesa,
+
+  /// Il cloud rifiuta l'accesso (di solito: regole di Firestore non
+  /// pubblicate o database non creato).
+  problema,
 }
 
 /// Database cloud dell'app (per ora solo profilo e stato di sincronizzazione;

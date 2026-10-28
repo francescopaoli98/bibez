@@ -89,6 +89,19 @@ void main() {
     expect(find.text('Dati sul telefono, in attesa del cloud'), findsOneWidget);
   });
 
+  testWidgets('Se il cloud rifiuta i dati lo dice chiaramente', (tester) async {
+    final servizi = await avviaApp(tester);
+    servizi.archivio.stato = StatoSincronizzazione.problema;
+
+    await tester.tap(find.bySemanticsLabel('Impostazioni'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Il cloud rifiuta i dati: controlla le regole di Firestore'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Se Firebase non parte si spiega il problema', (tester) async {
     await avviaApp(tester, erroreAvvio: 'No Firebase App');
 

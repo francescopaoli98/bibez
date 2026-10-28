@@ -87,24 +87,28 @@ class _StatoSync extends StatelessWidget {
     return StreamBuilder<StatoSincronizzazione>(
       stream: stato,
       builder: (context, istantanea) {
-        final sincronizzato =
-            istantanea.data == StatoSincronizzazione.sincronizzato;
-        final colore = sincronizzato
-            ? ColoriLaguna.positivo
-            : const Color(0xFF8A5A00);
-        final testo = sincronizzato
-            ? 'Dati sincronizzati col cloud'
-            : 'Dati sul telefono, in attesa del cloud';
+        final (colore, icona, testo) = switch (istantanea.data) {
+          StatoSincronizzazione.sincronizzato => (
+            ColoriLaguna.positivo,
+            Icons.cloud_done_rounded,
+            'Dati sincronizzati col cloud',
+          ),
+          StatoSincronizzazione.problema => (
+            ColoriLaguna.negativo,
+            Icons.error_outline_rounded,
+            'Il cloud rifiuta i dati: controlla le regole di Firestore',
+          ),
+          _ => (
+            const Color(0xFF8A5A00),
+            Icons.cloud_off_rounded,
+            'Dati sul telefono, in attesa del cloud',
+          ),
+        };
         return Semantics(
           liveRegion: true,
           child: Row(
             children: [
-              Icon(
-                sincronizzato
-                    ? Icons.cloud_done_rounded
-                    : Icons.cloud_off_rounded,
-                color: colore,
-              ),
+              Icon(icona, color: colore),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
