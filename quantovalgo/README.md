@@ -26,4 +26,15 @@ flutter build apk    # APK per installarlo sul telefono
 - [ ] 2. Login Google e database cloud
 - [ ] 3–12. Vedi il brief
 
+## Richieste aggiunte dopo il brief
+
+- **Costi una tantum**: costi presi in un certo mese, compresi nei costi totali
+  da recuperare (passo 4, con il saldo nel passo 6).
+- **Categorie dei costi** (es. "Microfono", "Doppiaggio"): create da te, ognuna
+  con il suo colore (passo 4).
+- **Effetto morbido al tocco**: pulsanti che si schiacciano e rimbalzano piano,
+  con un tick di vibrazione (fatto, `widget/effetto_morbido.dart`).
+- **Fluidità**: dissolvenza tra schede e tra pagine; app leggera, niente
+  librerie pesanti (fatto).
+
 Il font Nunito è incluso in `assets/fonts` (licenza OFL).

@@ -24,7 +24,11 @@ class CartaVetro extends StatelessWidget {
           colors: [Color(0xF2FFFFFF), Color(0xD9EEFCFC)],
         ),
         boxShadow: const [
-          BoxShadow(color: Color(0x38065A78), blurRadius: 14, offset: Offset(0, 5)),
+          BoxShadow(
+            color: Color(0x38065A78),
+            blurRadius: 14,
+            offset: Offset(0, 5),
+          ),
         ],
       ),
       child: child,

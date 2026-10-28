@@ -26,7 +26,12 @@ class StileLucido {
 
   /// Blu: azioni normali.
   static const blu = StileLucido(
-    sfumatura: [Color(0xFF0A4F82), Color(0xFF0F72A8), Color(0xFF0C5F8F), Color(0xFF3CC4EE)],
+    sfumatura: [
+      Color(0xFF0A4F82),
+      Color(0xFF0F72A8),
+      Color(0xFF0C5F8F),
+      Color(0xFF3CC4EE),
+    ],
     bordo: Color(0xFF0A4A7A),
     testo: Colors.white,
     ombra: Color(0x73053C64),
@@ -36,7 +41,12 @@ class StileLucido {
 
   /// Verde: azione principale (es. "+" nuovo lavoro).
   static const verde = StileLucido(
-    sfumatura: [Color(0xFF0F5F1F), Color(0xFF1A7F2A), Color(0xFF146B24), Color(0xFF6CE04A)],
+    sfumatura: [
+      Color(0xFF0F5F1F),
+      Color(0xFF1A7F2A),
+      Color(0xFF146B24),
+      Color(0xFF6CE04A),
+    ],
     bordo: Color(0xFF0E5A1C),
     testo: Colors.white,
     ombra: Color(0x800A5014),
@@ -46,7 +56,12 @@ class StileLucido {
 
   /// Oro: "Cerca prezzi", "Migliora testo". Testo scuro sul giallo.
   static const oro = StileLucido(
-    sfumatura: [Color(0xFFB87800), Color(0xFFF2A90C), Color(0xFFDE9400), Color(0xFFFFE27A)],
+    sfumatura: [
+      Color(0xFFB87800),
+      Color(0xFFF2A90C),
+      Color(0xFFDE9400),
+      Color(0xFFFFE27A),
+    ],
     bordo: Color(0xFF8A5A00),
     testo: Color(0xFF3A2400),
     ombra: Color(0x66965F00),
@@ -56,7 +71,12 @@ class StileLucido {
 
   /// Rosso: usato per l'icona del microfono nei progetti di doppiaggio.
   static const rosso = StileLucido(
-    sfumatura: [Color(0xFF7A1808), Color(0xFFC0391B), Color(0xFFA32D14), Color(0xFFFF8A5C)],
+    sfumatura: [
+      Color(0xFF7A1808),
+      Color(0xFFC0391B),
+      Color(0xFFA32D14),
+      Color(0xFFFF8A5C),
+    ],
     bordo: Color(0xFF6E1608),
     testo: Colors.white,
     ombra: Color(0x73781E0A),

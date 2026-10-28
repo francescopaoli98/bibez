@@ -53,9 +53,7 @@ class SfondoLaguna extends StatelessWidget {
           right: 0,
           bottom: 0,
           height: 170,
-          child: ExcludeSemantics(
-            child: CustomPaint(painter: _PittoreOnde()),
-          ),
+          child: ExcludeSemantics(child: CustomPaint(painter: _PittoreOnde())),
         ),
         child,
       ],

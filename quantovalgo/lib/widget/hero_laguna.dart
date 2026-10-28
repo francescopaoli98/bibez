@@ -21,7 +21,11 @@ class HeroLaguna extends StatelessWidget {
           colors: [ColoriLaguna.heroInizio, ColoriLaguna.heroFine],
         ),
         boxShadow: const [
-          BoxShadow(color: Color(0x6604466E), blurRadius: 24, offset: Offset(0, 10)),
+          BoxShadow(
+            color: Color(0x6604466E),
+            blurRadius: 24,
+            offset: Offset(0, 10),
+          ),
         ],
       ),
       child: ClipRRect(

@@ -34,9 +34,7 @@ class StatoVuoto extends StatelessWidget {
           Text(
             testo,
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
+            style: Theme.of(context).textTheme.bodyMedium
                 ?.copyWith(color: ColoriLaguna.testoSecondario),
           ),
         ],

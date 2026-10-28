@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../tema/colori.dart';
+import 'effetto_morbido.dart';
 import 'sfera_lucida.dart';
 import 'stile_lucido.dart';
 
@@ -49,7 +50,11 @@ class BarraNavigazione extends StatelessWidget {
           colors: [Color(0xF7FFFFFF), Color(0xEBECFBFC)],
         ),
         boxShadow: [
-          BoxShadow(color: Color(0x38065A78), blurRadius: 20, offset: Offset(0, -6)),
+          BoxShadow(
+            color: Color(0x38065A78),
+            blurRadius: 20,
+            offset: Offset(0, -6),
+          ),
         ],
       ),
       child: Row(
@@ -93,25 +98,30 @@ class _VoceBarra extends StatelessWidget {
       selected: selezionata,
       label: voce.etichetta,
       excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 56, minHeight: 44),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _IconaVoce(icona: voce.icona, selezionata: selezionata),
-              const SizedBox(height: 2),
-              Text(
-                voce.etichetta,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: selezionata ? FontWeight.w800 : FontWeight.w700,
-                  color: selezionata ? ColoriLaguna.testo : ColoriLaguna.testoSecondario,
+      child: EffettoMorbido(
+        scalaPremuto: 0.9,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 56, minHeight: 44),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _IconaVoce(icona: voce.icona, selezionata: selezionata),
+                const SizedBox(height: 2),
+                Text(
+                  voce.etichetta,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: selezionata ? FontWeight.w800 : FontWeight.w700,
+                    color: selezionata
+                        ? ColoriLaguna.testo
+                        : ColoriLaguna.testoSecondario,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -150,7 +160,11 @@ class _IconaVoce extends StatelessWidget {
           stops: StileLucido.stop,
         ),
         boxShadow: const [
-          BoxShadow(color: Color(0x66053C64), blurRadius: 8, offset: Offset(0, 3)),
+          BoxShadow(
+            color: Color(0x66053C64),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Stack(
@@ -180,7 +194,13 @@ class _IconaVoce extends StatelessWidget {
             icona,
             size: 22,
             color: Colors.white,
-            shadows: [Shadow(color: stile.ombraTesto, blurRadius: 1, offset: const Offset(0, 1))],
+            shadows: [
+              Shadow(
+                color: stile.ombraTesto,
+                blurRadius: 1,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
         ],
       ),

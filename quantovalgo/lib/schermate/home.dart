@@ -53,7 +53,11 @@ class HomePagina extends StatelessWidget {
                   letterSpacing: -1,
                   color: ColoriLaguna.cifraHero,
                   shadows: [
-                    Shadow(color: Color(0x73002838), blurRadius: 4, offset: Offset(0, 2)),
+                    Shadow(
+                      color: Color(0x73002838),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
                   ],
                 ),
               ),
@@ -111,7 +115,11 @@ class _LogoSole extends StatelessWidget {
           stops: [0.0, 0.45, 1.0],
         ),
         boxShadow: const [
-          BoxShadow(color: Color(0x66C86400), blurRadius: 8, offset: Offset(0, 3)),
+          BoxShadow(
+            color: Color(0x66C86400),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
     );
