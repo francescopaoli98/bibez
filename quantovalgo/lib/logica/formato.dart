@@ -29,14 +29,19 @@ String ore(double valore) {
 }
 
 /// Legge un numero scritto a mano ("12,5", "12.5", "1 000", "20 €").
-/// Restituisce null se vuoto, non valido o negativo.
-double? leggiNumero(String testo) {
+/// Restituisce null se vuoto, non valido o negativo (a meno che [negativi] sia vero:
+/// allora va bene anche il segno `-` o `−`).
+double? leggiNumero(String testo, {bool negativi = false}) {
   final pulito = testo
       .replaceAll('€', '')
+      .replaceAll('−', '-')
       .replaceAll(RegExp(r'\s'), '')
       .replaceAll(',', '.');
   final valore = double.tryParse(pulito);
-  return (valore == null || valore < 0 || valore.isNaN || valore.isInfinite)
+  return (valore == null ||
+          (valore < 0 && !negativi) ||
+          valore.isNaN ||
+          valore.isInfinite)
       ? null
       : valore;
 }
@@ -88,3 +93,12 @@ String cronometro(Duration tempo) {
 /// Ora del giorno: `14:05`.
 String oraDelGiorno(DateTime data) =>
     '${data.hour.toString().padLeft(2, '0')}:${data.minute.toString().padLeft(2, '0')}';
+
+/// Una percentuale intera: `22%`, `−30%`; con [conSegno] anche `+10%`.
+String percentuale(num valore, {bool conSegno = false}) {
+  final testo = valore == valore.roundToDouble()
+      ? valore.abs().round().toString()
+      : valore.abs().toString().replaceAll('.', ',');
+  final segno = valore < 0 ? '−' : (conSegno && valore > 0 ? '+' : '');
+  return '$segno$testo%';
+}

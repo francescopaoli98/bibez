@@ -12,6 +12,7 @@ class CampoTesto extends StatelessWidget {
     required this.etichetta,
     this.suggerimento,
     this.numerico = false,
+    this.negativo = false,
     this.errore,
     this.onChanged,
     this.azioneTastiera = TextInputAction.next,
@@ -24,6 +25,9 @@ class CampoTesto extends StatelessWidget {
   /// Testo grigio quando il campo è vuoto.
   final String? suggerimento;
   final bool numerico;
+
+  /// Con [numerico]: ammette anche il segno meno (per i valori che possono scendere sotto zero).
+  final bool negativo;
 
   /// Messaggio rosso sotto il campo.
   final String? errore;
@@ -56,10 +60,17 @@ class CampoTesto extends StatelessWidget {
             textInputAction: azioneTastiera,
             textCapitalization: numerico ? TextCapitalization.none : maiuscole,
             keyboardType: numerico
-                ? const TextInputType.numberWithOptions(decimal: true)
+                ? TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: negativo,
+                  )
                 : TextInputType.text,
             inputFormatters: numerico
-                ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+                ? [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(negativo ? r'[0-9.,\-−]' : r'[0-9.,]'),
+                    ),
+                  ]
                 : null,
             style: const TextStyle(
               fontSize: 17,

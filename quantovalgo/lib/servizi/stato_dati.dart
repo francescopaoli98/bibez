@@ -7,6 +7,7 @@ import '../logica/costi.dart';
 import '../logica/costi.dart' as logica_costi;
 import '../logica/giornate.dart';
 import '../logica/mesi.dart';
+import '../logica/obiettivo.dart';
 import '../logica/ore.dart';
 import '../logica/pagamenti.dart';
 import '../logica/promemoria.dart';
@@ -59,9 +60,8 @@ class StatoDati extends ChangeNotifier {
   List<SessioneOre> _sessioni = const [];
   Impostazioni _impostazioni = const Impostazioni();
 
-  /// Valori di calcolo (sconti, fattori di competenza). Dal passo 8 si
-  /// potranno cambiare da Impostazioni.
-  ParametriPrezzo parametri = ParametriPrezzo.predefiniti;
+  /// Valori di calcolo (sconti, fattori di competenza), da Impostazioni.
+  ParametriPrezzo get parametri => _impostazioni.parametriPrezzo;
 
   /// Vero se il cloud ha rifiutato un flusso (regole o database).
   bool problema = false;
@@ -257,6 +257,14 @@ class StatoDati extends ChangeNotifier {
       regalato: regalato,
     );
   }
+
+  /// Obiettivo, pareggio e tariffa minima di [mese].
+  PianoObiettivo pianoObiettivo(DateTime mese) => PianoObiettivo(
+    saldoMese: saldoDelMese(mese),
+    oreMese: oreDaMinuti(minutiDelMese(_sessioni, mese)),
+    tasse: _impostazioni.tasse,
+    obiettivoNetto: _impostazioni.obiettivoMensile,
+  );
 
   // --- Pagamenti ---
 

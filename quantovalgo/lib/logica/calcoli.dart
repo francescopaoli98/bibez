@@ -9,8 +9,19 @@ class Forbice {
   final double massimo;
 }
 
-/// Valori modificabili che entrano nel calcolo del prezzo.
-/// Ora sono quelli di partenza; dal passo 8 si cambiano in Impostazioni.
+/// Sconti di partenza per relazione (in %). Si cambiano da Impostazioni.
+const scontiPredefiniti = {
+  Relazione.nuovo: 0,
+  Relazione.consigliato: 10,
+  Relazione.amico: 30,
+  Relazione.famiglia: 50,
+};
+
+/// Correzione di partenza del prezzo per livello (in %): livello 1 = −20%,
+/// 3 = 0%, 5 = +20%; il 2 e il 4 a metà strada. Si cambia da Impostazioni.
+const correzioniPredefinite = {1: -20, 2: -10, 3: 0, 4: 10, 5: 20};
+
+/// Valori modificabili che entrano nel calcolo del prezzo (da Impostazioni).
 class ParametriPrezzo {
   const ParametriPrezzo({
     required this.scontoRelazione,
@@ -24,14 +35,8 @@ class ParametriPrezzo {
   final Map<int, int> correzioneLivello;
 
   static const predefiniti = ParametriPrezzo(
-    scontoRelazione: {
-      Relazione.nuovo: 0,
-      Relazione.consigliato: 10,
-      Relazione.amico: 30,
-      Relazione.famiglia: 50,
-    },
-    // Livello 1 = −20%, 3 = 0%, 5 = +20%; il 2 e il 4 a metà strada.
-    correzioneLivello: {1: -20, 2: -10, 3: 0, 4: 10, 5: 20},
+    scontoRelazione: scontiPredefiniti,
+    correzioneLivello: correzioniPredefinite,
   );
 
   int sconto(Relazione relazione) => scontoRelazione[relazione] ?? 0;

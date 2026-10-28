@@ -33,7 +33,8 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 5. Ore: cronometro e inserimento a mano
 - [x] 7. Pagamenti: da incassare, incassato, in ritardo, promemoria con notifiche
 - [x] 6. Home: saldo del mese, guadagno all'ora, sconti regalati
-- [ ] 8–12. Vedi il brief
+- [x] 8. Obiettivo, pareggio, tariffa minima e Impostazioni
+- [ ] 9–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
 
@@ -189,3 +190,22 @@ inventate da te):
   Il riquadro compare solo se c'è qualcosa.
 - **Da incassare** (tutti i mesi insieme) e l'elenco dei progetti stanno sotto.
 - Codice: `logica/saldo.dart`, `StatoDati.saldoDelMese`, `schermate/home.dart`.
+
+## Obiettivo e Impostazioni (passo 8)
+
+- **Obiettivo mensile NETTO** (dopo le tasse) e **tasse in %** (22 di partenza), da
+  Impostazioni o dalla pagina Obiettivo. Tutto in `utenti/{uid}/impostazioni/generali`.
+- **Netto dopo tasse** = saldo × (1 − tasse%); con saldo negativo non ci sono tasse.
+  **Avanzamento** = netto ÷ obiettivo (barra e percentuale; oltre il 100% = raggiunto).
+- **Punto di pareggio** = costi del mese (condivisi + diretti dei progetti incassati),
+  con quanto manca per coprirli.
+- **Tariffa minima oraria** = (obiettivo ÷ (1 − tasse%) + costi del mese) ÷ ore registrate
+  nel mese. Senza ore registrate (o senza obiettivo) mostra "—". Le ore iniziali scritte a
+  mano nei sottoprogetti non hanno data e non contano.
+- Pagina Obiettivo con le frecce dei mesi, come la Home.
+- **Sconti per relazione** e **correzione del prezzo per livello** si cambiano da
+  Impostazioni e valgono per i nuovi prezzi (i progetti già salvati restano com'erano).
+  Nei campi percentuale con valori negativi si può scrivere il segno meno.
+- Codice: `modelli/impostazioni.dart`, `logica/obiettivo.dart`, `schermate/obiettivo.dart`,
+  `schermate/impostazioni.dart`, `schermate/foglio_numero.dart`.
+- Ancora da fare in Impostazioni: stato della ricerca prezzi (passo 9) e backup.
