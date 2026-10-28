@@ -51,3 +51,6 @@ app.*.map.json
 /consegna/
 *.jks
 key.properties
+
+# Config Firebase personale: mai su GitHub (repo pubblico)
+/android/app/google-services.json

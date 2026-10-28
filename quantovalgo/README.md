@@ -23,7 +23,7 @@ flutter build apk    # APK per installarlo sul telefono
 ## Stato dei passi
 
 - [x] 1. Progetto, tema Laguna, navigazione, schermate vuote
-- [ ] 2. Login Google e database cloud
+- [x] 2. Login Google e database cloud (vedi sotto: serve l'SHA-1 su Firebase)
 - [ ] 3–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
@@ -40,3 +40,16 @@ flutter build apk    # APK per installarlo sul telefono
   librerie pesanti (fatto).
 
 Il font Nunito è incluso in `assets/fonts` (licenza OFL).
+
+## Cloud (passo 2)
+
+- Firebase, piano **Spark** (gratuito, nessuna carta): Authentication (Google) + Firestore.
+- File **personali, non nel repo** (è pubblico): `android/app/google-services.json`,
+  `android/key.properties` e `android/app/quantovalgo.jks` (chiave di firma).
+  Senza `google-services.json` l'app si apre e mostra "Il cloud non è configurato".
+- Dati sotto `utenti/{uid}`; regole di sicurezza in `firestore.rules` (da incollare
+  in Firebase → Firestore → Regole → Pubblica).
+- Cache offline di Firestore attiva (max 50 MB): l'app si apre già connessa e legge
+  i dati anche senza internet. In Impostazioni si vede se i dati sono sincronizzati.
+- Accesso: `servizi/accesso.dart` (interfaccia) e `accesso_firebase.dart` (vero).
+  Nei test si usano versioni finte (`test/finti.dart`).

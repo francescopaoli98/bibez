@@ -1,17 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quantovalgo/app.dart';
+
+import 'finti.dart';
 
 void main() {
   testWidgets('L\'app si apre sulla Home', (tester) async {
-    await tester.pumpWidget(const QuantoValgoApp());
-    await tester.pumpAndSettle();
+    await avviaApp(tester);
 
     expect(find.text('QuantoValgo'), findsOneWidget);
     expect(find.text('Saldo del mese'), findsOneWidget);
   });
 
   testWidgets('La barra in basso cambia scheda', (tester) async {
-    await tester.pumpWidget(const QuantoValgoApp());
+    await avviaApp(tester);
 
     for (final nome in ['Progetti', 'Preventivi', 'Costi']) {
       // Il testo compare anche nella barra: si tocca quello della barra.
@@ -25,8 +25,10 @@ void main() {
     expect(find.text('Saldo del mese'), findsOneWidget);
   });
 
-  testWidgets('Il + apre Nuovo lavoro e Indietro torna alla Home', (tester) async {
-    await tester.pumpWidget(const QuantoValgoApp());
+  testWidgets('Il + apre Nuovo lavoro e Indietro torna alla Home', (
+    tester,
+  ) async {
+    await avviaApp(tester);
 
     await tester.tap(find.bySemanticsLabel('Nuovo lavoro'));
     await tester.pumpAndSettle();
@@ -37,10 +39,15 @@ void main() {
     expect(find.text('Saldo del mese'), findsOneWidget);
   });
 
-  testWidgets('Dalla Home si aprono Clienti, Obiettivo e Impostazioni', (tester) async {
-    await tester.pumpWidget(const QuantoValgoApp());
+  testWidgets('Dalla Home si aprono Clienti, Obiettivo e Impostazioni', (
+    tester,
+  ) async {
+    await avviaApp(tester);
 
-    Future<void> apriEChiudi(Future<void> Function() tocca, String titolo) async {
+    Future<void> apriEChiudi(
+      Future<void> Function() tocca,
+      String titolo,
+    ) async {
       await tocca();
       await tester.pumpAndSettle();
       expect(find.text(titolo), findsWidgets);

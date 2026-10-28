@@ -6,6 +6,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Firebase: il plugin serve solo se google-services.json è presente
+// (il file è personale e non sta su GitHub).
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 // Chiave di firma personale (android/key.properties + app/quantovalgo.jks).
 // I due file NON vanno su GitHub (sono già in .gitignore). Se mancano,
 // la build usa la chiave di debug e il login Google non funzionerà.

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widget/hero_laguna.dart';
+import '../widget/logo_sole.dart';
 import '../widget/pulsante_lucido.dart';
 import '../widget/sfera_lucida.dart';
 import '../widget/stato_vuoto.dart';
@@ -24,7 +25,7 @@ class HomePagina extends StatelessWidget {
     return Scheda(
       titolo: 'QuantoValgo',
       // Pallino sole accanto al nome, come nel mockup
-      sinistra: const ExcludeSemantics(child: _LogoSole()),
+      sinistra: const LogoSole(),
       destra: SferaLucida(
         icona: Icons.settings_rounded,
         etichetta: 'Impostazioni',
@@ -93,35 +94,6 @@ class HomePagina extends StatelessWidget {
           testo: 'Premi il + verde per registrare il primo lavoro.',
         ),
       ],
-    );
-  }
-}
-
-/// Pallino giallo "sole" del logo.
-class _LogoSole extends StatelessWidget {
-  const _LogoSole();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
-        gradient: const RadialGradient(
-          center: Alignment(-0.3, -0.4),
-          colors: [Color(0xFFFFF6B0), Color(0xFFFFC93C), Color(0xFFF08A18)],
-          stops: [0.0, 0.45, 1.0],
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x66C86400),
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
     );
   }
 }
