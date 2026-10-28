@@ -165,25 +165,120 @@ void main() {
     });
   });
 
-  group('Da recuperare', () {
-    final costi = [
-      costo(TipoCosto.unaTantum, 90, mesi: 6),
-      costo(TipoCosto.unaTantum, 110),
-      costo(TipoCosto.abbonamento, 20), // non conta
-    ];
-
-    test('costi una tantum meno l\'utile incassato', () {
-      final r = daRecuperare(costi: costi, utileIncassato: 50);
-      expect(r.totale, 200);
-      expect(r.recuperato, 50);
-      expect(r.residuo, 150);
-      expect(r.avanzamento, 0.25);
+  group('Costo sostenuto fino a un mese', () {
+    test('una tantum: il prezzo intero dopo l\'acquisto, niente prima', () {
+      final microfono = costo(TipoCosto.unaTantum, 90, mesi: 6);
+      expect(costoSostenutoFinoA(microfono, DateTime(2026, 9)), 0);
+      expect(costoSostenutoFinoA(microfono, ottobre), 90);
+      expect(costoSostenutoFinoA(microfono, DateTime(2027, 6)), 90);
     });
 
-    test('non va mai sotto zero né oltre il totale', () {
-      expect(daRecuperare(costi: costi, utileIncassato: 999).residuo, 0);
-      expect(daRecuperare(costi: costi, utileIncassato: -40).recuperato, 0);
-      expect(daRecuperare(costi: const [], utileIncassato: 10).avanzamento, 0);
+    test('abbonamento: la somma dei mesi pagati (gen–ott = 10 × 20 €)', () {
+      final claude = costo(
+        TipoCosto.abbonamento,
+        20,
+        inizio: DateTime(2026, 1, 15),
+      );
+      expect(costoSostenutoFinoA(claude, ottobre), 200);
+      expect(costoSostenutoFinoA(claude, DateTime(2025, 12)), 0);
+    });
+
+    test('un abbonamento disdetto smette di crescere', () {
+      final claude = costo(
+        TipoCosto.abbonamento,
+        20,
+        inizio: DateTime(2026, 1),
+        fine: DateTime(2026, 3, 10),
+      );
+      expect(
+        costoSostenutoFinoA(claude, DateTime(2026, 12)),
+        60,
+      ); // gen, feb, mar
+    });
+  });
+
+  group('Da recuperare per tipo', () {
+    final claude = costo(TipoCosto.abbonamento, 20, inizio: DateTime(2026, 1));
+    final doppiaggio = costo(TipoCosto.unaTantum, 90, mesi: 6);
+    final generico = costo(TipoCosto.unaTantum, 100);
+    final internet = costo(TipoCosto.fisso, 30, inizio: DateTime(2026, 1));
+    final costi = [claude, doppiaggio, generico, internet];
+
+    TipoLavoro? tipoDi(Costo c) => c == claude
+        ? TipoLavoro.claude
+        : c == doppiaggio
+        ? TipoLavoro.doppiaggio
+        : null;
+
+    List<GruppoRecupero> calcola(Map<TipoLavoro, double> utile) =>
+        gruppiDaRecuperare(
+          costi: costi,
+          tipoDelCosto: tipoDi,
+          utileIncassatoPerTipo: utile,
+          mese: ottobre,
+        );
+
+    test('ogni tipo conta i propri costi, gli altri solo le una tantum', () {
+      final g = calcola({});
+      expect(
+        [for (final x in g) x.tipo],
+        [TipoLavoro.doppiaggio, TipoLavoro.claude, null],
+      );
+      expect(
+        [for (final x in g) x.totale],
+        [90, 200, 100],
+      ); // l'internet fisso non conta
+      expect(g.every((x) => x.recuperato == 0), isTrue);
+    });
+
+    test('i costi Claude si coprono solo con i progetti Claude', () {
+      // 150 € di utile sul doppiaggio non toccano il costo Claude
+      final g = calcola({TipoLavoro.doppiaggio: 150});
+      final cla = g.firstWhere((x) => x.tipo == TipoLavoro.claude);
+      expect(cla.recuperato, 0);
+      expect(cla.residuo, 200);
+
+      final conClaude = calcola({TipoLavoro.claude: 120});
+      final cla2 = conClaude.firstWhere((x) => x.tipo == TipoLavoro.claude);
+      expect(cla2.recuperato, 120);
+      expect(cla2.residuo, 80);
+      expect(cla2.avanzamento, closeTo(0.6, 1e-9));
+    });
+
+    test('mai oltre il totale e mai sotto zero', () {
+      final g = calcola({TipoLavoro.claude: 999, TipoLavoro.doppiaggio: -50});
+      expect(g.firstWhere((x) => x.tipo == TipoLavoro.claude).residuo, 0);
+      expect(
+        g.firstWhere((x) => x.tipo == TipoLavoro.doppiaggio).recuperato,
+        0,
+      );
+    });
+
+    test('gli altri costi si coprono con l\'utile che avanza', () {
+      // Claude: costo 200, utile 260 → avanzano 60; doppiaggio: 90 con utile 0
+      // Codice non ha costi: tutto il suo utile (30) avanza → 90 per gli altri
+      final g = calcola({TipoLavoro.claude: 260, TipoLavoro.codice: 30});
+      final altri = g.firstWhere((x) => x.tipo == null);
+      expect(altri.recuperato, 90);
+      expect(altri.residuo, 10);
+    });
+
+    test('l\'utile di un tipo non si usa due volte', () {
+      // 200 € di utile Claude bastano giusto per il costo Claude: per gli altri non avanza nulla
+      final g = calcola({TipoLavoro.claude: 200});
+      expect(g.firstWhere((x) => x.tipo == null).recuperato, 0);
+    });
+
+    test('senza costi non c\'è nessun gruppo', () {
+      expect(
+        gruppiDaRecuperare(
+          costi: const [],
+          tipoDelCosto: (_) => null,
+          utileIncassatoPerTipo: {TipoLavoro.claude: 10},
+          mese: ottobre,
+        ),
+        isEmpty,
+      );
     });
   });
 

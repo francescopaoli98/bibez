@@ -106,11 +106,36 @@ List<Lavoro> progettiAttivi(Iterable<Lavoro> lavori, DateTime mese) {
   ];
 }
 
-/// Costi una tantum ancora da recuperare con i guadagni.
-class DaRecuperare {
-  const DaRecuperare({required this.totale, required this.recuperato});
+/// Quanto è costato un costo dall'inizio fino a [mese] compreso.
+/// - Una tantum: il prezzo intero, se l'acquisto è già avvenuto.
+/// - Abbonamento e fisso: la somma dei mesi pagati.
+double costoSostenutoFinoA(Costo costo, DateTime mese) {
+  final ultimo = primoDelMese(mese);
+  final primo = primoDelMese(costo.inizio);
+  if (ultimo.isBefore(primo)) return 0;
+  if (costo.tipo == TipoCosto.unaTantum) return costo.importo;
 
-  /// Somma dei prezzi pagati per i costi una tantum.
+  // Un mese alla volta (con un tetto di sicurezza di 50 anni)
+  var somma = 0.0;
+  final mesi = differenzaMesi(primo, ultimo).clamp(0, 600);
+  for (var i = 0; i <= mesi; i++) {
+    somma += quotaNelMese(costo, DateTime(primo.year, primo.month + i));
+  }
+  return somma;
+}
+
+/// Costi che si recuperano con lo stesso tipo di progetti.
+/// [tipo] vuoto = gli "altri costi", non legati a un tipo.
+class GruppoRecupero {
+  const GruppoRecupero({
+    required this.tipo,
+    required this.totale,
+    required this.recuperato,
+  });
+
+  final TipoLavoro? tipo;
+
+  /// Quanto è costato in tutto.
   final double totale;
 
   /// Quanto ne hanno già coperto i progetti incassati (mai più del totale).
@@ -122,19 +147,59 @@ class DaRecuperare {
   double get avanzamento => totale <= 0 ? 0 : recuperato / totale;
 }
 
-/// "Da recuperare" = costi una tantum meno l'utile dei progetti incassati
-/// (ricavi − costi diretti). Gli abbonamenti e i fissi non contano: si
-/// coprono mese per mese con il saldo.
-DaRecuperare daRecuperare({
+/// "Da recuperare", diviso per tipo di lavoro.
+///
+/// - I costi legati a un tipo (tramite la categoria) contano **tutti** i mesi
+///   pagati e si coprono **solo** con l'utile dei progetti incassati di quel
+///   tipo. I mesi senza progetti di quel tipo non si perdono: restano lì.
+/// - Gli "altri costi" (senza tipo) contano come prima solo gli acquisti
+///   una tantum; si coprono con quello che avanza: l'utile in più dei tipi che
+///   hanno già coperto i propri costi, più l'utile dei tipi senza costi.
+///
+/// [utileIncassatoPerTipo]: utile (ricavi − costi diretti) dei progetti
+/// incassati, per tipo di lavoro.
+List<GruppoRecupero> gruppiDaRecuperare({
   required Iterable<Costo> costi,
-  required double utileIncassato,
+  required TipoLavoro? Function(Costo) tipoDelCosto,
+  required Map<TipoLavoro, double> utileIncassatoPerTipo,
+  required DateTime mese,
 }) {
-  final totale = costi
-      .where((c) => c.tipo == TipoCosto.unaTantum)
-      .fold<double>(0, (s, c) => s + c.importo);
-  final coperto = utileIncassato < 0 ? 0.0 : utileIncassato;
-  return DaRecuperare(
-    totale: totale,
-    recuperato: coperto > totale ? totale : coperto,
-  );
+  final perTipo = <TipoLavoro, double>{};
+  var altri = 0.0;
+  for (final c in costi) {
+    final tipo = tipoDelCosto(c);
+    if (tipo != null) {
+      perTipo[tipo] = (perTipo[tipo] ?? 0) + costoSostenutoFinoA(c, mese);
+    } else if (c.tipo == TipoCosto.unaTantum) {
+      altri += costoSostenutoFinoA(c, mese);
+    }
+  }
+
+  final gruppi = <GruppoRecupero>[];
+  var avanzo = 0.0; // utile che non serve ai costi del proprio tipo
+  for (final tipo in TipoLavoro.values) {
+    final utile = (utileIncassatoPerTipo[tipo] ?? 0) < 0
+        ? 0.0
+        : (utileIncassatoPerTipo[tipo] ?? 0);
+    final totale = perTipo[tipo] ?? 0;
+    if (totale <= 0) {
+      avanzo += utile;
+      continue;
+    }
+    final recuperato = utile > totale ? totale : utile;
+    avanzo += utile - recuperato;
+    gruppi.add(
+      GruppoRecupero(tipo: tipo, totale: totale, recuperato: recuperato),
+    );
+  }
+  if (altri > 0) {
+    gruppi.add(
+      GruppoRecupero(
+        tipo: null,
+        totale: altri,
+        recuperato: avanzo > altri ? altri : avanzo,
+      ),
+    );
+  }
+  return gruppi;
 }

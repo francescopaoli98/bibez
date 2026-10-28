@@ -270,6 +270,18 @@ class _FormCostoState extends State<_FormCosto> {
           scelta: _categoriaId,
           onCambia: (id) => setState(() => _categoriaId = id),
         ),
+        // Se la categoria è legata a un tipo di lavoro, lo si dice qui
+        if (DatiScope.di(context).categoria(_categoriaId)?.tipoLavoro
+            case final tipo?) ...[
+          const SizedBox(height: 6),
+          Text(
+            'Pesa e si recupera solo con i progetti ${tipo.etichetta}.',
+            style: tema.labelMedium?.copyWith(
+              color: ColoriLaguna.testoSecondario,
+              fontSize: 14,
+            ),
+          ),
+        ],
         if (ricorrente && widget.esistente != null) ...[
           const SizedBox(height: 14),
           Row(

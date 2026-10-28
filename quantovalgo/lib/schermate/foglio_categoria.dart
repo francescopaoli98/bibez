@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../modelli/categoria.dart';
+import '../modelli/tipi.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../tema/palette_categorie.dart';
@@ -10,6 +11,7 @@ import '../widget/chip_categoria.dart';
 import '../widget/effetto_morbido.dart';
 import '../widget/foglio_laguna.dart';
 import '../widget/pulsante_lucido.dart';
+import '../widget/pulsante_scelta.dart';
 import '../widget/stile_lucido.dart';
 
 /// Foglio per creare o modificare una categoria.
@@ -36,11 +38,15 @@ Future<void> gestisciCategorie(BuildContext context) {
 
 /// Categorie proposte con un tocco: nome e posizione del colore.
 const _categorieDiPartenza = [
-  ('Doppiaggio', 6), // rosso, come il microfono
-  ('Codice', 1), // blu
-  ('Claude', 8), // viola
-  ('Generale', 9), // grigio
+  ('Doppiaggio', 6, TipoLavoro.doppiaggio), // rosso, come il microfono
+  ('Codice', 1, TipoLavoro.codice), // blu
+  ('Claude', 8, TipoLavoro.claude), // viola
+  ('Generale', 9, null), // grigio: per tutti i progetti
 ];
+
+/// Testo che dice con quali progetti si recuperano i costi di una categoria.
+String descriviTipoCategoria(TipoLavoro? tipo) =>
+    tipo == null ? 'tutti i progetti' : 'progetti ${tipo.etichetta}';
 
 class _FormCategoria extends StatefulWidget {
   const _FormCategoria({this.esistente});
@@ -54,6 +60,7 @@ class _FormCategoria extends StatefulWidget {
 class _FormCategoriaState extends State<_FormCategoria> {
   late final _nome = TextEditingController(text: widget.esistente?.nome);
   late int _colore = widget.esistente?.colore ?? 0;
+  late TipoLavoro? _tipoLavoro = widget.esistente?.tipoLavoro;
   String? _erroreNome;
 
   @override
@@ -82,6 +89,7 @@ class _FormCategoriaState extends State<_FormCategoria> {
         id: vecchia?.id ?? '',
         nome: nome,
         colore: _colore,
+        tipoLavoro: _tipoLavoro,
         creatoIl: vecchia?.creatoIl ?? DateTime.now(),
       ),
     );
@@ -134,6 +142,39 @@ class _FormCategoriaState extends State<_FormCategoria> {
                 onTap: () => setState(() => _colore = i),
               ),
           ],
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'Si recupera con i progetti…',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            PulsanteScelta(
+              etichetta: 'Tutti',
+              selezionato: _tipoLavoro == null,
+              onTap: () => setState(() => _tipoLavoro = null),
+            ),
+            // I lavori "A giornata" hanno un guadagno netto fisso: non portano costi
+            for (final t in TipoLavoro.values)
+              if (t != TipoLavoro.aGiornata)
+                PulsanteScelta(
+                  etichetta: t.etichetta,
+                  selezionato: _tipoLavoro == t,
+                  onTap: () => setState(() => _tipoLavoro = t),
+                ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _tipoLavoro == null
+              ? 'I costi di questa categoria si dividono tra tutti i progetti.'
+              : 'I costi di questa categoria pesano e si recuperano solo con i progetti ${_tipoLavoro!.etichetta}.',
+          style: Theme.of(context).textTheme.labelMedium
+              ?.copyWith(color: ColoriLaguna.testoSecondario),
         ),
         const SizedBox(height: 16),
         PulsanteLucido(
@@ -252,12 +293,13 @@ class _ElencoCategorie extends StatelessWidget {
             stile: StileLucido.oro,
             onPressed: () {
               final adesso = DateTime.now();
-              for (final (nome, colore) in _categorieDiPartenza) {
+              for (final (nome, colore, tipo) in _categorieDiPartenza) {
                 dati.salvaCategoria(
                   Categoria(
                     id: '',
                     nome: nome,
                     colore: colore,
+                    tipoLavoro: tipo,
                     creatoIl: adesso,
                   ),
                 );
@@ -293,7 +335,8 @@ class _ElencoCategorie extends StatelessWidget {
                           Text(c.nome, style: tema.titleMedium),
                           Text(
                             '${coloreDellaPalette(c.colore).nome} · '
-                            '${dati.costiDellaCategoria(c.id)} ${dati.costiDellaCategoria(c.id) == 1 ? 'costo' : 'costi'}',
+                            '${dati.costiDellaCategoria(c.id)} ${dati.costiDellaCategoria(c.id) == 1 ? 'costo' : 'costi'} · '
+                            '${descriviTipoCategoria(c.tipoLavoro)}',
                             style: tema.labelMedium?.copyWith(
                               color: ColoriLaguna.testoSecondario,
                               fontWeight: FontWeight.w600,

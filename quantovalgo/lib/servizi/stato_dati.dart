@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import '../logica/calcoli.dart';
 import '../logica/costi.dart';
+import '../logica/costi.dart' as logica_costi;
 import '../logica/giornate.dart';
 import '../logica/ore.dart';
 import '../modelli/categoria.dart';
@@ -296,9 +297,16 @@ class StatoDati extends ChangeNotifier {
     if (!costo.siDivideTraProgetti) return const [];
     final importo = quotaNelMese(costo, mese);
     if (importo <= 0) return const [];
-    // I lavori a giornata hanno un guadagno netto fisso: non prendono quote
+    // I lavori a giornata hanno un guadagno netto fisso: non prendono quote.
+    // Se la categoria del costo è legata a un tipo (es. Claude), lo dividono
+    // solo i progetti di quel tipo.
+    final tipoLegato = tipoDelCosto(costo);
     final attivi = progettiAttivi(
-      _lavori.where((l) => l.tipo != TipoLavoro.aGiornata),
+      _lavori.where(
+        (l) =>
+            l.tipo != TipoLavoro.aGiornata &&
+            (tipoLegato == null || l.tipo == tipoLegato),
+      ),
       mese,
     ).toList();
 
@@ -340,17 +348,30 @@ class StatoDati extends ChangeNotifier {
     return posizione < 0 ? 0 : posizione;
   }
 
-  /// Costi una tantum ancora da recuperare con i progetti incassati.
-  DaRecuperare daRecuperareOra() {
-    var utileIncassato = 0.0;
+  /// Tipo di lavoro con cui si recupera un costo (dalla sua categoria).
+  /// Vuoto = tutti i progetti.
+  TipoLavoro? tipoDelCosto(Costo costo) =>
+      categoria(costo.categoriaId)?.tipoLavoro;
+
+  /// "Da recuperare" diviso per tipo di lavoro (Claude, Doppiaggio…) più gli
+  /// altri costi: ogni gruppo si copre con l'utile dei progetti incassati
+  /// del proprio tipo.
+  List<GruppoRecupero> gruppiDaRecuperare() {
+    final utilePerTipo = <TipoLavoro, double>{};
     for (final l in _lavori) {
       // Le giornate si incassano nel giorno stesso: contano quelle già fatte
       if (l.statoPagamento == StatoPagamento.incassato ||
           l.tipo == TipoLavoro.aGiornata) {
-        utileIncassato += riepilogoDi(l.id).utile;
+        utilePerTipo[l.tipo] =
+            (utilePerTipo[l.tipo] ?? 0) + riepilogoDi(l.id).utile;
       }
     }
-    return daRecuperare(costi: _costi, utileIncassato: utileIncassato);
+    return logica_costi.gruppiDaRecuperare(
+      costi: _costi,
+      tipoDelCosto: tipoDelCosto,
+      utileIncassatoPerTipo: utilePerTipo,
+      mese: adesso(),
+    );
   }
 
   // --- Scritture (restituiscono subito, anche offline) ---

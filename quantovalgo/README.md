@@ -122,3 +122,20 @@ Il font Nunito è incluso in `assets/fonts` (licenza OFL).
 - **Costi condivisi**: la divisione tra i progetti segue le ore registrate **nel mese**;
   se nel mese non ce ne sono, le ore totali del progetto; se non ce ne sono, parti uguali.
 - Dati in `utenti/{uid}/sessioni`; calcoli in `logica/ore.dart`.
+
+## Costi legati a un tipo di lavoro
+
+- Ogni **categoria** può essere legata a un tipo di lavoro (Doppiaggio, Codice, Claude, Altro):
+  "Si recupera con i progetti…". Senza legame (**Tutti**) vale per tutti i progetti.
+- Un costo di una categoria legata (es. Claude) **si divide solo tra i progetti di quel tipo**
+  attivi nel mese, e **si recupera solo con l'utile dei progetti incassati di quel tipo**.
+  I lavori "A giornata" non portano mai costi.
+- Se in un mese non ci sono progetti di quel tipo, il costo non pesa su nessuno ("Da assegnare")
+  ma **resta nel da recuperare** del tipo: i costi legati contano tutti i mesi pagati.
+- Il riquadro **Da recuperare** ha una riga per tipo, più "Altri costi" (solo acquisti una tantum
+  senza tipo): gli altri costi si coprono con l'utile che avanza dai tipi che hanno già
+  coperto i propri costi, più l'utile dei tipi senza costi. L'utile non si usa due volte.
+- Le categorie create **prima** di questa regola non hanno il legame: vale "Tutti" finché
+  non lo scegli (Costi → Gestisci categorie → tocca la categoria).
+- Le categorie di partenza (Doppiaggio, Codice, Claude) nascono già legate al loro tipo.
+- Calcoli in `logica/costi.dart` (`gruppiDaRecuperare`, `costoSostenutoFinoA`).

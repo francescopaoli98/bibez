@@ -4,6 +4,7 @@ import '../logica/costi.dart';
 import '../logica/formato.dart';
 import '../logica/mesi.dart';
 import '../modelli/costo.dart';
+import '../modelli/tipi.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../tema/palette_categorie.dart';
@@ -28,45 +29,50 @@ class CostiPagina extends StatefulWidget {
 }
 
 class _CostiPaginaState extends State<CostiPagina> {
-  DateTime _mese = primoDelMese(DateTime.now());
+  /// Mese mostrato; finché non si cambia è quello di oggi.
+  DateTime? _meseScelto;
 
-  void _vaiA(DateTime mese) => setState(() => _mese = mese);
+  void _vaiA(DateTime mese) => setState(() => _meseScelto = mese);
 
   @override
   Widget build(BuildContext context) {
     final dati = DatiScope.di(context);
     final tema = Theme.of(context).textTheme;
+    final mese = _meseScelto ?? primoDelMese(dati.adesso());
 
     // Costi che pesano nel mese scelto e costi che in questo mese non pesano
     final delMese = [
       for (final c in dati.costi)
-        if (quotaNelMese(c, _mese) > 0) c,
+        if (quotaNelMese(c, mese) > 0) c,
     ];
     final altri = [
       for (final c in dati.costi)
-        if (quotaNelMese(c, _mese) <= 0) c,
+        if (quotaNelMese(c, mese) <= 0) c,
     ];
-    final totale = dati.costiDelMese(_mese);
-    final daRecuperare = dati.daRecuperareOra();
+    final totale = dati.costiDelMese(mese);
+    final gruppi = dati.gruppiDaRecuperare();
 
     return Scheda(
       titolo: 'Costi',
       sottotitolo: 'Abbonamenti e spese, divisi sui progetti',
       figli: [
-        SelettoreMese(mese: _mese, onCambia: _vaiA),
+        SelettoreMese(mese: mese, onCambia: _vaiA),
         const SizedBox(height: 12),
         _HeroCosti(
           dati: dati,
-          mese: _mese,
+          mese: mese,
           costiDelMese: delMese,
           totale: totale,
-          daRecuperare: daRecuperare,
         ),
+        if (gruppi.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _CartaDaRecuperare(gruppi: gruppi),
+        ],
         if (delMese.any(
           (c) => c.categoriaId != null && dati.categoria(c.categoriaId) != null,
         )) ...[
           const SizedBox(height: 12),
-          _CartaCategorie(dati: dati, mese: _mese, costi: delMese),
+          _CartaCategorie(dati: dati, mese: mese, costi: delMese),
         ],
         const SizedBox(height: 12),
         if (delMese.isEmpty)
@@ -74,12 +80,12 @@ class _CostiPaginaState extends State<CostiPagina> {
             icona: Icons.euro_rounded,
             titolo: dati.costi.isEmpty
                 ? 'Nessun costo'
-                : 'Nessun costo a ${nomeMese(_mese)}',
+                : 'Nessun costo a ${nomeMese(mese)}',
             testo: 'Aggiungi abbonamenti, attrezzatura e spese fisse.',
           )
         else
           for (final c in delMese) ...[
-            _CartaCosto(dati: dati, costo: c, mese: _mese),
+            _CartaCosto(dati: dati, costo: c, mese: mese),
             const SizedBox(height: 12),
           ],
         if (altri.isNotEmpty) ...[
@@ -89,7 +95,7 @@ class _CostiPaginaState extends State<CostiPagina> {
           ),
           const SizedBox(height: 8),
           for (final c in altri) ...[
-            _RigaAltroCosto(costo: c, mese: _mese),
+            _RigaAltroCosto(costo: c, mese: mese),
             const SizedBox(height: 8),
           ],
         ],
@@ -98,7 +104,7 @@ class _CostiPaginaState extends State<CostiPagina> {
           etichetta: 'Aggiungi costo',
           icona: Icons.add_rounded,
           altezza: 54,
-          onPressed: () => modificaCosto(context, mese: _mese),
+          onPressed: () => modificaCosto(context, mese: mese),
         ),
         const SizedBox(height: 10),
         PulsanteLucido(
@@ -111,21 +117,19 @@ class _CostiPaginaState extends State<CostiPagina> {
   }
 }
 
-/// Riquadro grande: costi del mese e avanzamento del "da recuperare".
+/// Riquadro grande: costi del mese.
 class _HeroCosti extends StatelessWidget {
   const _HeroCosti({
     required this.dati,
     required this.mese,
     required this.costiDelMese,
     required this.totale,
-    required this.daRecuperare,
   });
 
   final StatoDati dati;
   final DateTime mese;
   final List<Costo> costiDelMese;
   final double totale;
-  final DaRecuperare daRecuperare;
 
   @override
   Widget build(BuildContext context) {
@@ -187,38 +191,6 @@ class _HeroCosti extends StatelessWidget {
                 ),
             ],
           ),
-          if (daRecuperare.totale > 0) ...[
-            const SizedBox(height: 12),
-            Container(height: 1, color: Colors.white.withValues(alpha: 0.4)),
-            const SizedBox(height: 10),
-            Text(
-              'Da recuperare ${euro(daRecuperare.residuo)} di ${euro(daRecuperare.totale)}',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 6),
-            Semantics(
-              label:
-                  'Recuperato il ${(daRecuperare.avanzamento * 100).round()} per cento',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value: daRecuperare.avanzamento,
-                  minHeight: 12,
-                  backgroundColor: Colors.white.withValues(alpha: 0.25),
-                  valueColor: const AlwaysStoppedAnimation(Color(0xFF9ADB3C)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Si recupera con l\'utile dei progetti incassati',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: ColoriLaguna.testoChiaro,
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -296,14 +268,19 @@ class _CartaCosto extends StatelessWidget {
   final Costo costo;
   final DateTime mese;
 
-  String _descrizione(List<Quota> quote) {
+  String _descrizione(List<Quota> quote, TipoLavoro? tipoLegato) {
+    // "Claude": solo i progetti di quel tipo dividono il costo
+    final di = tipoLegato == null ? '' : ' ${tipoLegato.etichetta}';
+    final nessuno = tipoLegato == null
+        ? 'nessun progetto attivo'
+        : 'nessun progetto$di attivo: si accumula da recuperare';
     switch (costo.tipo) {
       case TipoCosto.abbonamento:
         return quote.isEmpty
-            ? 'Abbonamento · nessun progetto attivo'
-            : 'Abbonamento · usato su ${quote.length} ${quote.length == 1 ? 'progetto' : 'progetti'}';
+            ? 'Abbonamento · $nessuno'
+            : 'Abbonamento · usato su ${quote.length} ${quote.length == 1 ? 'progetto' : 'progetti'}$di';
       case TipoCosto.unaTantum:
-        final progetti = quote.isEmpty ? ' · nessun progetto attivo' : '';
+        final progetti = quote.isEmpty ? ' · $nessuno' : '';
         if (costo.mesi <= 1) {
           return 'Acquisto da ${euro(costo.importo)}, tutto in questo mese$progetti';
         }
@@ -347,7 +324,7 @@ class _CartaCosto extends StatelessWidget {
             ],
           ),
           Text(
-            _descrizione(quote),
+            _descrizione(quote, dati.tipoDelCosto(costo)),
             style: tema.labelMedium?.copyWith(
               color: ColoriLaguna.testoSecondario,
               fontWeight: FontWeight.w600,
@@ -428,6 +405,65 @@ class _RigaAltroCosto extends StatelessWidget {
               color: ColoriLaguna.testoSecondario,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Da recuperare" diviso per tipo di lavoro: ogni riga si copre con l'utile
+/// dei progetti incassati di quel tipo (Claude con i progetti Claude…).
+class _CartaDaRecuperare extends StatelessWidget {
+  const _CartaDaRecuperare({required this.gruppi});
+
+  final List<GruppoRecupero> gruppi;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context).textTheme;
+    return CartaVetro(
+      colori: const [Color(0xFFFFF6C4), Color(0xFFFFE98F)],
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            header: true,
+            child: Text('Da recuperare', style: tema.titleMedium),
+          ),
+          for (final g in gruppi) ...[
+            const SizedBox(height: 10),
+            Text(
+              g.tipo == null ? 'Altri costi' : g.tipo!.etichetta,
+              style: tema.labelLarge,
+            ),
+            Text(
+              'Da recuperare ${euro(g.residuo)} di ${euro(g.totale)}',
+              style: tema.bodyMedium,
+            ),
+            const SizedBox(height: 4),
+            Semantics(
+              label: 'Recuperato il ${(g.avanzamento * 100).round()} per cento',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: g.avanzamento,
+                  minHeight: 12,
+                  backgroundColor: const Color(0x40795500),
+                  valueColor: const AlwaysStoppedAnimation(Color(0xFF1A8F2E)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              g.tipo == null
+                  ? 'Si copre con l\'utile che avanza dagli altri progetti incassati'
+                  : 'Si copre solo con l\'utile dei progetti ${g.tipo!.etichetta} incassati',
+              style: tema.labelMedium?.copyWith(
+                color: ColoriLaguna.testoSecondario,
+              ),
+            ),
+          ],
         ],
       ),
     );
