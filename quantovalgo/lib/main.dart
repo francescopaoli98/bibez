@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'servizi/accesso_firebase.dart';
 import 'servizi/archivio_firestore.dart';
+import 'servizi/promemoria_locali.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,12 +30,22 @@ Future<void> main() async {
     erroreAvvio = e.toString();
   }
 
+  // Notifiche dei promemoria: se non partono l'app funziona lo stesso
+  final promemoria = PromemoriaLocali();
+  var notificheAttive = true;
+  try {
+    await promemoria.inizializza();
+  } catch (e) {
+    notificheAttive = false;
+  }
+
   final accesso = AccessoFirebase();
   runApp(
     QuantoValgoApp(
       accesso: accesso,
       archivio: ArchivioFirestore(accesso: accesso),
       erroreAvvio: erroreAvvio,
+      promemoria: notificheAttive ? promemoria : null,
     ),
   );
 }

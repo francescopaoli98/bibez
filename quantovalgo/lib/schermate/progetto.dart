@@ -25,6 +25,7 @@ import '../widget/sfera_lucida.dart';
 import '../widget/stato_vuoto.dart';
 import '../widget/stile_lucido.dart';
 import 'aggiungi_giornate.dart';
+import 'carta_pagamento.dart';
 import 'cronometro_azioni.dart';
 import 'foglio_giornata.dart';
 import 'foglio_sottoprogetto.dart';
@@ -160,6 +161,9 @@ class ProgettoPagina extends StatelessWidget {
             ),
           ),
         ],
+        // Da incassare / incassato, scadenza e giorni per pagare
+        const SizedBox(height: 12),
+        CartaPagamento(lavoro: lavoro),
         const SizedBox(height: 16),
         Row(
           children: [

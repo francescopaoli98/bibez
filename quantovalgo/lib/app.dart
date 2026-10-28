@@ -5,6 +5,8 @@ import 'schermate/cancello_accesso.dart';
 import 'schermate/errore_avvio.dart';
 import 'servizi/accesso.dart';
 import 'servizi/archivio.dart';
+import 'servizi/pianificatore_promemoria.dart';
+import 'servizi/promemoria_servizio.dart';
 import 'servizi/servizi_app.dart';
 import 'servizi/stato_dati.dart';
 import 'tema/tema_laguna.dart';
@@ -17,6 +19,7 @@ class QuantoValgoApp extends StatefulWidget {
     required this.archivio,
     this.erroreAvvio,
     this.adesso,
+    this.promemoria,
   });
 
   final ServizioAccesso accesso;
@@ -27,6 +30,9 @@ class QuantoValgoApp extends StatefulWidget {
 
   /// Orologio dell'app: serve solo ai test per fissare "oggi".
   final DateTime Function()? adesso;
+
+  /// Notifiche del telefono per i promemoria (vuoto: niente notifiche).
+  final ServizioPromemoria? promemoria;
 
   @override
   State<QuantoValgoApp> createState() => _QuantoValgoAppState();
@@ -43,8 +49,21 @@ class _QuantoValgoAppState extends State<QuantoValgoApp> {
           adesso: widget.adesso,
         );
 
+  /// Riprogramma le notifiche ogni volta che cambiano i pagamenti.
+  late final PianificatorePromemoria? _pianificatore =
+      _dati == null || widget.promemoria == null
+      ? null
+      : PianificatorePromemoria(dati: _dati, servizio: widget.promemoria!);
+
+  @override
+  void initState() {
+    super.initState();
+    _pianificatore; // si crea subito (è "late")
+  }
+
   @override
   void dispose() {
+    _pianificatore?.dispose();
     _dati?.dispose();
     super.dispose();
   }

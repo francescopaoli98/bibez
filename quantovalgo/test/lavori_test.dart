@@ -291,7 +291,8 @@ void main() {
     await tocca(tester, find.text('Clienti'));
 
     expect(find.text('Amico −30% · 1 lavoro'), findsOneWidget);
-    expect(find.text('350 €'), findsOneWidget); // totale dei suoi lavori
+    // Totale dei suoi lavori: nella riga del cliente e nel riquadro "Da incassare"
+    expect(find.text('350 €'), findsNWidgets(2));
 
     await tocca(tester, find.text('Luca'));
     expect(find.text('Ha dei lavori: non eliminabile'), findsOneWidget);

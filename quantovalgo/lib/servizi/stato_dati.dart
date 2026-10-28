@@ -7,10 +7,13 @@ import '../logica/costi.dart';
 import '../logica/costi.dart' as logica_costi;
 import '../logica/giornate.dart';
 import '../logica/ore.dart';
+import '../logica/pagamenti.dart';
+import '../logica/promemoria.dart';
 import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
 import '../modelli/giornata.dart';
+import '../modelli/impostazioni.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/sessione_ore.dart';
@@ -39,7 +42,7 @@ class StatoDati extends ChangeNotifier {
   late final StreamSubscription<Utente?> _ascoltoUtente;
   final List<StreamSubscription<Object?>> _ascolti = [];
   final Set<String> _arrivati = {};
-  static const _totaleFlussi = 8;
+  static const _totaleFlussi = 9;
 
   /// "Adesso" dell'app (sostituibile nei test).
   final DateTime Function() adesso;
@@ -52,6 +55,7 @@ class StatoDati extends ChangeNotifier {
   List<Categoria> _categorie = const [];
   List<Giornata> _giornate = const [];
   List<SessioneOre> _sessioni = const [];
+  Impostazioni _impostazioni = const Impostazioni();
 
   /// Valori di calcolo (sconti, fattori di competenza). Dal passo 8 si
   /// potranno cambiare da Impostazioni.
@@ -71,6 +75,7 @@ class StatoDati extends ChangeNotifier {
   List<Categoria> get categorie => _categorie;
   List<Giornata> get giornate => _giornate;
   List<SessioneOre> get sessioni => _sessioni;
+  Impostazioni get impostazioni => _impostazioni;
 
   // --- Ascolto ---
 
@@ -84,6 +89,7 @@ class StatoDati extends ChangeNotifier {
     _categorie = const [];
     _giornate = const [];
     _sessioni = const [];
+    _impostazioni = const Impostazioni();
     _arrivati.clear();
     problema = false;
 
@@ -117,6 +123,11 @@ class StatoDati extends ChangeNotifier {
       _ascolta<SessioneOre>('sessioni', _archivio.sessioni(), (v) {
         _sessioni = [...v]..sort((a, b) => b.inizio.compareTo(a.inizio));
       });
+      _ascolta<Impostazioni>(
+        'impostazioni',
+        _archivio.impostazioni().map((i) => [i]),
+        (v) => _impostazioni = v.single,
+      );
     }
     notifyListeners();
   }
@@ -198,6 +209,97 @@ class StatoDati extends ChangeNotifier {
       ore:
           dalleParti.ore +
           oreDaMinuti(minutiConclusi(sessioniDelLavoro(lavoroId))),
+    );
+  }
+
+  // --- Pagamenti ---
+
+  /// Quanto aspettarsi da un progetto (ricavi dei sottoprogetti o prezzo finale).
+  double importoDi(Lavoro lavoro) =>
+      importoDaIncassare(riepilogoDi(lavoro.id).ricavi, lavoro.prezzoFinale);
+
+  /// Progetti ancora da incassare: prima i più in ritardo, poi per scadenza,
+  /// in fondo quelli senza scadenza.
+  List<Lavoro> get lavoriDaIncassare {
+    final ora = adesso();
+    final elenco = [
+      for (final l in _lavori)
+        if (daIncassare(l)) l,
+    ];
+    elenco.sort((a, b) {
+      final ritardoA = giorniRitardo(a, ora);
+      final ritardoB = giorniRitardo(b, ora);
+      if (ritardoA != ritardoB) return ritardoB.compareTo(ritardoA);
+      final sa = a.scadenza;
+      final sb = b.scadenza;
+      if (sa != null && sb != null) return sa.compareTo(sb);
+      if (sa != null) return -1; // chi ha una scadenza viene prima
+      if (sb != null) return 1;
+      return a.creatoIl.compareTo(b.creatoIl);
+    });
+    return elenco;
+  }
+
+  double get totaleDaIncassare =>
+      lavoriDaIncassare.fold<double>(0, (somma, l) => somma + importoDi(l));
+
+  int get numeroInRitardo {
+    final ora = adesso();
+    return lavoriDaIncassare.where((l) => inRitardo(l, ora)).length;
+  }
+
+  /// Segna il progetto come incassato nel giorno [giorno] (di solito oggi).
+  void segnaIncassato(Lavoro lavoro, DateTime giorno) => _archivio.salvaLavoro(
+    lavoro.copyWith(
+      statoPagamento: StatoPagamento.incassato,
+      dataIncasso: () => soloData(giorno),
+    ),
+  );
+
+  /// Torna a "da incassare" (se hai segnato per sbaglio).
+  void riapriPagamento(Lavoro lavoro) => _archivio.salvaLavoro(
+    lavoro.copyWith(
+      statoPagamento: StatoPagamento.daIncassare,
+      dataIncasso: () => null,
+    ),
+  );
+
+  /// Cambia la scadenza (null = nessuna scadenza).
+  void impostaScadenza(Lavoro lavoro, DateTime? scadenza) =>
+      _archivio.salvaLavoro(
+        lavoro.copyWith(
+          scadenza: () => scadenza == null ? null : soloData(scadenza),
+        ),
+      );
+
+  /// Cambia il giorno in cui hai chiesto il pagamento (null = giorno di creazione).
+  void impostaRichiesta(Lavoro lavoro, DateTime? giorno) =>
+      _archivio.salvaLavoro(
+        lavoro.copyWith(
+          richiestoIl: () => giorno == null ? null : soloData(giorno),
+        ),
+      );
+
+  /// Come pagano i clienti (una riga per cliente).
+  List<StatisticheCliente> statisticheDeiClienti() => statisticheClienti(
+    clienti: _clienti,
+    lavori: _lavori,
+    importo: importoDi,
+    adesso: adesso(),
+  );
+
+  /// Giorni medi che i clienti impiegano a pagare (vuoto se nessun incasso).
+  double? get giorniMediPerPagare =>
+      mediaGiorniPerPagare(_lavori.where(haPagamento));
+
+  /// Le notifiche da programmare (nessuna se i promemoria sono spenti).
+  List<Promemoria> promemoriaDaProgrammare() {
+    if (!_impostazioni.promemoria) return const [];
+    return promemoriaPagamenti(
+      lavori: _lavori,
+      importo: importoDi,
+      cliente: (l) => cliente(l.clienteId)?.nome ?? '',
+      adesso: adesso(),
     );
   }
 
@@ -415,6 +517,8 @@ class StatoDati extends ChangeNotifier {
 
   String salvaCategoria(Categoria c) => _archivio.salvaCategoria(c);
   void eliminaCategoria(String id) => _archivio.eliminaCategoria(id);
+
+  void salvaImpostazioni(Impostazioni i) => _archivio.salvaImpostazioni(i);
 
   String salvaSessione(SessioneOre s) => _archivio.salvaSessione(s);
   void eliminaSessione(String id) => _archivio.eliminaSessione(id);

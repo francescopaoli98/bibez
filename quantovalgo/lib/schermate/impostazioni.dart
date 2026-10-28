@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../servizi/archivio.dart';
 import '../servizi/servizi_app.dart';
+import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../widget/carta_vetro.dart';
 import '../widget/pagina_secondaria.dart';
@@ -65,10 +66,12 @@ class ImpostazioniPagina extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        const _CartaPromemoria(),
+        const SizedBox(height: 16),
         const StatoVuoto(
           icona: Icons.tune_rounded,
           titolo: 'Altre impostazioni in arrivo',
-          testo: 'Qui regolerai sconti, tasse e promemoria.',
+          testo: 'Qui regolerai sconti e tasse.',
         ),
       ],
     );
@@ -121,6 +124,48 @@ class _StatoSync extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Interruttore dei promemoria dei pagamenti (notifiche sul telefono).
+class _CartaPromemoria extends StatelessWidget {
+  const _CartaPromemoria();
+
+  @override
+  Widget build(BuildContext context) {
+    final dati = DatiScope.di(context);
+    final tema = Theme.of(context).textTheme;
+
+    return CartaVetro(
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Promemoria pagamenti', style: tema.titleMedium),
+                const SizedBox(height: 2),
+                Text(
+                  'Una notifica alle 9 il giorno prima della scadenza, il '
+                  'giorno stesso e poi ogni 3 giorni di ritardo.',
+                  style: tema.bodyMedium?.copyWith(
+                    color: ColoriLaguna.testoSecondario,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch(
+            key: const Key('interruttore-promemoria'),
+            value: dati.impostazioni.promemoria,
+            onChanged: (acceso) => dati.salvaImpostazioni(
+              dati.impostazioni.copyWith(promemoria: acceso),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

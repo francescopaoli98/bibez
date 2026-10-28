@@ -7,6 +7,7 @@ import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
 import '../modelli/giornata.dart';
+import '../modelli/impostazioni.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/sessione_ore.dart';
@@ -136,6 +137,21 @@ class ArchivioFirestore implements Archivio {
   Stream<List<SessioneOre>> sessioni() =>
       _ascolta('sessioni', SessioneOre.fromMap);
 
+  @override
+  Stream<Impostazioni> impostazioni() {
+    if (_accesso.utenteCorrente == null) {
+      return Stream.value(const Impostazioni());
+    }
+    return _raccolta('impostazioni')
+        .doc('generali')
+        .snapshots()
+        .map(
+          (d) => d.exists
+              ? Impostazioni.fromMap(_normalizza(d.data()!))
+              : const Impostazioni(),
+        );
+  }
+
   // --- Scrittura (senza aspettare il cloud) ---
 
   String _salva(String raccolta, String id, Map<String, Object?> dati) {
@@ -230,6 +246,11 @@ class ArchivioFirestore implements Archivio {
 
   @override
   void eliminaCategoria(String id) => _elimina('categorie', id);
+
+  @override
+  void salvaImpostazioni(Impostazioni impostazioni) {
+    _salva('impostazioni', 'generali', impostazioni.toMap());
+  }
 
   @override
   String salvaSessione(SessioneOre sessione) =>

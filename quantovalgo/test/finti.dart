@@ -6,12 +6,15 @@ import 'package:quantovalgo/modelli/categoria.dart';
 import 'package:quantovalgo/modelli/cliente.dart';
 import 'package:quantovalgo/modelli/costo.dart';
 import 'package:quantovalgo/modelli/giornata.dart';
+import 'package:quantovalgo/modelli/impostazioni.dart';
 import 'package:quantovalgo/modelli/lavoro.dart';
 import 'package:quantovalgo/modelli/prezzo_mercato.dart';
 import 'package:quantovalgo/modelli/sessione_ore.dart';
 import 'package:quantovalgo/modelli/sottoprogetto.dart';
 import 'package:quantovalgo/servizi/accesso.dart';
+import 'package:quantovalgo/logica/promemoria.dart';
 import 'package:quantovalgo/servizi/archivio.dart';
+import 'package:quantovalgo/servizi/promemoria_servizio.dart';
 import 'package:quantovalgo/servizi/utente.dart';
 
 const utenteProva = Utente(
@@ -95,6 +98,8 @@ class FintoArchivio implements Archivio {
   final tabellaCategorie = _Tabella<Categoria>();
   final tabellaGiornate = _Tabella<Giornata>();
   final tabellaSessioni = _Tabella<SessioneOre>();
+  var impostazioniSalvate = const Impostazioni();
+  final _flussoImpostazioni = StreamController<Impostazioni>.broadcast();
   int _contatore = 0;
 
   String _nuovoId(String id) => id.isEmpty ? 'id${++_contatore}' : id;
@@ -124,6 +129,11 @@ class FintoArchivio implements Archivio {
   Stream<List<Giornata>> giornate() => tabellaGiornate.ascolta();
   @override
   Stream<List<SessioneOre>> sessioni() => tabellaSessioni.ascolta();
+  @override
+  Stream<Impostazioni> impostazioni() async* {
+    yield impostazioniSalvate;
+    yield* _flussoImpostazioni.stream;
+  }
 
   // --- Scrittura ---
   @override
@@ -194,6 +204,12 @@ class FintoArchivio implements Archivio {
   void eliminaCategoria(String id) => tabellaCategorie.togli(id);
 
   @override
+  void salvaImpostazioni(Impostazioni i) {
+    impostazioniSalvate = i;
+    _flussoImpostazioni.add(i);
+  }
+
+  @override
   String salvaSessione(SessioneOre s) {
     final id = _nuovoId(s.id);
     tabellaSessioni.metti(id, SessioneOre.fromMap(id, s.toMap()));
@@ -218,6 +234,26 @@ class FintoArchivio implements Archivio {
   void eliminaGiornata(String id) => tabellaGiornate.togli(id);
 }
 
+/// Notifiche finte: ricordano solo l'ultima programmazione.
+class FintoPromemoria implements ServizioPromemoria {
+  List<Promemoria> programmati = const [];
+  int programmazioni = 0;
+  int permessiChiesti = 0;
+  bool permessoConcesso = true;
+
+  @override
+  Future<bool> chiediPermesso() async {
+    permessiChiesti++;
+    return permessoConcesso;
+  }
+
+  @override
+  Future<void> programma(List<Promemoria> promemoria) async {
+    programmazioni++;
+    programmati = promemoria;
+  }
+}
+
 /// Avvia l'app con servizi finti e aspetta che si assesti.
 Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   WidgetTester tester, {
@@ -225,6 +261,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   String? erroreAvvio,
   FintoArchivio? archivio,
   DateTime Function()? adesso,
+  ServizioPromemoria? promemoria,
 }) async {
   final accesso = FintoAccesso(iniziale: utente);
   final archivioUsato = archivio ?? FintoArchivio();
@@ -234,6 +271,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
       archivio: archivioUsato,
       erroreAvvio: erroreAvvio,
       adesso: adesso,
+      promemoria: promemoria,
     ),
   );
   await tester.pumpAndSettle();

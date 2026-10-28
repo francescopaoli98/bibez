@@ -31,7 +31,8 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 4. Costi: abbonamenti, una tantum, fissi, categorie colorate
 - [x] 4b. Lavori "A giornata" (es. negozio con mamma: 30 € netti al giorno)
 - [x] 5. Ore: cronometro e inserimento a mano
-- [ ] 6–12. Vedi il brief
+- [x] 7. Pagamenti: da incassare, incassato, in ritardo, promemoria con notifiche
+- [ ] 6, 8–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
 
@@ -145,3 +146,29 @@ inventate da te):
   da lì, anche i vecchi. Se scegli un'altra categoria (o "Nessuna") vince la tua scelta.
 - Calcoli in `logica/costi.dart` (`gruppiDaRecuperare`, `costoSostenutoFinoA`); la categoria di
   un progetto in `StatoDati.categoriaDelLavoro`.
+
+## Pagamenti (passo 7)
+
+- Ogni progetto (tranne "A giornata", che si incassa giorno per giorno) ha una scheda
+  **Pagamento**: *Da incassare*, *In ritardo di N giorni* o *Incassato*, con importo,
+  scadenza (7 / 15 / 30 giorni da oggi, data a scelta, nessuna) e "Richiesto il…".
+  "Segna incassato" ha l'**Annulla**; "Riporta a da incassare" corregge un errore.
+- **In ritardo** = scadenza superata e non incassato (il giorno della scadenza non conta).
+- **Giorni per pagare** = dalla data "Richiesto il…" (se vuota, dalla creazione del progetto)
+  al giorno dell'incasso. La media dei clienti sta in Clienti.
+- **Importo di un progetto** = somma dei ricavi dei sottoprogetti; se non ce ne sono, il
+  prezzo finale.
+- **Da incassare** (riquadro in Clienti, poi in Home) porta alla lista: prima i più in ritardo.
+- **Clienti**: giorni medi di pagamento, *I migliori* (chi ha pagato di più), *Ritardatari*
+  con "Copia promemoria": copia un messaggio pronto da incollare in WhatsApp o dove vuoi.
+- **Promemoria**: notifiche locali del telefono (niente server, niente costi), alle 9:00
+  ora di Roma: il giorno prima della scadenza, il giorno stesso e ogni 3 giorni di
+  ritardo (5 volte). Solo per i progetti con scadenza. Si ricalcolano a ogni modifica e si
+  spengono da Impostazioni → *Promemoria pagamenti*. Il permesso notifiche si chiede una
+  volta, quando c'è almeno un promemoria. Arrivano con una tolleranza di qualche minuto
+  (sveglie "inesatte": non serve un permesso speciale).
+- Dati: i campi `statoPagamento`, `scadenza`, `dataIncasso`, `richiestoIl` stanno nel
+  progetto; l'interruttore in `utenti/{uid}/impostazioni/generali`.
+- Codice: `logica/pagamenti.dart`, `logica/promemoria.dart`, `servizi/promemoria_*.dart`,
+  `servizi/pianificatore_promemoria.dart`, `schermate/carta_pagamento.dart`,
+  `schermate/pagamenti.dart`.

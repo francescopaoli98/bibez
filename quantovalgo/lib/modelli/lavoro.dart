@@ -17,6 +17,7 @@ class Lavoro {
     this.statoPagamento = StatoPagamento.daIncassare,
     this.scadenza,
     this.dataIncasso,
+    this.richiestoIl,
   });
 
   final String id;
@@ -47,8 +48,17 @@ class Lavoro {
 
   // Pagamento (si usa dal passo 7)
   final StatoPagamento statoPagamento;
+
+  /// Entro quando il cliente deve pagare (vuota = nessuna scadenza).
   final DateTime? scadenza;
+
+  /// Giorno in cui l'hai incassato (solo se incassato).
   final DateTime? dataIncasso;
+
+  /// Giorno in cui hai chiesto il pagamento (consegna o fattura). Da qui si
+  /// contano i giorni che un cliente impiega a pagare. Vuoto = giorno in cui
+  /// hai creato il lavoro.
+  final DateTime? richiestoIl;
 
   final DateTime creatoIl;
 
@@ -63,6 +73,9 @@ class Lavoro {
     double? prezzoFinale,
     double? tariffaGiornaliera,
     StatoPagamento? statoPagamento,
+    DateTime? Function()? scadenza,
+    DateTime? Function()? dataIncasso,
+    DateTime? Function()? richiestoIl,
   }) => Lavoro(
     id: id,
     nome: nome ?? this.nome,
@@ -75,8 +88,9 @@ class Lavoro {
     prezzoFinale: prezzoFinale ?? this.prezzoFinale,
     tariffaGiornaliera: tariffaGiornaliera ?? this.tariffaGiornaliera,
     statoPagamento: statoPagamento ?? this.statoPagamento,
-    scadenza: scadenza,
-    dataIncasso: dataIncasso,
+    scadenza: scadenza != null ? scadenza() : this.scadenza,
+    dataIncasso: dataIncasso != null ? dataIncasso() : this.dataIncasso,
+    richiestoIl: richiestoIl != null ? richiestoIl() : this.richiestoIl,
     creatoIl: creatoIl,
   );
 
@@ -93,6 +107,7 @@ class Lavoro {
     'statoPagamento': statoPagamento.name,
     'scadenza': scadenza,
     'dataIncasso': dataIncasso,
+    'richiestoIl': richiestoIl,
     'creatoIl': creatoIl,
   };
 
@@ -110,6 +125,7 @@ class Lavoro {
     statoPagamento: StatoPagamento.da(dati['statoPagamento']),
     scadenza: leggiData(dati['scadenza']),
     dataIncasso: leggiData(dati['dataIncasso']),
+    richiestoIl: leggiData(dati['richiestoIl']),
     creatoIl:
         leggiData(dati['creatoIl']) ?? DateTime.fromMillisecondsSinceEpoch(0),
   );

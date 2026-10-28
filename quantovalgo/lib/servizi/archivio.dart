@@ -2,6 +2,7 @@ import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
 import '../modelli/giornata.dart';
+import '../modelli/impostazioni.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/sessione_ore.dart';
@@ -42,6 +43,9 @@ abstract interface class Archivio {
   Stream<List<Giornata>> giornate();
   Stream<List<SessioneOre>> sessioni();
 
+  /// Le impostazioni: emette subito quelle attuali (o quelle di partenza).
+  Stream<Impostazioni> impostazioni();
+
   // --- Scrittura. Con id vuoto si crea; il metodo restituisce l'id. ---
   String salvaLavoro(Lavoro lavoro);
 
@@ -71,6 +75,8 @@ abstract interface class Archivio {
 
   String salvaSessione(SessioneOre sessione);
   void eliminaSessione(String id);
+
+  void salvaImpostazioni(Impostazioni impostazioni);
 
   String salvaGiornata(Giornata giornata);
 

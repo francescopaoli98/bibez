@@ -47,3 +47,6 @@ String nomeGiorno(int giornoSettimana) => _nomiGiorni[giornoSettimana - 1];
 /// `mercoledì 28 ottobre`
 String descrizioneGiorno(DateTime data) =>
     '${nomeGiorno(data.weekday)} ${data.day} ${nomeMese(data)}';
+
+/// `28 ottobre 2026`
+String dataLunga(DateTime data) => '${data.day} ${nomeMese(data)} ${data.year}';
