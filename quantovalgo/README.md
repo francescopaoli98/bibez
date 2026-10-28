@@ -29,6 +29,7 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 2. Login Google e database cloud (vedi sotto: serve l'SHA-1 su Firebase)
 - [x] 3. Lavori, sottoprogetti e clienti, con la forbice di prezzo a mano
 - [x] 4. Costi: abbonamenti, una tantum, fissi, categorie colorate
+- [x] 4b. Lavori "A giornata" (es. negozio con mamma: 30 € netti al giorno)
 - [ ] 5–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
@@ -86,3 +87,17 @@ Il font Nunito è incluso in `assets/fonts` (licenza OFL).
   (resta pieno finché i pagamenti non si segnano come incassati: passo 7).
 - Un abbonamento disdetto (interruttore "Ancora attivo") smette dal mese dopo.
 - Calcoli in `logica/costi.dart`, provati con i numeri del brief e del mockup.
+
+## Lavori "A giornata" (passo 4b)
+
+- Nuovo tipo di lavoro: guadagno **netto fisso per giornata** (es. 30 €), senza ore,
+  senza sottoprogetti e senza quote dei costi condivisi.
+- Ogni giornata ha una data e un importo (di partenza la tariffa, ma si cambia giorno per giorno).
+  Si incassa **nel giorno stesso**: contano nel guadagno le giornate fino a oggi,
+  quelle future sono "in programma".
+- **Aggiungere più giorni** (pagina "Aggiungi giornate"): schema della settimana
+  (L M M G V S D, con scorciatoie) + "dal…" + "per N giorni" oppure "fino al…";
+  il calendario si riempie e si toccano i singoli giorni per toglierne o aggiungerne.
+  I giorni già registrati si saltano e non contano nel numero.
+- Dalla pagina del progetto un tocco su un giorno del calendario aggiunge, modifica o toglie quella giornata.
+- Dati in `utenti/{uid}/giornate`; la logica dei giorni è in `logica/giornate.dart`.

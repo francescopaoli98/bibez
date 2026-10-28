@@ -30,3 +30,20 @@ String nomeMese(DateTime data) => _nomiMesi[data.month - 1];
 
 /// `ottobre 2026`
 String nomeMeseAnno(DateTime data) => '${nomeMese(data)} ${data.year}';
+
+const _nomiGiorni = [
+  'lunedì',
+  'martedì',
+  'mercoledì',
+  'giovedì',
+  'venerdì',
+  'sabato',
+  'domenica',
+];
+
+/// `mercoledì` (lunedì = 1 … domenica = 7, come `DateTime.weekday`)
+String nomeGiorno(int giornoSettimana) => _nomiGiorni[giornoSettimana - 1];
+
+/// `mercoledì 28 ottobre`
+String descrizioneGiorno(DateTime data) =>
+    '${nomeGiorno(data.weekday)} ${data.day} ${nomeMese(data)}';

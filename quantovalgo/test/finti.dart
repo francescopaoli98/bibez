@@ -5,6 +5,7 @@ import 'package:quantovalgo/app.dart';
 import 'package:quantovalgo/modelli/categoria.dart';
 import 'package:quantovalgo/modelli/cliente.dart';
 import 'package:quantovalgo/modelli/costo.dart';
+import 'package:quantovalgo/modelli/giornata.dart';
 import 'package:quantovalgo/modelli/lavoro.dart';
 import 'package:quantovalgo/modelli/prezzo_mercato.dart';
 import 'package:quantovalgo/modelli/sottoprogetto.dart';
@@ -91,6 +92,7 @@ class FintoArchivio implements Archivio {
   final tabellaPrezzi = _Tabella<PrezzoMercato>();
   final tabellaCosti = _Tabella<Costo>();
   final tabellaCategorie = _Tabella<Categoria>();
+  final tabellaGiornate = _Tabella<Giornata>();
   int _contatore = 0;
 
   String _nuovoId(String id) => id.isEmpty ? 'id${++_contatore}' : id;
@@ -116,6 +118,8 @@ class FintoArchivio implements Archivio {
   Stream<List<Costo>> costi() => tabellaCosti.ascolta();
   @override
   Stream<List<Categoria>> categorie() => tabellaCategorie.ascolta();
+  @override
+  Stream<List<Giornata>> giornate() => tabellaGiornate.ascolta();
 
   // --- Scrittura ---
   @override
@@ -126,9 +130,14 @@ class FintoArchivio implements Archivio {
   }
 
   @override
-  void eliminaLavoro(String id, {required List<String> idSottoprogetti}) {
+  void eliminaLavoro(
+    String id, {
+    required List<String> idSottoprogetti,
+    List<String> idGiornate = const [],
+  }) {
     tabellaLavori.togli(id);
     idSottoprogetti.forEach(tabellaSotto.togli);
+    idGiornate.forEach(tabellaGiornate.togli);
   }
 
   @override
@@ -174,6 +183,20 @@ class FintoArchivio implements Archivio {
 
   @override
   void eliminaCategoria(String id) => tabellaCategorie.togli(id);
+
+  @override
+  String salvaGiornata(Giornata g) {
+    final id = _nuovoId(g.id);
+    tabellaGiornate.metti(id, Giornata.fromMap(id, g.toMap()));
+    return id;
+  }
+
+  @override
+  void salvaGiornate(List<Giornata> giornate) =>
+      giornate.forEach(salvaGiornata);
+
+  @override
+  void eliminaGiornata(String id) => tabellaGiornate.togli(id);
 }
 
 /// Avvia l'app con servizi finti e aspetta che si assesti.
@@ -182,6 +205,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   Utente? utente = utenteProva,
   String? erroreAvvio,
   FintoArchivio? archivio,
+  DateTime Function()? adesso,
 }) async {
   final accesso = FintoAccesso(iniziale: utente);
   final archivioUsato = archivio ?? FintoArchivio();
@@ -190,6 +214,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
       accesso: accesso,
       archivio: archivioUsato,
       erroreAvvio: erroreAvvio,
+      adesso: adesso,
     ),
   );
   await tester.pumpAndSettle();

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
+import '../modelli/giornata.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/sottoprogetto.dart';
@@ -127,6 +128,9 @@ class ArchivioFirestore implements Archivio {
   Stream<List<Categoria>> categorie() =>
       _ascolta('categorie', Categoria.fromMap);
 
+  @override
+  Stream<List<Giornata>> giornate() => _ascolta('giornate', Giornata.fromMap);
+
   // --- Scrittura (senza aspettare il cloud) ---
 
   String _salva(String raccolta, String id, Map<String, Object?> dati) {
@@ -154,12 +158,19 @@ class ArchivioFirestore implements Archivio {
       _salva('lavori', lavoro.id, lavoro.toMap());
 
   @override
-  void eliminaLavoro(String id, {required List<String> idSottoprogetti}) {
+  void eliminaLavoro(
+    String id, {
+    required List<String> idSottoprogetti,
+    List<String> idGiornate = const [],
+  }) {
     // Un solo "pacchetto": o spariscono tutti insieme o nessuno.
     final pacchetto = _db.batch();
     pacchetto.delete(_raccolta('lavori').doc(id));
     for (final idSotto in idSottoprogetti) {
       pacchetto.delete(_raccolta('sottoprogetti').doc(idSotto));
+    }
+    for (final idGiornata in idGiornate) {
+      pacchetto.delete(_raccolta('giornate').doc(idGiornata));
     }
     unawaited(
       pacchetto.commit().catchError((Object e) {
@@ -198,4 +209,25 @@ class ArchivioFirestore implements Archivio {
 
   @override
   void eliminaCategoria(String id) => _elimina('categorie', id);
+
+  @override
+  String salvaGiornata(Giornata giornata) =>
+      _salva('giornate', giornata.id, giornata.toMap());
+
+  @override
+  void salvaGiornate(List<Giornata> giornate) {
+    // Pacchetto unico: Firestore ne accetta fino a 500, noi ne creiamo al massimo 366.
+    final pacchetto = _db.batch();
+    for (final g in giornate) {
+      pacchetto.set(_raccolta('giornate').doc(), g.toMap());
+    }
+    unawaited(
+      pacchetto.commit().catchError((Object e) {
+        debugPrint('Salvataggio delle giornate non riuscito: $e');
+      }),
+    );
+  }
+
+  @override
+  void eliminaGiornata(String id) => _elimina('giornate', id);
 }

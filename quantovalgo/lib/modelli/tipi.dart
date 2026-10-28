@@ -3,6 +3,9 @@ enum TipoLavoro {
   doppiaggio('Doppiaggio'),
   codice('Codice'),
   claude('Claude'),
+
+  /// Guadagno netto fisso per ogni giornata lavorata (es. il negozio).
+  aGiornata('A giornata'),
   altro('Altro');
 
   const TipoLavoro(this.etichetta);

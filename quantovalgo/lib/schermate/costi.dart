@@ -12,7 +12,7 @@ import '../widget/carta_vetro.dart';
 import '../widget/hero_laguna.dart';
 import '../widget/pillola_lucida.dart';
 import '../widget/pulsante_lucido.dart';
-import '../widget/sfera_lucida.dart';
+import '../widget/selettore_mese.dart';
 import '../widget/stato_vuoto.dart';
 import '../widget/stile_lucido.dart';
 import 'foglio_categoria.dart';
@@ -53,7 +53,7 @@ class _CostiPaginaState extends State<CostiPagina> {
       titolo: 'Costi',
       sottotitolo: 'Abbonamenti e spese, divisi sui progetti',
       figli: [
-        _SelettoreMese(mese: _mese, onCambia: _vaiA),
+        SelettoreMese(mese: _mese, onCambia: _vaiA),
         const SizedBox(height: 12),
         _HeroCosti(
           dati: dati,
@@ -105,42 +105,6 @@ class _CostiPaginaState extends State<CostiPagina> {
           etichetta: 'Gestisci categorie',
           icona: Icons.palette_rounded,
           onPressed: () => gestisciCategorie(context),
-        ),
-      ],
-    );
-  }
-}
-
-/// ‹ ottobre 2026 ›
-class _SelettoreMese extends StatelessWidget {
-  const _SelettoreMese({required this.mese, required this.onCambia});
-
-  final DateTime mese;
-  final ValueChanged<DateTime> onCambia;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SferaLucida(
-          icona: Icons.chevron_left_rounded,
-          etichetta: 'Mese precedente',
-          onPressed: () => onCambia(mesePrecedente(mese)),
-        ),
-        Expanded(
-          child: Semantics(
-            liveRegion: true,
-            child: Text(
-              nomeMeseAnno(mese),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-        ),
-        SferaLucida(
-          icona: Icons.chevron_right_rounded,
-          etichetta: 'Mese successivo',
-          onPressed: () => onCambia(meseSuccessivo(mese)),
         ),
       ],
     );

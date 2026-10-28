@@ -37,6 +37,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
   final _cliente = TextEditingController();
   final _pieno = TextEditingController();
   final _finale = TextEditingController();
+  final _tariffa = TextEditingController(text: '30');
 
   TipoLavoro _tipo = TipoLavoro.doppiaggio;
   int _livello = 3;
@@ -50,6 +51,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
   String? _erroreNome;
   String? _errorePieno;
   String? _erroreFinale;
+  String? _erroreTariffa;
 
   @override
   void didChangeDependencies() {
@@ -68,6 +70,9 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     _pieno.text = l.prezzoPieno == 0 ? '' : numeroPerCampo(l.prezzoPieno);
     _finale.text = l.prezzoFinale == 0 ? '' : numeroPerCampo(l.prezzoFinale);
     _finaleScrittoAMano = true; // in modifica non si tocca da solo
+    if (l.tariffaGiornaliera != null) {
+      _tariffa.text = numeroPerCampo(l.tariffaGiornaliera!);
+    }
   }
 
   @override
@@ -76,6 +81,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     _cliente.dispose();
     _pieno.dispose();
     _finale.dispose();
+    _tariffa.dispose();
     super.dispose();
   }
 
@@ -97,8 +103,52 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     });
   }
 
+  /// Lavoro "A giornata": bastano nome e guadagno netto al giorno. I giorni
+  /// si aggiungono poi dalla pagina del progetto.
+  void _salvaAGiornata() {
+    final tariffa = leggiNumero(_tariffa.text);
+    setState(() {
+      _erroreNome = _nome.text.trim().isEmpty
+          ? 'Scrivi il nome del lavoro'
+          : null;
+      _erroreTariffa = (tariffa == null || tariffa <= 0)
+          ? 'Scrivi un importo'
+          : null;
+    });
+    if (_erroreNome != null || _erroreTariffa != null) return;
+    _salvato = true;
+
+    final dati = DatiScope.leggi(context);
+    final vecchio = widget.esistente;
+    final id = dati.salvaLavoro(
+      Lavoro(
+        id: vecchio?.id ?? '',
+        nome: _nome.text.trim(),
+        tipo: TipoLavoro.aGiornata,
+        relazione: vecchio?.relazione ?? Relazione.nuovo,
+        livello: vecchio?.livello ?? 3,
+        prezzoPieno: 0,
+        prezzoFinale: 0,
+        tariffaGiornaliera: tariffa,
+        creatoIl: vecchio?.creatoIl ?? DateTime.now(),
+      ),
+    );
+
+    if (vecchio != null) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(builder: (_) => ProgettoPagina(lavoroId: id)),
+      );
+    }
+  }
+
   void _salva() {
     if (_salvato) return;
+    if (_tipo == TipoLavoro.aGiornata) {
+      _salvaAGiornata();
+      return;
+    }
 
     final pieno = _pieno.text.trim().isEmpty ? 0.0 : leggiNumero(_pieno.text);
     final finale = _finale.text.trim().isEmpty
@@ -181,6 +231,16 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
   Widget build(BuildContext context) {
     final dati = DatiScope.di(context);
     final modifica = widget.esistente != null;
+    final aGiornata = _tipo == TipoLavoro.aGiornata;
+    // Modificando non si passa da "A giornata" a un altro tipo (e viceversa):
+    // i dati sono fatti in modo diverso.
+    final tipiScelta = [
+      for (final t in TipoLavoro.values)
+        if (!modifica ||
+            (t == TipoLavoro.aGiornata) ==
+                (widget.esistente!.tipo == TipoLavoro.aGiornata))
+          t,
+    ];
     final mercato = dati.mercatoPer(_tipo);
     final sconto = dati.parametri.sconto(_relazione);
 
@@ -226,7 +286,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final t in TipoLavoro.values)
+            for (final t in tipiScelta)
               PulsanteScelta(
                 etichetta: t.etichetta,
                 selezionato: t == _tipo,
@@ -236,85 +296,106 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
           ],
         ),
         const SizedBox(height: 12),
-        SelettoreLivello(
-          livello: _livello,
-          onCambia: (n) => setState(() => _livello = n),
-        ),
-        const SizedBox(height: 12),
-        CampoTesto(
-          key: const Key('campo-cliente'),
-          controller: _cliente,
-          etichetta: 'Cliente (facoltativo)',
-          suggerimento: 'Es. Luca',
-          onChanged: (_) => setState(() {}),
-          maiuscole: TextCapitalization.words,
-        ),
-        if (dati.clienti.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final c in dati.clienti)
-                PulsanteScelta(
-                  etichetta: c.nome,
-                  selezionato:
-                      c.nome.trim().toLowerCase() ==
-                      _cliente.text.trim().toLowerCase(),
-                  onTap: () => _scegliCliente(c),
-                ),
-            ],
+        if (aGiornata) ...[
+          CampoTesto(
+            key: const Key('campo-tariffa'),
+            controller: _tariffa,
+            etichetta: 'Guadagno netto al giorno (€)',
+            suggerimento: 'Es. 30',
+            numerico: true,
+            errore: _erroreTariffa,
+            azioneTastiera: TextInputAction.done,
           ),
+          const SizedBox(height: 6),
+          Text(
+            modifica
+                ? 'Cambia solo le giornate che aggiungerai da ora: quelle già inserite restano come sono.'
+                : 'Dopo il salvataggio scegli i giorni: anche tanti insieme, con lo schema della settimana.',
+            style: Theme.of(context).textTheme.labelMedium
+                ?.copyWith(color: ColoriLaguna.testoSecondario, fontSize: 14),
+          ),
+          const SizedBox(height: 16),
+        ] else ...[
+          SelettoreLivello(
+            livello: _livello,
+            onCambia: (n) => setState(() => _livello = n),
+          ),
+          const SizedBox(height: 12),
+          CampoTesto(
+            key: const Key('campo-cliente'),
+            controller: _cliente,
+            etichetta: 'Cliente (facoltativo)',
+            suggerimento: 'Es. Luca',
+            onChanged: (_) => setState(() {}),
+            maiuscole: TextCapitalization.words,
+          ),
+          if (dati.clienti.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final c in dati.clienti)
+                  PulsanteScelta(
+                    etichetta: c.nome,
+                    selezionato:
+                        c.nome.trim().toLowerCase() ==
+                        _cliente.text.trim().toLowerCase(),
+                    onTap: () => _scegliCliente(c),
+                  ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
+          SelettoreRelazione(
+            valore: _relazione,
+            parametri: dati.parametri,
+            onCambia: (r) => setState(() {
+              _relazione = r;
+              _ricalcolaFinale();
+            }),
+          ),
+          const SizedBox(height: 12),
+          _RiquadroPrezzo(
+            mercato: mercato == null
+                ? null
+                : Forbice(mercato.minimo, mercato.massimo),
+            manuale: mercato?.manuale ?? true,
+            suggerito: suggerito,
+            senzaSconto: senzaSconto,
+            sconto: sconto,
+            relazione: _relazione,
+            onModifica: () => modificaForbice(context, _tipo),
+          ),
+          const SizedBox(height: 12),
+          CampoTesto(
+            key: const Key('campo-pieno'),
+            controller: _pieno,
+            etichetta: 'Prezzo pieno (€)',
+            suggerimento: 'Es. 1000',
+            numerico: true,
+            errore: _errorePieno,
+            onChanged: (_) => setState(_ricalcolaFinale),
+          ),
+          const SizedBox(height: 12),
+          CampoTesto(
+            key: const Key('campo-finale'),
+            controller: _finale,
+            etichetta: 'Prezzo finale, già scontato (€)',
+            suggerimento: _finaleScrittoAMano
+                ? 'Es. 700'
+                : 'Si calcola dallo sconto',
+            numerico: true,
+            errore: _erroreFinale,
+            azioneTastiera: TextInputAction.done,
+            onChanged: (testo) {
+              // Se lo svuoti, torna automatico
+              _finaleScrittoAMano = testo.trim().isNotEmpty;
+              if (!_finaleScrittoAMano) setState(_ricalcolaFinale);
+            },
+          ),
+          const SizedBox(height: 16),
         ],
-        const SizedBox(height: 12),
-        SelettoreRelazione(
-          valore: _relazione,
-          parametri: dati.parametri,
-          onCambia: (r) => setState(() {
-            _relazione = r;
-            _ricalcolaFinale();
-          }),
-        ),
-        const SizedBox(height: 12),
-        _RiquadroPrezzo(
-          mercato: mercato == null
-              ? null
-              : Forbice(mercato.minimo, mercato.massimo),
-          manuale: mercato?.manuale ?? true,
-          suggerito: suggerito,
-          senzaSconto: senzaSconto,
-          sconto: sconto,
-          relazione: _relazione,
-          onModifica: () => modificaForbice(context, _tipo),
-        ),
-        const SizedBox(height: 12),
-        CampoTesto(
-          key: const Key('campo-pieno'),
-          controller: _pieno,
-          etichetta: 'Prezzo pieno (€)',
-          suggerimento: 'Es. 1000',
-          numerico: true,
-          errore: _errorePieno,
-          onChanged: (_) => setState(_ricalcolaFinale),
-        ),
-        const SizedBox(height: 12),
-        CampoTesto(
-          key: const Key('campo-finale'),
-          controller: _finale,
-          etichetta: 'Prezzo finale, già scontato (€)',
-          suggerimento: _finaleScrittoAMano
-              ? 'Es. 700'
-              : 'Si calcola dallo sconto',
-          numerico: true,
-          errore: _erroreFinale,
-          azioneTastiera: TextInputAction.done,
-          onChanged: (testo) {
-            // Se lo svuoti, torna automatico
-            _finaleScrittoAMano = testo.trim().isNotEmpty;
-            if (!_finaleScrittoAMano) setState(_ricalcolaFinale);
-          },
-        ),
-        const SizedBox(height: 16),
         PulsanteLucido(
           etichetta: modifica ? 'Salva modifiche' : 'Salva lavoro',
           stile: StileLucido.verde,

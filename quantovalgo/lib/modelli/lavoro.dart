@@ -12,6 +12,7 @@ class Lavoro {
     required this.prezzoFinale,
     required this.creatoIl,
     this.clienteId,
+    this.tariffaGiornaliera,
     this.statoPagamento = StatoPagamento.daIncassare,
     this.scadenza,
     this.dataIncasso,
@@ -32,6 +33,10 @@ class Lavoro {
   final double prezzoPieno;
   final double prezzoFinale;
 
+  /// Solo lavori "A giornata": guadagno netto di una giornata (es. 30 €).
+  /// È l'importo di partenza delle nuove giornate; ognuna poi può cambiarlo.
+  final double? tariffaGiornaliera;
+
   // Pagamento (si usa dal passo 7)
   final StatoPagamento statoPagamento;
   final DateTime? scadenza;
@@ -47,6 +52,7 @@ class Lavoro {
     int? livello,
     double? prezzoPieno,
     double? prezzoFinale,
+    double? tariffaGiornaliera,
     StatoPagamento? statoPagamento,
   }) => Lavoro(
     id: id,
@@ -57,6 +63,7 @@ class Lavoro {
     livello: livello ?? this.livello,
     prezzoPieno: prezzoPieno ?? this.prezzoPieno,
     prezzoFinale: prezzoFinale ?? this.prezzoFinale,
+    tariffaGiornaliera: tariffaGiornaliera ?? this.tariffaGiornaliera,
     statoPagamento: statoPagamento ?? this.statoPagamento,
     scadenza: scadenza,
     dataIncasso: dataIncasso,
@@ -71,6 +78,7 @@ class Lavoro {
     'livello': livello,
     'prezzoPieno': prezzoPieno,
     'prezzoFinale': prezzoFinale,
+    'tariffaGiornaliera': tariffaGiornaliera,
     'statoPagamento': statoPagamento.name,
     'scadenza': scadenza,
     'dataIncasso': dataIncasso,
@@ -86,6 +94,7 @@ class Lavoro {
     livello: ((dati['livello'] as num?)?.toInt() ?? 3).clamp(1, 5),
     prezzoPieno: leggiDouble(dati['prezzoPieno']),
     prezzoFinale: leggiDouble(dati['prezzoFinale']),
+    tariffaGiornaliera: (dati['tariffaGiornaliera'] as num?)?.toDouble(),
     statoPagamento: StatoPagamento.da(dati['statoPagamento']),
     scadenza: leggiData(dati['scadenza']),
     dataIncasso: leggiData(dati['dataIncasso']),

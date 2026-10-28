@@ -13,6 +13,7 @@ class PulsanteScelta extends StatelessWidget {
     required this.selezionato,
     required this.onTap,
     this.sottotitolo,
+    this.nomeAccessibile,
     this.stileSelezionato = StileLucido.blu,
     this.altezza = 44,
   });
@@ -21,6 +22,9 @@ class PulsanteScelta extends StatelessWidget {
 
   /// Seconda riga più piccola (es. "−30%").
   final String? sottotitolo;
+
+  /// Nome per i lettori di schermo se l'etichetta è una sigla (es. "L" → "Lunedì").
+  final String? nomeAccessibile;
   final bool selezionato;
   final VoidCallback onTap;
 
@@ -43,7 +47,9 @@ class PulsanteScelta extends StatelessWidget {
       container: true,
       button: true,
       selected: selezionato,
-      label: sottotitolo == null ? etichetta : '$etichetta, $sottotitolo',
+      label:
+          nomeAccessibile ??
+          (sottotitolo == null ? etichetta : '$etichetta, $sottotitolo'),
       excludeSemantics: true,
       child: EffettoMorbido(
         scalaPremuto: 0.95,

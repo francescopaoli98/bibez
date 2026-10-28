@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../logica/formato.dart';
 import '../modelli/lavoro.dart';
+import '../modelli/tipi.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import 'aspetto_tipo.dart';
@@ -31,13 +32,15 @@ class RigaProgetto extends StatelessWidget {
     final cliente = dati.cliente(lavoro.clienteId);
 
     // "Doppiaggio · Luca · Amico −30%"
-    final dettagli = [
-      lavoro.tipo.etichetta,
-      ?cliente?.nome,
-      sconto == 0
-          ? lavoro.relazione.breve
-          : '${lavoro.relazione.breve} −$sconto%',
-    ].join(' · ');
+    final dettagli = lavoro.tipo == TipoLavoro.aGiornata
+        ? '${lavoro.tipo.etichetta} · ${euro(lavoro.tariffaGiornaliera ?? 0)} al giorno'
+        : [
+            lavoro.tipo.etichetta,
+            ?cliente?.nome,
+            sconto == 0
+                ? lavoro.relazione.breve
+                : '${lavoro.relazione.breve} −$sconto%',
+          ].join(' · ');
 
     return CartaVetro(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

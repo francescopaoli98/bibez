@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../logica/calcoli.dart';
 import '../logica/formato.dart';
+import '../logica/giornate.dart';
 import '../logica/mesi.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/sottoprogetto.dart';
+import '../modelli/tipi.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
+import '../widget/calendario_giorni.dart';
 import '../widget/carta_vetro.dart';
 import '../widget/foglio_laguna.dart';
 import '../widget/hero_laguna.dart';
@@ -14,9 +17,12 @@ import '../widget/pagina_secondaria.dart';
 import '../widget/pillola_lucida.dart';
 import '../widget/pulsante_lucido.dart';
 import '../widget/riga_progetto.dart';
+import '../widget/selettore_mese.dart';
 import '../widget/sfera_lucida.dart';
 import '../widget/stato_vuoto.dart';
 import '../widget/stile_lucido.dart';
+import 'aggiungi_giornate.dart';
+import 'foglio_giornata.dart';
 import 'foglio_sottoprogetto.dart';
 import 'nuovo_lavoro.dart';
 
@@ -26,7 +32,7 @@ class ProgettoPagina extends StatelessWidget {
 
   final String lavoroId;
 
-  Future<void> _elimina(BuildContext context, Lavoro lavoro) async {
+  static Future<void> _elimina(BuildContext context, Lavoro lavoro) async {
     final navigatore = Navigator.of(context);
     final dati = DatiScope.leggi(context);
     final conferma = await chiediConferma(
@@ -47,6 +53,11 @@ class ProgettoPagina extends StatelessWidget {
 
     // Il progetto è appena stato eliminato: la pagina si sta chiudendo.
     if (lavoro == null) return const PaginaSecondaria(titolo: '', figli: []);
+
+    // I lavori a giornata hanno una pagina tutta loro: giornate e calendario
+    if (lavoro.tipo == TipoLavoro.aGiornata) {
+      return _ProgettoGiornate(lavoro: lavoro);
+    }
 
     final numeri = dati.riepilogoDi(lavoro.id);
     final sottoprogetti = dati.sottoprogettiDi(lavoro.id);
@@ -403,6 +414,222 @@ class _RigaSottoprogetto extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Pagina di un lavoro "A giornata": guadagno, giornate fatte e in programma,
+/// calendario del mese da toccare per aggiungere, cambiare o togliere un giorno.
+class _ProgettoGiornate extends StatefulWidget {
+  const _ProgettoGiornate({required this.lavoro});
+
+  final Lavoro lavoro;
+
+  @override
+  State<_ProgettoGiornate> createState() => _ProgettoGiornateState();
+}
+
+class _ProgettoGiornateState extends State<_ProgettoGiornate> {
+  DateTime? _mese; // mese mostrato nel calendario (all'inizio: quello di oggi)
+
+  @override
+  Widget build(BuildContext context) {
+    final dati = DatiScope.di(context);
+    final lavoro = widget.lavoro;
+    final tema = Theme.of(context).textTheme;
+    final oggi = soloData(dati.adesso());
+    final mese = _mese ?? primoDelMese(oggi);
+    final tariffa = lavoro.tariffaGiornaliera ?? 0;
+
+    final fatte = dati.giornateFatte(lavoro.id);
+    final inProgramma = dati.giornateInProgramma(lavoro.id);
+    final tutte = dati.giornateDi(lavoro.id);
+    final delMese = [
+      for (final g in tutte)
+        if (primoDelMese(g.data) == mese) g,
+    ];
+
+    return PaginaSecondaria(
+      titolo: lavoro.nome,
+      sottotitolo: 'A giornata · ${euro(tariffa)} al giorno',
+      destra: SferaLucida(
+        icona: Icons.edit_rounded,
+        etichetta: 'Modifica lavoro',
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => NuovoLavoroPagina(esistente: lavoro),
+          ),
+        ),
+      ),
+      figli: [
+        HeroLaguna(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Guadagno netto',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: ColoriLaguna.testoChiaro,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                euro(totaleGiornate(fatte), conSegno: true),
+                style: const TextStyle(
+                  fontSize: 46,
+                  height: 1,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1,
+                  color: ColoriLaguna.cifraHero,
+                  shadows: [
+                    Shadow(
+                      color: Color(0x73002838),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _Dato(
+                      etichetta: 'Giornate',
+                      valore: '${fatte.length}',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _Dato(
+                      etichetta: 'In programma',
+                      valore: '${inProgramma.length}',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _Dato(etichetta: 'Al giorno', valore: euro(tariffa)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                header: true,
+                child: Text('Giornate', style: tema.titleLarge),
+              ),
+            ),
+            PulsanteLucido(
+              etichetta: '+ Aggiungi',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => AggiungiGiornatePagina(lavoroId: lavoro.id),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SelettoreMese(mese: mese, onCambia: (m) => setState(() => _mese = m)),
+        const SizedBox(height: 8),
+        CalendarioGiorni(
+          mese: mese,
+          oggi: oggi,
+          verdi: {for (final g in fatte) g.data},
+          blu: {for (final g in inProgramma) g.data},
+          onTapGiorno: (giorno) {
+            final esistente = tutte.where((g) => g.data == giorno).firstOrNull;
+            modificaGiornata(
+              context,
+              lavoroId: lavoro.id,
+              data: giorno,
+              tariffa: tariffa,
+              esistente: esistente,
+            );
+          },
+          etichettaGiorno: (giorno, stato) {
+            final nome = descrizioneGiorno(giorno);
+            final g = tutte.where((g) => g.data == giorno).firstOrNull;
+            return switch (stato) {
+              StatoGiorno.normale => '$nome, libero: tocca per aggiungere',
+              _ => '$nome, ${euro(g?.importo ?? 0)}: tocca per modificare',
+            };
+          },
+        ),
+        const SizedBox(height: 6),
+        const Row(
+          children: [
+            _LegendaGiorno(colore: Color(0xFF1A8F2E), testo: 'Fatte'),
+            SizedBox(width: 16),
+            _LegendaGiorno(colore: Color(0xFF0F72A8), testo: 'In programma'),
+          ],
+        ),
+        const SizedBox(height: 12),
+        CartaVetro(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  delMese.isEmpty
+                      ? 'Nessuna giornata a ${nomeMese(mese)}'
+                      : '${delMese.length} ${delMese.length == 1 ? 'giornata' : 'giornate'} a ${nomeMese(mese)}',
+                  style: tema.titleMedium,
+                ),
+              ),
+              Text(
+                euro(totaleGiornate(delMese), conSegno: true),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: coloreImporto(totaleGiornate(delMese)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        PulsanteLucido(
+          etichetta: 'Elimina progetto',
+          icona: Icons.delete_outline_rounded,
+          stile: StileLucido.rosso,
+          onPressed: () => ProgettoPagina._elimina(context, lavoro),
+        ),
+      ],
+    );
+  }
+}
+
+class _LegendaGiorno extends StatelessWidget {
+  const _LegendaGiorno({required this.colore, required this.testo});
+
+  final Color colore;
+  final String testo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        ExcludeSemantics(
+          child: Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: colore),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          testo,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+      ],
     );
   }
 }

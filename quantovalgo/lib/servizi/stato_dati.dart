@@ -4,9 +4,11 @@ import 'package:flutter/widgets.dart';
 
 import '../logica/calcoli.dart';
 import '../logica/costi.dart';
+import '../logica/giornate.dart';
 import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
+import '../modelli/giornata.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/sottoprogetto.dart';
@@ -22,7 +24,11 @@ import 'utente.dart';
 /// da qui, quindi aprirne una nuova non costa letture in più. Quando
 /// l'utente esce (o cambia) la memoria si svuota e si riparte.
 class StatoDati extends ChangeNotifier {
-  StatoDati({required ServizioAccesso accesso, required this._archivio}) {
+  StatoDati({
+    required ServizioAccesso accesso,
+    required this._archivio,
+    DateTime Function()? adesso,
+  }) : adesso = adesso ?? DateTime.now {
     _ascoltoUtente = accesso.utente.listen(_cambioUtente);
   }
 
@@ -30,7 +36,10 @@ class StatoDati extends ChangeNotifier {
   late final StreamSubscription<Utente?> _ascoltoUtente;
   final List<StreamSubscription<Object?>> _ascolti = [];
   final Set<String> _arrivati = {};
-  static const _totaleFlussi = 6;
+  static const _totaleFlussi = 7;
+
+  /// "Adesso" dell'app (sostituibile nei test).
+  final DateTime Function() adesso;
 
   List<Lavoro> _lavori = const [];
   List<Sottoprogetto> _sottoprogetti = const [];
@@ -38,6 +47,7 @@ class StatoDati extends ChangeNotifier {
   List<PrezzoMercato> _prezzi = const [];
   List<Costo> _costi = const [];
   List<Categoria> _categorie = const [];
+  List<Giornata> _giornate = const [];
 
   /// Valori di calcolo (sconti, fattori di competenza). Dal passo 8 si
   /// potranno cambiare da Impostazioni.
@@ -54,6 +64,7 @@ class StatoDati extends ChangeNotifier {
   List<Cliente> get clienti => _clienti;
   List<Costo> get costi => _costi;
   List<Categoria> get categorie => _categorie;
+  List<Giornata> get giornate => _giornate;
 
   // --- Ascolto ---
 
@@ -65,6 +76,7 @@ class StatoDati extends ChangeNotifier {
     _prezzi = const [];
     _costi = const [];
     _categorie = const [];
+    _giornate = const [];
     _arrivati.clear();
     problema = false;
 
@@ -91,6 +103,9 @@ class StatoDati extends ChangeNotifier {
       });
       _ascolta<Categoria>('categorie', _archivio.categorie(), (v) {
         _categorie = [...v]..sort((a, b) => a.creatoIl.compareTo(b.creatoIl));
+      });
+      _ascolta<Giornata>('giornate', _archivio.giornate(), (v) {
+        _giornate = [...v]..sort((a, b) => a.data.compareTo(b.data));
       });
     }
     notifyListeners();
@@ -151,8 +166,34 @@ class StatoDati extends ChangeNotifier {
   List<Sottoprogetto> sottoprogettiDi(String lavoroId) =>
       _sottoprogetti.where((s) => s.lavoroId == lavoroId).toList();
 
-  RiepilogoLavoro riepilogoDi(String lavoroId) =>
-      riepilogo(sottoprogettiDi(lavoroId));
+  /// Numeri di un progetto. Per un lavoro "A giornata" l'utile è la somma delle
+  /// giornate già fatte (dal loro giorno in poi): niente costi né ore.
+  RiepilogoLavoro riepilogoDi(String lavoroId) {
+    if (lavoro(lavoroId)?.tipo == TipoLavoro.aGiornata) {
+      return RiepilogoLavoro(
+        ricavi: totaleGiornate(giornateFatte(lavoroId)),
+        costi: 0,
+        ore: 0,
+      );
+    }
+    return riepilogo(sottoprogettiDi(lavoroId));
+  }
+
+  /// Tutte le giornate di un lavoro, dalla più vecchia.
+  List<Giornata> giornateDi(String lavoroId) =>
+      _giornate.where((g) => g.lavoroId == lavoroId).toList();
+
+  /// Giornate già arrivate (oggi compreso): il guadagno è incassato.
+  List<Giornata> giornateFatte(String lavoroId) => [
+    for (final g in giornateDi(lavoroId))
+      if (giornataFatta(g, adesso())) g,
+  ];
+
+  /// Giornate in programma (dopo oggi).
+  List<Giornata> giornateInProgramma(String lavoroId) => [
+    for (final g in giornateDi(lavoroId))
+      if (!giornataFatta(g, adesso())) g,
+  ];
 
   List<Lavoro> lavoriDelCliente(String clienteId) =>
       _lavori.where((l) => l.clienteId == clienteId).toList();
@@ -179,7 +220,11 @@ class StatoDati extends ChangeNotifier {
     final importo = quotaNelMese(costo, mese);
     if (importo <= 0) return const [];
     final quote = ripartisci(importo, [
-      for (final l in progettiAttivi(_lavori, mese))
+      // I lavori a giornata hanno un guadagno netto fisso: non prendono quote
+      for (final l in progettiAttivi(
+        _lavori.where((l) => l.tipo != TipoLavoro.aGiornata),
+        mese,
+      ))
         PesoProgetto(l.id, riepilogoDi(l.id).ore),
     ]);
     // Dalla quota più grande alla più piccola (a parità, resta l'ordine dei progetti)
@@ -209,7 +254,9 @@ class StatoDati extends ChangeNotifier {
   DaRecuperare daRecuperareOra() {
     var utileIncassato = 0.0;
     for (final l in _lavori) {
-      if (l.statoPagamento == StatoPagamento.incassato) {
+      // Le giornate si incassano nel giorno stesso: contano quelle già fatte
+      if (l.statoPagamento == StatoPagamento.incassato ||
+          l.tipo == TipoLavoro.aGiornata) {
         utileIncassato += riepilogoDi(l.id).utile;
       }
     }
@@ -223,6 +270,7 @@ class StatoDati extends ChangeNotifier {
   void eliminaLavoro(String id) => _archivio.eliminaLavoro(
     id,
     idSottoprogetti: [for (final s in sottoprogettiDi(id)) s.id],
+    idGiornate: [for (final g in giornateDi(id)) g.id],
   );
 
   String salvaSottoprogetto(Sottoprogetto s) => _archivio.salvaSottoprogetto(s);
@@ -238,6 +286,11 @@ class StatoDati extends ChangeNotifier {
 
   String salvaCategoria(Categoria c) => _archivio.salvaCategoria(c);
   void eliminaCategoria(String id) => _archivio.eliminaCategoria(id);
+
+  String salvaGiornata(Giornata g) => _archivio.salvaGiornata(g);
+  void salvaGiornate(List<Giornata> giornate) =>
+      _archivio.salvaGiornate(giornate);
+  void eliminaGiornata(String id) => _archivio.eliminaGiornata(id);
 }
 
 /// Rende [StatoDati] disponibile a tutte le schermate. Sta sopra il

@@ -16,6 +16,7 @@ class QuantoValgoApp extends StatefulWidget {
     required this.accesso,
     required this.archivio,
     this.erroreAvvio,
+    this.adesso,
   });
 
   final ServizioAccesso accesso;
@@ -23,6 +24,9 @@ class QuantoValgoApp extends StatefulWidget {
 
   /// Se non nullo, Firebase non è partito: si mostra solo l'errore.
   final String? erroreAvvio;
+
+  /// Orologio dell'app: serve solo ai test per fissare "oggi".
+  final DateTime Function()? adesso;
 
   @override
   State<QuantoValgoApp> createState() => _QuantoValgoAppState();
@@ -33,7 +37,11 @@ class _QuantoValgoAppState extends State<QuantoValgoApp> {
   /// è partito non si crea, così non si tocca il database.
   late final StatoDati? _dati = widget.erroreAvvio != null
       ? null
-      : StatoDati(accesso: widget.accesso, archivio: widget.archivio);
+      : StatoDati(
+          accesso: widget.accesso,
+          archivio: widget.archivio,
+          adesso: widget.adesso,
+        );
 
   @override
   void dispose() {
