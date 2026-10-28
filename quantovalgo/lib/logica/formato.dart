@@ -59,3 +59,11 @@ String _conPunti(int intero) {
   }
   return buffer.toString();
 }
+
+/// Quantità di giornate scritta bene: `mezza giornata`, `1 giornata`, `2,5 giornate`.
+/// (Una mezza giornata conta 0,5.)
+String testoGiornate(double quante) {
+  if (quante == 0.5) return 'mezza giornata';
+  final testo = numeroPerCampo(quante);
+  return quante == 1 ? '1 giornata' : '$testo giornate';
+}

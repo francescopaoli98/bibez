@@ -28,6 +28,7 @@ class CalendarioGiorni extends StatelessWidget {
     required this.onTapGiorno,
     this.verdi = const {},
     this.blu = const {},
+    this.mezze = const {},
     this.etichettaGiorno,
   });
 
@@ -36,6 +37,9 @@ class CalendarioGiorni extends StatelessWidget {
   final DateTime oggi;
   final Set<DateTime> verdi;
   final Set<DateTime> blu;
+
+  /// Giorni da segnare con "½" (mezza giornata), in aggiunta al colore.
+  final Set<DateTime> mezze;
   final ValueChanged<DateTime> onTapGiorno;
 
   /// Nome del giorno per i lettori di schermo (es. "28 ottobre, giornata").
@@ -114,6 +118,7 @@ class CalendarioGiorni extends StatelessWidget {
       numero: numero,
       stato: stato,
       eOggi: giorno == oggiSolo,
+      mezza: mezze.contains(giorno),
       etichetta:
           etichettaGiorno?.call(giorno, stato) ?? descrizioneGiorno(giorno),
       onTap: () => onTapGiorno(giorno),
@@ -126,6 +131,7 @@ class _CellaGiorno extends StatelessWidget {
     required this.numero,
     required this.stato,
     required this.eOggi,
+    required this.mezza,
     required this.etichetta,
     required this.onTap,
   });
@@ -133,6 +139,7 @@ class _CellaGiorno extends StatelessWidget {
   final int numero;
   final StatoGiorno stato;
   final bool eOggi;
+  final bool mezza;
   final String etichetta;
   final VoidCallback onTap;
 
@@ -169,47 +176,97 @@ class _CellaGiorno extends StatelessWidget {
           child: SizedBox(
             height: 48,
             child: Center(
-              child: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: colori,
-                  ),
-                  border: eOggi
-                      ? Border.all(color: ColoriLaguna.testo, width: 2.5)
-                      : Border.all(
-                          color: colorato
-                              ? Colors.white
-                              : const Color(0xFFB8E4F2),
-                          width: 1.5,
-                        ),
-                  boxShadow: colorato
-                      ? const [
-                          BoxShadow(
-                            color: Color(0x40065A78),
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
+              child: _ConBadge(
+                mezza: mezza,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: colori,
+                    ),
+                    border: eOggi
+                        ? Border.all(color: ColoriLaguna.testo, width: 2.5)
+                        : Border.all(
+                            color: colorato
+                                ? Colors.white
+                                : const Color(0xFFB8E4F2),
+                            width: 1.5,
                           ),
-                        ]
-                      : null,
-                ),
-                child: Text(
-                  '$numero',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: testo,
+                    boxShadow: colorato
+                        ? const [
+                            BoxShadow(
+                              color: Color(0x40065A78),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Text(
+                    '$numero',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: testo,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Aggiunge in alto a destra il segno "½" delle mezze giornate.
+class _ConBadge extends StatelessWidget {
+  const _ConBadge({required this.mezza, required this.child});
+
+  final bool mezza;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!mezza) return child;
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          child,
+          Positioned(
+            top: -2,
+            right: -4,
+            child: Container(
+              width: 21,
+              height: 21,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFFFE27A),
+                border: Border.all(color: const Color(0xFF9A6400), width: 1.5),
+              ),
+              child: const Text(
+                '½',
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF3A2400),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

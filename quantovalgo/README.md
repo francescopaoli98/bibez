@@ -101,3 +101,8 @@ Il font Nunito è incluso in `assets/fonts` (licenza OFL).
   I giorni già registrati si saltano e non contano nel numero.
 - Dalla pagina del progetto un tocco su un giorno del calendario aggiunge, modifica o toglie quella giornata.
 - Dati in `utenti/{uid}/giornate`; la logica dei giorni è in `logica/giornate.dart`.
+- **Mezza giornata**: ogni giornata può essere intera o mezza. La mezza vale **metà**
+  dell'importo intero di partenza (15 € su 30 €), ritoccabile; conta 0,5 nel numero
+  di giornate. Nel calendario è segnata con ½. Nello schema si sceglie "Giorni interi" o
+  "Mezze giornate" per tutto il gruppo, poi ogni giorno si cambia con tocchi
+  successivi: intero → mezza → tolto.

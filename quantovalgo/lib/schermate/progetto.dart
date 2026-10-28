@@ -498,14 +498,14 @@ class _ProgettoGiornateState extends State<_ProgettoGiornate> {
                   Expanded(
                     child: _Dato(
                       etichetta: 'Giornate',
-                      valore: '${fatte.length}',
+                      valore: numeroPerCampo(numeroGiornate(fatte)),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _Dato(
                       etichetta: 'In programma',
-                      valore: '${inProgramma.length}',
+                      valore: numeroPerCampo(numeroGiornate(inProgramma)),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -544,6 +544,10 @@ class _ProgettoGiornateState extends State<_ProgettoGiornate> {
           oggi: oggi,
           verdi: {for (final g in fatte) g.data},
           blu: {for (final g in inProgramma) g.data},
+          mezze: {
+            for (final g in tutte)
+              if (g.mezza) g.data,
+          },
           onTapGiorno: (giorno) {
             final esistente = tutte.where((g) => g.data == giorno).firstOrNull;
             modificaGiornata(
@@ -559,7 +563,8 @@ class _ProgettoGiornateState extends State<_ProgettoGiornate> {
             final g = tutte.where((g) => g.data == giorno).firstOrNull;
             return switch (stato) {
               StatoGiorno.normale => '$nome, libero: tocca per aggiungere',
-              _ => '$nome, ${euro(g?.importo ?? 0)}: tocca per modificare',
+              _ =>
+                '$nome, ${g?.mezza == true ? 'mezza giornata, ' : ''}${euro(g?.importo ?? 0)}: tocca per modificare',
             };
           },
         ),
@@ -580,7 +585,7 @@ class _ProgettoGiornateState extends State<_ProgettoGiornate> {
                 child: Text(
                   delMese.isEmpty
                       ? 'Nessuna giornata a ${nomeMese(mese)}'
-                      : '${delMese.length} ${delMese.length == 1 ? 'giornata' : 'giornate'} a ${nomeMese(mese)}',
+                      : '${testoGiornate(numeroGiornate(delMese))} a ${nomeMese(mese)}',
                   style: tema.titleMedium,
                 ),
               ),

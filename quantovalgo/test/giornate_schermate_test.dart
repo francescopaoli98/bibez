@@ -184,7 +184,7 @@ void main() {
     },
   );
 
-  testWidgets('Dal calendario si toglie un giorno prima di salvare', (
+  testWidgets('Dal calendario un giorno passa da intero a mezza a tolto', (
     tester,
   ) async {
     schermoAlto(tester);
@@ -195,23 +195,172 @@ void main() {
     await tocca(tester, find.text('+ Aggiungi'));
     await scrivi(tester, 'campo-numero-giorni', '3'); // 28, 29, 30 ottobre
 
-    // Il 29 è in ferie: lo tolgo dal calendario
+    // Un tocco sul 29: da intero a mezza giornata (½)
     await tocca(tester, find.bySemanticsLabel('giovedì 29 ottobre, scelto'));
+    expect(find.text('½'), findsOneWidget);
+    expect(
+      find.text('2 intere + 1 mezza · 75 €\ndal 28 ottobre al 30 ottobre'),
+      findsOneWidget,
+    );
+    // Secondo tocco: tolto (il giorno è in ferie)
+    await tocca(
+      tester,
+      find.bySemanticsLabel('giovedì 29 ottobre, scelto, mezza giornata'),
+    );
+    expect(find.text('½'), findsNothing);
     expect(
       find.text('2 giornate · 60 €\ndal 28 ottobre al 30 ottobre'),
       findsOneWidget,
     );
-    // …e poi ci ripenso
+    // Terzo tocco: ci ripenso, torna intero
     await tocca(tester, find.bySemanticsLabel('giovedì 29 ottobre'));
     expect(
       find.text('3 giornate · 90 €\ndal 28 ottobre al 30 ottobre'),
       findsOneWidget,
     );
 
-    // Togliendo il 29 e salvando restano 2 giornate
+    // Tolgo il 29 (due tocchi) e salvo: restano 2 giornate
     await tocca(tester, find.bySemanticsLabel('giovedì 29 ottobre, scelto'));
+    await tocca(
+      tester,
+      find.bySemanticsLabel('giovedì 29 ottobre, scelto, mezza giornata'),
+    );
     await tocca(tester, find.text('Aggiungi 2 giornate'));
     expect(archivio.tabellaGiornate.elenco, hasLength(2));
+  });
+
+  testWidgets('Schema con mezze giornate: ognuna vale metà', (tester) async {
+    schermoAlto(tester);
+    final archivio = FintoArchivio();
+    archivio.salvaLavoro(negozio());
+    await avviaApp(tester, archivio: archivio, adesso: oggi);
+    await tocca(tester, find.text('Negozio con mamma'));
+    await tocca(tester, find.text('+ Aggiungi'));
+
+    await tocca(tester, find.text('Mezze giornate'));
+    await scrivi(tester, 'campo-numero-giorni', '4'); // 28, 29, 30 ott e 2 nov
+    expect(
+      find.text('4 mezze · 60 €\ndal 28 ottobre al 2 novembre'),
+      findsOneWidget,
+    );
+    expect(find.text('½'), findsWidgets);
+
+    await tocca(tester, find.text('Aggiungi 4 giornate'));
+    final salvate = archivio.tabellaGiornate.elenco;
+    expect(salvate, hasLength(4));
+    expect(salvate.every((g) => g.mezza && g.importo == 15), isTrue);
+  });
+
+  testWidgets('Intere e mezze insieme: il totale tiene conto di tutte', (
+    tester,
+  ) async {
+    schermoAlto(tester);
+    final archivio = FintoArchivio();
+    archivio.salvaLavoro(negozio());
+    await avviaApp(tester, archivio: archivio, adesso: oggi);
+    await tocca(tester, find.text('Negozio con mamma'));
+    await tocca(tester, find.text('+ Aggiungi'));
+    await scrivi(tester, 'campo-numero-giorni', '3');
+    await tocca(tester, find.bySemanticsLabel('giovedì 29 ottobre, scelto'));
+    await tocca(tester, find.text('Aggiungi 3 giornate'));
+
+    final giornate = archivio.tabellaGiornate.elenco
+      ..sort((a, b) => a.data.compareTo(b.data));
+    expect([for (final g in giornate) g.mezza], [false, true, false]);
+    expect([for (final g in giornate) g.importo], [30, 15, 30]);
+
+    // Pagina del progetto: 2,5 giornate (le fatte: 28; il 29 e il 30 in programma)
+    expect(find.text('+30 €'), findsWidgets); // solo il 28 è fatto
+    await tocca(tester, find.bySemanticsLabel('Mese successivo'));
+    await tocca(tester, find.bySemanticsLabel('Mese precedente'));
+    expect(find.text('2,5 giornate a ottobre'), findsOneWidget);
+    expect(find.text('+75 €'), findsOneWidget);
+  });
+
+  testWidgets(
+    'Singola mezza giornata: importo di partenza = metà, ritoccabile',
+    (tester) async {
+      schermoAlto(tester);
+      final archivio = FintoArchivio();
+      archivio.salvaLavoro(negozio());
+      await avviaApp(tester, archivio: archivio, adesso: oggi);
+      await tocca(tester, find.text('Negozio con mamma'));
+
+      await tocca(
+        tester,
+        find.bySemanticsLabel(
+          'martedì 27 ottobre, libero: tocca per aggiungere',
+        ),
+      );
+      String importoNelCampo() => tester
+          .widget<TextField>(
+            find.descendant(
+              of: find.byKey(const Key('campo-importo-giornata')),
+              matching: find.byType(TextField),
+            ),
+          )
+          .controller!
+          .text;
+      expect(importoNelCampo(), '30'); // di partenza: intera
+
+      await tocca(tester, find.text('Mezza giornata'));
+      expect(importoNelCampo(), '15'); // la metà
+      await tocca(tester, find.text('Giornata intera'));
+      expect(importoNelCampo(), '30'); // di nuovo intera
+      await tocca(tester, find.text('Mezza giornata'));
+      await tocca(tester, find.text('Aggiungi'));
+
+      final g = archivio.tabellaGiornate.elenco.single;
+      expect(g.mezza, isTrue);
+      expect(g.importo, 15);
+      expect(find.text('mezza giornata a ottobre'), findsOneWidget);
+      expect(find.text('+15 €'), findsWidgets);
+      expect(find.text('½'), findsOneWidget);
+
+      // Quel giorno la mezza giornata ha dato 20 €: si ritocca
+      await tocca(
+        tester,
+        find.bySemanticsLabel(
+          'martedì 27 ottobre, mezza giornata, 15 €: tocca per modificare',
+        ),
+      );
+      expect(find.text('Mezza giornata'), findsOneWidget);
+      await scrivi(tester, 'campo-importo-giornata', '20');
+      await tocca(tester, find.text('Salva'));
+      final dopo = archivio.tabellaGiornate.elenco.single;
+      expect(dopo.mezza, isTrue);
+      expect(dopo.importo, 20);
+    },
+  );
+
+  testWidgets('La tariffa decimale dà una metà arrotondata ai centesimi', (
+    tester,
+  ) async {
+    schermoAlto(tester);
+    final archivio = FintoArchivio();
+    final lavoro = negozio();
+    archivio.salvaLavoro(
+      Lavoro(
+        id: '',
+        nome: 'Mercatino',
+        tipo: TipoLavoro.aGiornata,
+        relazione: lavoro.relazione,
+        livello: 3,
+        prezzoPieno: 0,
+        prezzoFinale: 0,
+        tariffaGiornaliera: 45.5,
+        creatoIl: DateTime(2026, 10, 1),
+      ),
+    );
+    await avviaApp(tester, archivio: archivio, adesso: oggi);
+    await tocca(tester, find.text('Mercatino'));
+    await tocca(
+      tester,
+      find.bySemanticsLabel('martedì 27 ottobre, libero: tocca per aggiungere'),
+    );
+    await tocca(tester, find.text('Mezza giornata'));
+    await tocca(tester, find.text('Aggiungi'));
+    expect(archivio.tabellaGiornate.elenco.single.importo, 22.75);
   });
 
   testWidgets('"Fino al" e importo diverso dal valore di partenza', (

@@ -54,3 +54,12 @@ bool giornataFatta(Giornata giornata, DateTime adesso) =>
 /// Totale in euro di un insieme di giornate.
 double totaleGiornate(Iterable<Giornata> giornate) =>
     giornate.fold<double>(0, (somma, g) => somma + g.importo);
+
+/// Quante giornate "intere" valgono queste: una mezza giornata conta 0,5.
+double numeroGiornate(Iterable<Giornata> giornate) =>
+    giornate.fold<double>(0, (somma, g) => somma + (g.mezza ? 0.5 : 1));
+
+/// Importo di partenza di una mezza giornata: metà di quello intero
+/// (arrotondato al centesimo).
+double importoMezzaGiornata(double importoIntero) =>
+    (importoIntero * 50).round() / 100;

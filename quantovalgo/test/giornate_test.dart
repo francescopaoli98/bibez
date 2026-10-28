@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quantovalgo/logica/formato.dart';
 import 'package:quantovalgo/logica/giornate.dart';
 import 'package:quantovalgo/modelli/giornata.dart';
 import 'package:quantovalgo/modelli/lavoro.dart';
@@ -165,6 +166,38 @@ void main() {
       expect(giornataFatta(g(DateTime(2026, 10, 28), 30), adesso), isTrue);
       expect(giornataFatta(g(DateTime(2026, 10, 29), 30), adesso), isFalse);
     });
+
+    test('una mezza giornata vale metà e conta 0,5', () {
+      expect(importoMezzaGiornata(30), 15);
+      expect(importoMezzaGiornata(45.5), 22.75);
+      expect(importoMezzaGiornata(25), 12.5);
+      final tutte = [
+        g(DateTime(2026, 10, 1), 30),
+        g(DateTime(2026, 10, 2), 30),
+        g(DateTime(2026, 10, 3), 15).copyWith(mezza: true),
+      ];
+      expect(numeroGiornate(tutte), 2.5);
+      expect(totaleGiornate(tutte), 75);
+    });
+
+    test('testo delle giornate', () {
+      expect(testoGiornate(0), '0 giornate');
+      expect(testoGiornate(0.5), 'mezza giornata');
+      expect(testoGiornate(1), '1 giornata');
+      expect(testoGiornate(1.5), '1,5 giornate');
+      expect(testoGiornate(12), '12 giornate');
+    });
+
+    test(
+      'la mezza giornata si salva, e i dati vecchi senza il campo sono intere',
+      () {
+        final mezza = g(DateTime(2026, 10, 4), 15).copyWith(mezza: true);
+        expect(Giornata.fromMap('a', mezza.toMap()).mezza, isTrue);
+        final vecchia = Map<String, Object?>.from(mezza.toMap())
+          ..remove('mezza');
+        expect(Giornata.fromMap('a', vecchia).mezza, isFalse);
+      },
+    );
 
     test('salvataggio e lettura tengono solo il giorno', () {
       final letta = Giornata.fromMap(

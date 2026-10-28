@@ -9,6 +9,7 @@ class Giornata {
     required this.data,
     required this.importo,
     required this.creatoIl,
+    this.mezza = false,
   });
 
   final String id;
@@ -19,13 +20,17 @@ class Giornata {
 
   /// Guadagno netto di questa giornata, in euro.
   final double importo;
+
+  /// Mezza giornata: di partenza vale metà dell'importo di una giornata intera.
+  final bool mezza;
   final DateTime creatoIl;
 
-  Giornata copyWith({double? importo}) => Giornata(
+  Giornata copyWith({double? importo, bool? mezza}) => Giornata(
     id: id,
     lavoroId: lavoroId,
     data: data,
     importo: importo ?? this.importo,
+    mezza: mezza ?? this.mezza,
     creatoIl: creatoIl,
   );
 
@@ -33,6 +38,7 @@ class Giornata {
     'lavoroId': lavoroId,
     'data': data,
     'importo': importo,
+    'mezza': mezza,
     'creatoIl': creatoIl,
   };
 
@@ -44,6 +50,7 @@ class Giornata {
       lavoroId: dati['lavoroId'] as String? ?? '',
       data: DateTime(data.year, data.month, data.day),
       importo: leggiDouble(dati['importo']),
+      mezza: dati['mezza'] as bool? ?? false,
       creatoIl:
           leggiData(dati['creatoIl']) ?? DateTime.fromMillisecondsSinceEpoch(0),
     );

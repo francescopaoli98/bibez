@@ -9,10 +9,12 @@ import '../tema/colori.dart';
 import '../widget/campo_testo.dart';
 import '../widget/foglio_laguna.dart';
 import '../widget/pulsante_lucido.dart';
+import '../widget/pulsante_scelta.dart';
 import '../widget/stile_lucido.dart';
 
 /// Foglio per aggiungere, modificare o togliere la giornata di un giorno.
 /// Con [esistente] modifica; senza, aggiunge una giornata nuova a [data].
+/// [tariffa] è il guadagno di una giornata intera: la mezza vale la metà.
 Future<void> modificaGiornata(
   BuildContext context, {
   required String lavoroId,
@@ -50,6 +52,7 @@ class _FormGiornata extends StatefulWidget {
 }
 
 class _FormGiornataState extends State<_FormGiornata> {
+  late bool _mezza = widget.esistente?.mezza ?? false;
   late final _importo = TextEditingController(
     text: numeroPerCampo(widget.esistente?.importo ?? widget.tariffa),
   );
@@ -60,6 +63,16 @@ class _FormGiornataState extends State<_FormGiornata> {
     _importo.dispose();
     super.dispose();
   }
+
+  /// Cambiando tra intera e mezza l'importo torna a quello di partenza:
+  /// la tariffa intera oppure la sua metà (poi si può ritoccare).
+  void _scegli(bool mezza) => setState(() {
+    _mezza = mezza;
+    _erroreImporto = null;
+    _importo.text = numeroPerCampo(
+      mezza ? importoMezzaGiornata(widget.tariffa) : widget.tariffa,
+    );
+  });
 
   void _salva() {
     final importo = leggiNumero(_importo.text);
@@ -76,6 +89,7 @@ class _FormGiornataState extends State<_FormGiornata> {
         lavoroId: widget.lavoroId,
         data: widget.data,
         importo: importo,
+        mezza: _mezza,
         creatoIl: vecchia?.creatoIl ?? DateTime.now(),
       ),
     );
@@ -107,6 +121,26 @@ class _FormGiornataState extends State<_FormGiornata> {
           style: tema.titleMedium?.copyWith(
             color: ColoriLaguna.testoSecondario,
           ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: PulsanteScelta(
+                etichetta: 'Giornata intera',
+                selezionato: !_mezza,
+                onTap: () => _scegli(false),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: PulsanteScelta(
+                etichetta: 'Mezza giornata',
+                selezionato: _mezza,
+                onTap: () => _scegli(true),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         CampoTesto(

@@ -41,7 +41,11 @@ class _AggiungiGiornatePaginaState extends State<AggiungiGiornatePagina> {
   late DateTime _dal;
   late DateTime _fino;
   bool _perNumero = true; // vero: "per N giorni", falso: "fino al…"
-  Set<DateTime> _scelti = {};
+  /// Giorni scelti. Il valore dice se è una mezza giornata (vero) o intera (falso).
+  Map<DateTime, bool> _scelti = {};
+
+  /// Come si contano i giorni generati dallo schema: interi o mezze giornate.
+  bool _schemaMezze = false;
   late DateTime _mese;
   bool _iniziato = false;
 
@@ -87,15 +91,20 @@ class _AggiungiGiornatePaginaState extends State<AggiungiGiornatePagina> {
         : null;
 
     // I giorni già registrati si saltano e non contano nel numero
-    _scelti = giorniDelloSchema(
-      dal: _dal,
-      giorniSettimana: _giorniSettimana,
-      numeroGiorni: _perNumero && numeroValido ? numero : null,
-      fino: _perNumero ? null : _fino,
-      esclusi: _esistenti(),
-    ).toSet();
+    _scelti = {
+      for (final g in giorniDelloSchema(
+        dal: _dal,
+        giorniSettimana: _giorniSettimana,
+        numeroGiorni: _perNumero && numeroValido ? numero : null,
+        fino: _perNumero ? null : _fino,
+        esclusi: _esistenti(),
+      ))
+        g: _schemaMezze,
+    };
     if (_scelti.isNotEmpty) {
-      _mese = primoDelMese(_scelti.reduce((a, b) => a.isBefore(b) ? a : b));
+      _mese = primoDelMese(
+        _scelti.keys.reduce((a, b) => a.isBefore(b) ? a : b),
+      );
     }
   }
 
@@ -116,8 +125,16 @@ class _AggiungiGiornatePaginaState extends State<AggiungiGiornatePagina> {
   void _toccaGiorno(DateTime giorno) {
     // Già presente: si modifica dalla pagina del progetto
     if (_esistenti().contains(giorno)) return;
+    // Un tocco: libero → intero → mezza giornata → di nuovo libero
     setState(() {
-      if (!_scelti.remove(giorno)) _scelti.add(giorno);
+      final attuale = _scelti[giorno];
+      if (attuale == null) {
+        _scelti[giorno] = false;
+      } else if (!attuale) {
+        _scelti[giorno] = true;
+      } else {
+        _scelti.remove(giorno);
+      }
     });
   }
 
@@ -131,14 +148,16 @@ class _AggiungiGiornatePaginaState extends State<AggiungiGiornatePagina> {
     if (importo == null || importo <= 0 || _scelti.isEmpty) return;
 
     final adesso = DateTime.now();
-    final giorni = _scelti.toList()..sort();
+    final giorni = _scelti.keys.toList()..sort();
     DatiScope.leggi(context).salvaGiornate([
       for (final g in giorni)
         Giornata(
           id: '',
           lavoroId: widget.lavoroId,
           data: g,
-          importo: importo,
+          // La mezza giornata vale la metà dell'importo intero
+          importo: _scelti[g]! ? importoMezzaGiornata(importo) : importo,
+          mezza: _scelti[g]!,
           creatoIl: adesso,
         ),
     ]);
@@ -152,20 +171,31 @@ class _AggiungiGiornatePaginaState extends State<AggiungiGiornatePagina> {
     final tema = Theme.of(context).textTheme;
     final importo = leggiNumero(_importo.text);
     final n = _scelti.length;
-    final ordinati = _scelti.toList()..sort();
+    final ordinati = _scelti.keys.toList()..sort();
+    final mezze = _scelti.values.where((m) => m).length;
+    final intere = n - mezze;
     final esistenti = _esistenti();
 
     String riepilogo;
     if (n == 0) {
       riepilogo = 'Nessuna giornata scelta';
     } else {
-      final totale = importo == null ? '' : ' · ${euro(n * importo)}';
+      final totale = importo == null
+          ? ''
+          : ' · ${euro(intere * importo + mezze * importoMezzaGiornata(importo))}';
       final primo = ordinati.first;
       final ultimo = ordinati.last;
       final periodo = n == 1
           ? descrizioneGiorno(primo)
           : 'dal ${primo.day} ${nomeMese(primo)} al ${ultimo.day} ${nomeMese(ultimo)}';
-      riepilogo = '$n ${n == 1 ? 'giornata' : 'giornate'}$totale\n$periodo';
+      // "5 giornate", oppure "4 intere + 1 mezza" se ci sono mezze giornate
+      final conteggio = mezze == 0
+          ? '$n ${n == 1 ? 'giornata' : 'giornate'}'
+          : [
+              if (intere > 0) '$intere ${intere == 1 ? 'intera' : 'intere'}',
+              '$mezze ${mezze == 1 ? 'mezza' : 'mezze'}',
+            ].join(' + ');
+      riepilogo = '$conteggio$totale\n$periodo';
     }
 
     return PaginaSecondaria(
@@ -233,6 +263,26 @@ class _AggiungiGiornatePaginaState extends State<AggiungiGiornatePagina> {
           ],
         ),
         const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: PulsanteScelta(
+                etichetta: 'Giorni interi',
+                selezionato: !_schemaMezze,
+                onTap: () => _cambiaSchema(() => _schemaMezze = false),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: PulsanteScelta(
+                etichetta: 'Mezze giornate',
+                selezionato: _schemaMezze,
+                onTap: () => _cambiaSchema(() => _schemaMezze = true),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
         PulsanteLucido(
           etichetta: 'Dal ${_dal.day} ${nomeMeseAnno(_dal)}',
           icona: Icons.calendar_month_rounded,
@@ -287,7 +337,7 @@ class _AggiungiGiornatePaginaState extends State<AggiungiGiornatePagina> {
           child: Text('Calendario', style: tema.titleLarge),
         ),
         Text(
-          'Tocca un giorno per toglierlo o aggiungerlo. Se cambi lo schema il calendario si rifà da capo.',
+          'Tocca un giorno: intero, poi mezza giornata (½), poi tolto. Se cambi lo schema il calendario si rifà da capo.',
           style: tema.labelMedium?.copyWith(
             color: ColoriLaguna.testoSecondario,
           ),
@@ -298,13 +348,20 @@ class _AggiungiGiornatePaginaState extends State<AggiungiGiornatePagina> {
         CalendarioGiorni(
           mese: _mese,
           oggi: oggi,
-          verdi: _scelti,
+          verdi: _scelti.keys.toSet(),
+          mezze: {
+            for (final voce in _scelti.entries)
+              if (voce.value) voce.key,
+          },
           blu: esistenti,
           onTapGiorno: _toccaGiorno,
           etichettaGiorno: (g, stato) {
             final nome = descrizioneGiorno(g);
             return switch (stato) {
-              StatoGiorno.verde => '$nome, scelto',
+              StatoGiorno.verde =>
+                _scelti[g] == true
+                    ? '$nome, scelto, mezza giornata'
+                    : '$nome, scelto',
               StatoGiorno.blu => '$nome, già registrato',
               StatoGiorno.normale => nome,
             };
