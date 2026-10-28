@@ -29,7 +29,7 @@ class PagamentiPagina extends StatelessWidget {
       titolo: 'Da incassare',
       sottotitolo: 'Prima quelli in ritardo',
       figli: [
-        RiquadroDaIncassare(dati: dati),
+        RiquadroDaIncassare(dati: dati, apribile: false),
         const SizedBox(height: 12),
         if (lavori.isEmpty)
           const StatoVuoto(

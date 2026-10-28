@@ -94,70 +94,73 @@ class ProgettoPagina extends StatelessWidget {
       figli: [
         _RigaCategoria(categoria: dati.categoriaDelLavoro(lavoro)),
         _HeroProgetto(numeri: numeri),
-        if (lavoro.prezzoPieno > 0) ...[
+        // Prezzo e costi condivisi in una sola scheda (meno blocchi uno sopra l'altro)
+        if (lavoro.prezzoPieno > 0 || quotaCosti > 0) ...[
           const SizedBox(height: 12),
           CartaVetro(
-            colori: const [Color(0xFFFFF6C4), Color(0xFFFFE98F)],
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Row(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                if (lavoro.prezzoPieno > 0)
+                  Row(
                     children: [
-                      Text(
-                        'Prezzo pieno ${euro(lavoro.prezzoPieno)} · applicato ${euro(lavoro.prezzoFinale)}',
-                        style: tema.labelMedium?.copyWith(fontSize: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Prezzo pieno ${euro(lavoro.prezzoPieno)} · applicato ${euro(lavoro.prezzoFinale)}',
+                              style: tema.labelMedium?.copyWith(fontSize: 14),
+                            ),
+                            Text(
+                              sconto == 0
+                                  ? 'Nessuno sconto'
+                                  : 'Sconto ${lavoro.relazione.breve} −$sconto%',
+                              style: tema.labelLarge,
+                            ),
+                          ],
+                        ),
                       ),
-                      Text(
-                        sconto == 0
-                            ? 'Nessuno sconto'
-                            : 'Sconto ${lavoro.relazione.breve} −$sconto%',
-                        style: tema.labelLarge,
-                      ),
+                      if (regalato > 0) ...[
+                        const SizedBox(width: 8),
+                        _EtichettaRegalo(testo: 'Regali ${euro(regalato)}'),
+                      ],
                     ],
                   ),
-                ),
-                if (regalato > 0) ...[
-                  const SizedBox(width: 8),
-                  _EtichettaRegalo(testo: 'Regali ${euro(regalato)}'),
-                ],
-              ],
-            ),
-          ),
-        ],
-        // Parte di abbonamenti e acquisti che tocca a questo progetto
-        if (quotaCosti > 0) ...[
-          const SizedBox(height: 12),
-          CartaVetro(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                if (lavoro.prezzoPieno > 0 && quotaCosti > 0)
+                  const Divider(height: 24),
+                // Parte di abbonamenti e acquisti che tocca a questo progetto
+                if (quotaCosti > 0)
+                  Row(
                     children: [
-                      Text(
-                        'Costi condivisi di ${nomeMese(meseAttuale)}: ${euro(quotaCosti)}',
-                        style: tema.labelMedium?.copyWith(fontSize: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Costi condivisi di ${nomeMese(meseAttuale)}: ${euro(quotaCosti)}',
+                              style: tema.labelMedium?.copyWith(fontSize: 14),
+                            ),
+                            Text(
+                              'Utile dopo i costi condivisi',
+                              style: tema.labelMedium?.copyWith(
+                                color: ColoriLaguna.testoSecondario,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       Text(
-                        'Utile dopo i costi condivisi',
-                        style: tema.labelMedium?.copyWith(
-                          color: ColoriLaguna.testoSecondario,
+                        euro(numeri.utile - quotaCosti, conSegno: true),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: coloreImporto(numeri.utile - quotaCosti),
                         ),
                       ),
                     ],
                   ),
-                ),
-                Text(
-                  euro(numeri.utile - quotaCosti, conSegno: true),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: coloreImporto(numeri.utile - quotaCosti),
-                  ),
-                ),
               ],
             ),
           ),

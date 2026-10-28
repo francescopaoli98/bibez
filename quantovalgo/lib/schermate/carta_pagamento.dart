@@ -8,23 +8,21 @@ import '../modelli/tipi.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../widget/carta_vetro.dart';
+import '../widget/foglio_laguna.dart';
 import '../widget/pillola_pagamento.dart';
 import '../widget/pulsante_lucido.dart';
 import '../widget/pulsante_scelta.dart';
 import '../widget/stile_lucido.dart';
 import 'pagamenti.dart';
 
-/// Scheda "Pagamento" di un progetto: stato, importo, scadenza e giorni
-/// impiegati dal cliente a pagare.
+/// Scheda "Pagamento" di un progetto: stato, importo e un'azione sola
+/// ("Segna incassato"). La scadenza si cambia toccando la sua riga.
 class CartaPagamento extends StatelessWidget {
   const CartaPagamento({super.key, required this.lavoro});
 
   final Lavoro lavoro;
 
-  /// Giorni scelti con i pulsanti rapidi della scadenza.
-  static const _scorciatoie = [7, 15, 30];
-
-  Future<DateTime?> _scegliData(
+  static Future<DateTime?> _scegliData(
     BuildContext context,
     DateTime iniziale,
     String aiuto,
@@ -46,6 +44,9 @@ class CartaPagamento extends StatelessWidget {
     final incassato = lavoro.statoPagamento == StatoPagamento.incassato;
     final scadenza = lavoro.scadenza;
     final giorni = giorniPerPagare(lavoro);
+    final grigio = tema.bodyMedium?.copyWith(
+      color: ColoriLaguna.testoSecondario,
+    );
 
     return CartaVetro(
       padding: const EdgeInsets.all(14),
@@ -72,80 +73,70 @@ class CartaPagamento extends StatelessWidget {
             Text(
               'Incassato il ${dataLunga(lavoro.dataIncasso!)}'
               '${giorni == null ? '' : ' · pagato dopo $giorni ${giorni == 1 ? 'giorno' : 'giorni'}'}',
-              style: tema.bodyMedium?.copyWith(
-                color: ColoriLaguna.testoSecondario,
-              ),
+              style: grigio,
             ),
           const SizedBox(height: 12),
           if (incassato)
-            PulsanteLucido(
-              etichetta: 'Riporta a da incassare',
-              icona: Icons.undo_rounded,
-              onPressed: () => dati.riapriPagamento(lavoro),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => dati.riapriPagamento(lavoro),
+                icon: const Icon(Icons.undo_rounded),
+                label: const Text('Riporta a da incassare'),
+              ),
             )
-          else
+          else ...[
             PulsanteLucido(
               etichetta: 'Segna incassato',
               icona: Icons.check_rounded,
               stile: StileLucido.verde,
               onPressed: () => segnaIncassatoConAnnulla(context, lavoro),
             ),
-          if (!incassato) ...[
-            const SizedBox(height: 14),
-            Text(
-              scadenza == null
-                  ? 'Nessuna scadenza'
-                  : 'Scadenza: ${dataLunga(scadenza)}',
-              style: tema.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final n in _scorciatoie)
-                  PulsanteScelta(
-                    key: Key('scadenza-$n'),
-                    etichetta: '$n giorni',
-                    // Scelto se la scadenza è esattamente tra n giorni da oggi
-                    selezionato:
-                        scadenza != null && scadenza == scadenzaDopo(adesso, n),
-                    onTap: () =>
-                        dati.impostaScadenza(lavoro, scadenzaDopo(adesso, n)),
-                  ),
-                PulsanteScelta(
-                  key: const Key('scadenza-data'),
-                  etichetta: 'Scegli data',
-                  selezionato: false,
-                  onTap: () async {
-                    final data = await _scegliData(
-                      context,
-                      scadenza ?? scadenzaDopo(adesso, 30),
-                      'Scadenza del pagamento',
-                    );
-                    if (data != null) dati.impostaScadenza(lavoro, data);
-                  },
+            const SizedBox(height: 4),
+            // Una riga sola: toccandola si sceglie la scadenza
+            InkWell(
+              key: const Key('scadenza-riga'),
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => mostraFoglio<void>(
+                context,
+                titolo: 'Scadenza del pagamento',
+                costruttore: (_) => _ScelteScadenza(lavoroId: lavoro.id),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.event_rounded,
+                      color: ColoriLaguna.testoSecondario,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        scadenza == null
+                            ? 'Nessuna scadenza'
+                            : 'Scadenza: ${dataLunga(scadenza)}',
+                        style: tema.titleMedium,
+                      ),
+                    ),
+                    Text(
+                      'Cambia',
+                      style: tema.labelLarge?.copyWith(
+                        color: const Color(0xFF2A6A92),
+                      ),
+                    ),
+                  ],
                 ),
-                if (scadenza != null)
-                  PulsanteScelta(
-                    key: const Key('scadenza-nessuna'),
-                    etichetta: 'Nessuna',
-                    selezionato: false,
-                    onTap: () => dati.impostaScadenza(lavoro, null),
-                  ),
-              ],
+              ),
             ),
           ],
-          const SizedBox(height: 14),
           // Da quando si contano i giorni impiegati a pagare
           Row(
             children: [
               Expanded(
                 child: Text(
                   'Richiesto il ${dataLunga(inizioPagamento(lavoro))}',
-                  style: tema.bodyMedium?.copyWith(
-                    color: ColoriLaguna.testoSecondario,
-                  ),
+                  style: grigio,
                 ),
               ),
               TextButton(
@@ -164,6 +155,66 @@ class CartaPagamento extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Dentro il foglio: scorciatoie per la scadenza, data a scelta o nessuna.
+class _ScelteScadenza extends StatelessWidget {
+  const _ScelteScadenza({required this.lavoroId});
+
+  final String lavoroId;
+
+  /// Giorni scelti con i pulsanti rapidi della scadenza.
+  static const _scorciatoie = [7, 15, 30];
+
+  @override
+  Widget build(BuildContext context) {
+    final dati = DatiScope.leggi(context);
+    final adesso = dati.adesso();
+    final lavoro = dati.lavoro(lavoroId);
+    if (lavoro == null) return const SizedBox.shrink();
+    final scadenza = lavoro.scadenza;
+
+    // Scelta fatta: si salva e il foglio si chiude
+    void scegli(DateTime? data) {
+      dati.impostaScadenza(lavoro, data);
+      Navigator.of(context).pop();
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final n in _scorciatoie)
+          PulsanteScelta(
+            key: Key('scadenza-$n'),
+            etichetta: 'Tra $n giorni',
+            selezionato:
+                scadenza != null && scadenza == scadenzaDopo(adesso, n),
+            onTap: () => scegli(scadenzaDopo(adesso, n)),
+          ),
+        PulsanteScelta(
+          key: const Key('scadenza-data'),
+          etichetta: 'Scegli data',
+          selezionato: false,
+          onTap: () async {
+            final data = await CartaPagamento._scegliData(
+              context,
+              scadenza ?? scadenzaDopo(adesso, 30),
+              'Scadenza del pagamento',
+            );
+            if (data != null && context.mounted) scegli(data);
+          },
+        ),
+        if (scadenza != null)
+          PulsanteScelta(
+            key: const Key('scadenza-nessuna'),
+            etichetta: 'Nessuna scadenza',
+            selezionato: false,
+            onTap: () => scegli(null),
+          ),
+      ],
     );
   }
 }

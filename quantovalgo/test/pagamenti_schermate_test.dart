@@ -103,10 +103,13 @@ void main() {
       await tocca(tester, find.text('Spot'));
       expect(find.text('Nessuna scadenza'), findsOneWidget);
 
+      // La scadenza si sceglie da un foglio che si apre toccando la riga
+      await tocca(tester, find.byKey(const Key('scadenza-riga')));
       await tocca(tester, find.byKey(const Key('scadenza-7')));
       expect(nelDatabase(archivio, 'Spot').scadenza, DateTime(2026, 11, 4));
       expect(find.text('Scadenza: 4 novembre 2026'), findsOneWidget);
 
+      await tocca(tester, find.byKey(const Key('scadenza-riga')));
       await tocca(tester, find.byKey(const Key('scadenza-nessuna')));
       expect(nelDatabase(archivio, 'Spot').scadenza, isNull);
 

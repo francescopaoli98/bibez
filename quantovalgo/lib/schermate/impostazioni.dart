@@ -8,7 +8,6 @@ import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../widget/carta_vetro.dart';
 import '../widget/pagina_secondaria.dart';
-import '../widget/pulsante_lucido.dart';
 import 'foglio_numero.dart';
 
 /// Impostazioni: per ora account Google, stato di sincronizzazione e uscita.
@@ -58,11 +57,18 @@ class ImpostazioniPagina extends StatelessWidget {
                   stato: servizi.archivio.statoSincronizzazione(utente.uid),
                 ),
               ],
-              const SizedBox(height: 16),
-              PulsanteLucido(
-                etichetta: 'Esci',
-                icona: Icons.logout_rounded,
+              const SizedBox(height: 8),
+              TextButton.icon(
                 onPressed: () => _esci(context),
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Esci'),
+                style: TextButton.styleFrom(
+                  foregroundColor: ColoriLaguna.negativo,
+                  textStyle: tema.labelLarge?.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ],
           ),
@@ -189,24 +195,53 @@ class _RigaValore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context).textTheme;
-    return CartaVetro(
+    return InkWell(
       key: chiave,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       onTap: onTap,
-      child: Row(
-        children: [
-          Expanded(child: Text(nome, style: tema.titleMedium)),
-          Text(
-            valore,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(child: Text(nome, style: tema.titleMedium)),
+            Text(
+              valore,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(width: 6),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: ColoriLaguna.testoSecondario,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Più righe in una sola scheda, separate da una linea sottile.
+class _Gruppo extends StatelessWidget {
+  const _Gruppo({required this.righe});
+
+  final List<Widget> righe;
+
+  @override
+  Widget build(BuildContext context) {
+    return CartaVetro(
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Material(
+          type: MaterialType.transparency,
+          child: Column(
+            children: [
+              for (var i = 0; i < righe.length; i++) ...[
+                if (i > 0) const Divider(height: 1, indent: 14, endIndent: 14),
+                righe[i],
+              ],
+            ],
           ),
-          const SizedBox(width: 8),
-          const Icon(
-            Icons.edit_rounded,
-            size: 20,
-            color: ColoriLaguna.testoSecondario,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -272,32 +307,37 @@ class _SezioneTasseObiettivo extends StatelessWidget {
           'Tasse e obiettivo',
           'Servono per il netto e per la tariffa minima.',
         ),
-        _RigaValore(
-          chiave: const Key('riga-tasse'),
-          nome: 'Tasse',
-          valore: percentuale(i.tasse),
-          onTap: () async {
-            final nuove = await chiediNumero(
-              context,
-              titolo: 'Tasse',
-              etichetta: 'Percentuale di tasse (%)',
-              iniziale: i.tasse,
-              massimo: 99,
-              aiuto: 'Si toglie dal saldo del mese per avere il netto.',
-            );
-            if (nuove != null) {
-              dati.salvaImpostazioni(dati.impostazioni.copyWith(tasse: nuove));
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        _RigaValore(
-          chiave: const Key('riga-obiettivo'),
-          nome: 'Obiettivo mensile netto',
-          valore: i.obiettivoMensile > 0
-              ? euro(i.obiettivoMensile)
-              : 'Non scelto',
-          onTap: () => modificaObiettivo(context),
+        _Gruppo(
+          righe: [
+            _RigaValore(
+              chiave: const Key('riga-tasse'),
+              nome: 'Tasse',
+              valore: percentuale(i.tasse),
+              onTap: () async {
+                final nuove = await chiediNumero(
+                  context,
+                  titolo: 'Tasse',
+                  etichetta: 'Percentuale di tasse (%)',
+                  iniziale: i.tasse,
+                  massimo: 99,
+                  aiuto: 'Si toglie dal saldo del mese per avere il netto.',
+                );
+                if (nuove != null) {
+                  dati.salvaImpostazioni(
+                    dati.impostazioni.copyWith(tasse: nuove),
+                  );
+                }
+              },
+            ),
+            _RigaValore(
+              chiave: const Key('riga-obiettivo'),
+              nome: 'Obiettivo mensile netto',
+              valore: i.obiettivoMensile > 0
+                  ? euro(i.obiettivoMensile)
+                  : 'Non scelto',
+              onTap: () => modificaObiettivo(context),
+            ),
+          ],
         ),
       ],
     );
@@ -318,32 +358,37 @@ class _SezioneSconti extends StatelessWidget {
           'Sconti per relazione',
           'Si applicano ai nuovi prezzi; i progetti già fatti restano come sono.',
         ),
-        for (final r in Relazione.values) ...[
-          _RigaValore(
-            chiave: Key('riga-sconto-${r.name}'),
-            nome: r.etichetta,
-            valore: percentuale(dati.parametri.sconto(r)),
-            onTap: () async {
-              final nuovo = await chiediNumero(
-                context,
-                titolo: 'Sconto · ${r.etichetta}',
-                etichetta: 'Sconto (%)',
-                iniziale: dati.parametri.sconto(r).toDouble(),
-                massimo: 100,
-                intero: true,
-              );
-              if (nuovo != null) {
-                final i = dati.impostazioni;
-                dati.salvaImpostazioni(
-                  i.copyWith(
-                    scontoRelazione: {...i.scontoRelazione, r: nuovo.round()},
-                  ),
-                );
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
+        _Gruppo(
+          righe: [
+            for (final r in Relazione.values)
+              _RigaValore(
+                chiave: Key('riga-sconto-${r.name}'),
+                nome: r.etichetta,
+                valore: percentuale(dati.parametri.sconto(r)),
+                onTap: () async {
+                  final nuovo = await chiediNumero(
+                    context,
+                    titolo: 'Sconto · ${r.etichetta}',
+                    etichetta: 'Sconto (%)',
+                    iniziale: dati.parametri.sconto(r).toDouble(),
+                    massimo: 100,
+                    intero: true,
+                  );
+                  if (nuovo != null) {
+                    final i = dati.impostazioni;
+                    dati.salvaImpostazioni(
+                      i.copyWith(
+                        scontoRelazione: {
+                          ...i.scontoRelazione,
+                          r: nuovo.round(),
+                        },
+                      ),
+                    );
+                  }
+                },
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -363,40 +408,42 @@ class _SezioneLivelli extends StatelessWidget {
           'Prezzo per livello',
           'Quanto alzare o abbassare la forbice di mercato in base al tuo livello.',
         ),
-        for (var livello = 1; livello <= 5; livello++) ...[
-          _RigaValore(
-            chiave: Key('riga-livello-$livello'),
-            nome: 'Livello $livello',
-            valore: percentuale(
-              dati.parametri.correzione(livello),
-              conSegno: true,
-            ),
-            onTap: () async {
-              final nuovo = await chiediNumero(
-                context,
-                titolo: 'Livello $livello',
-                etichetta: 'Correzione del prezzo (%)',
-                iniziale: dati.parametri.correzione(livello).toDouble(),
-                minimo: -90,
-                massimo: 200,
-                intero: true,
-                aiuto: 'Con segno meno il prezzo scende, con più sale.',
-              );
-              if (nuovo != null) {
-                final i = dati.impostazioni;
-                dati.salvaImpostazioni(
-                  i.copyWith(
-                    correzioneLivello: {
-                      ...i.correzioneLivello,
-                      livello: nuovo.round(),
-                    },
-                  ),
-                );
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
+        _Gruppo(
+          righe: [
+            for (var livello = 1; livello <= 5; livello++)
+              _RigaValore(
+                chiave: Key('riga-livello-$livello'),
+                nome: 'Livello $livello',
+                valore: percentuale(
+                  dati.parametri.correzione(livello),
+                  conSegno: true,
+                ),
+                onTap: () async {
+                  final nuovo = await chiediNumero(
+                    context,
+                    titolo: 'Livello $livello',
+                    etichetta: 'Correzione del prezzo (%)',
+                    iniziale: dati.parametri.correzione(livello).toDouble(),
+                    minimo: -90,
+                    massimo: 200,
+                    intero: true,
+                    aiuto: 'Con segno meno il prezzo scende, con più sale.',
+                  );
+                  if (nuovo != null) {
+                    final i = dati.impostazioni;
+                    dati.salvaImpostazioni(
+                      i.copyWith(
+                        correzioneLivello: {
+                          ...i.correzioneLivello,
+                          livello: nuovo.round(),
+                        },
+                      ),
+                    );
+                  }
+                },
+              ),
+          ],
+        ),
       ],
     );
   }

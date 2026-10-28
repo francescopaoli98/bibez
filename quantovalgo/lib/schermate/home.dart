@@ -9,12 +9,12 @@ import '../widget/dato_hero.dart';
 import '../widget/hero_laguna.dart';
 import '../widget/logo_sole.dart';
 import '../widget/pillola_lucida.dart';
-import '../widget/pulsante_lucido.dart';
 import '../widget/riga_progetto.dart';
 import '../widget/riquadro_da_incassare.dart';
 import '../widget/selettore_mese.dart';
 import '../widget/sfera_lucida.dart';
 import '../widget/stile_lucido.dart';
+import '../widget/tessera_rapida.dart';
 import 'clienti.dart';
 import 'impostazioni.dart';
 import 'obiettivo.dart';
@@ -62,29 +62,25 @@ class _HomePaginaState extends State<HomePagina> {
           onCambia: (m) => setState(() => _mese = m == corrente ? null : m),
         ),
         const SizedBox(height: 12),
-        _HeroSaldo(saldo: saldo.saldo, dati: saldo),
-        if (saldo.regalato > 0) ...[
-          const SizedBox(height: 12),
-          _RigaRegali(regalato: saldo.regalato, mese: mese),
-        ],
+        _HeroSaldo(saldo: saldo.saldo, dati: saldo, mese: mese),
         const SizedBox(height: 12),
         RiquadroDaIncassare(dati: dati),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
-              child: PulsanteLucido(
-                etichetta: 'Clienti',
+              child: TesseraRapida(
                 icona: Icons.people_alt_rounded,
-                onPressed: () => _apri(const ClientiPagina()),
+                etichetta: 'Clienti',
+                onTap: () => _apri(const ClientiPagina()),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: PulsanteLucido(
-                etichetta: 'Obiettivo',
+              child: TesseraRapida(
                 icona: Icons.flag_rounded,
-                onPressed: () => _apri(const ObiettivoPagina()),
+                etichetta: 'Obiettivo',
+                onTap: () => _apri(const ObiettivoPagina()),
               ),
             ),
           ],
@@ -104,10 +100,15 @@ class _HomePaginaState extends State<HomePagina> {
 /// Riquadro grande: saldo del mese, se è in positivo o in negativo, e sotto
 /// incassato, costi e guadagno all'ora.
 class _HeroSaldo extends StatelessWidget {
-  const _HeroSaldo({required this.saldo, required this.dati});
+  const _HeroSaldo({
+    required this.saldo,
+    required this.dati,
+    required this.mese,
+  });
 
   final double saldo;
   final SaldoMese dati;
+  final DateTime mese;
 
   @override
   Widget build(BuildContext context) {
@@ -176,42 +177,29 @@ class _HeroSaldo extends StatelessWidget {
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// "Sconti regalati in ottobre: 300 €" (progetti creati in quel mese).
-class _RigaRegali extends StatelessWidget {
-  const _RigaRegali({required this.regalato, required this.mese});
-
-  final double regalato;
-  final DateTime mese;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFF0C36A)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.card_giftcard_rounded, color: Color(0xFF6B2A10)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Sconti regalati in ${nomeMese(mese)}: ${euro(regalato)}',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF6B2A10),
-              ),
+          if (dati.regalato > 0) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(
+                  Icons.card_giftcard_rounded,
+                  size: 20,
+                  color: ColoriLaguna.cifraHero,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Sconti regalati in ${nomeMese(mese)}: ${euro(dati.regalato)}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: ColoriLaguna.testoChiaro,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
+          ],
         ],
       ),
     );

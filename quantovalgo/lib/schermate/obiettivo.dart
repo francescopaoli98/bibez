@@ -99,14 +99,16 @@ class _HeroObiettivo extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            avanzamento == null ? '—' : '${(avanzamento * 100).round()}%',
-            style: const TextStyle(
-              fontSize: 48,
+            avanzamento == null
+                ? 'Nessun obiettivo'
+                : '${(avanzamento * 100).round()}%',
+            style: TextStyle(
+              fontSize: avanzamento == null ? 30 : 48,
               height: 1,
               fontWeight: FontWeight.w800,
               letterSpacing: -1,
               color: ColoriLaguna.cifraHero,
-              shadows: [
+              shadows: const [
                 Shadow(
                   color: Color(0x73002838),
                   blurRadius: 4,
