@@ -4,6 +4,7 @@ import '../modelli/costo.dart';
 import '../modelli/giornata.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
+import '../modelli/sessione_ore.dart';
 import '../modelli/sottoprogetto.dart';
 import 'utente.dart';
 
@@ -39,6 +40,7 @@ abstract interface class Archivio {
   Stream<List<Costo>> costi();
   Stream<List<Categoria>> categorie();
   Stream<List<Giornata>> giornate();
+  Stream<List<SessioneOre>> sessioni();
 
   // --- Scrittura. Con id vuoto si crea; il metodo restituisce l'id. ---
   String salvaLavoro(Lavoro lavoro);
@@ -48,10 +50,13 @@ abstract interface class Archivio {
     String id, {
     required List<String> idSottoprogetti,
     List<String> idGiornate = const [],
+    List<String> idSessioni = const [],
   });
 
   String salvaSottoprogetto(Sottoprogetto sottoprogetto);
-  void eliminaSottoprogetto(String id);
+
+  /// Elimina il sottoprogetto e le sue sessioni di ore.
+  void eliminaSottoprogetto(String id, {List<String> idSessioni = const []});
 
   String salvaCliente(Cliente cliente);
   void eliminaCliente(String id);
@@ -63,6 +68,9 @@ abstract interface class Archivio {
 
   String salvaCategoria(Categoria categoria);
   void eliminaCategoria(String id);
+
+  String salvaSessione(SessioneOre sessione);
+  void eliminaSessione(String id);
 
   String salvaGiornata(Giornata giornata);
 

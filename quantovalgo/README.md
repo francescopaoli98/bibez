@@ -30,7 +30,8 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 3. Lavori, sottoprogetti e clienti, con la forbice di prezzo a mano
 - [x] 4. Costi: abbonamenti, una tantum, fissi, categorie colorate
 - [x] 4b. Lavori "A giornata" (es. negozio con mamma: 30 € netti al giorno)
-- [ ] 5–12. Vedi il brief
+- [x] 5. Ore: cronometro e inserimento a mano
+- [ ] 6–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
 
@@ -106,3 +107,18 @@ Il font Nunito è incluso in `assets/fonts` (licenza OFL).
   di giornate. Nel calendario è segnata con ½. Nello schema si sceglie "Giorni interi" o
   "Mezze giornate" per tutto il gruppo, poi ogni giorno si cambia con tocchi
   successivi: intero → mezza → tolto.
+
+## Ore (passo 5)
+
+- **Cronometro** su ogni sottoprogetto: tasto avvio/stop nella riga del progetto, oppure
+  dalla pagina del sottoprogetto (tocco sulla riga). Uno solo acceso alla volta: se ne avvii
+  un altro, il primo si ferma e si salva.
+- Il cronometro è un **orario di inizio salvato nel cloud** (sessione senza `fine`),
+  non un contatore che gira nell'app: continua anche se chiudi l'app o spegni il telefono,
+  e riaprendo la banda in basso mostra subito il tempo trascorso. Sotto il minuto non si salva.
+- **Ore a mano**: giorno + ore + minuti (anche "1,5" ore); le sessioni si correggono e si tolgono.
+- **Ore di un sottoprogetto** = ore iniziali (scritte a mano nel sottoprogetto) + ore registrate.
+  Il cronometro acceso conta solo da quando lo fermi.
+- **Costi condivisi**: la divisione tra i progetti segue le ore registrate **nel mese**;
+  se nel mese non ce ne sono, le ore totali del progetto; se non ce ne sono, parti uguali.
+- Dati in `utenti/{uid}/sessioni`; calcoli in `logica/ore.dart`.

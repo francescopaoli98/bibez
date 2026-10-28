@@ -149,7 +149,7 @@ class _FormSottoprogettoState extends State<_FormSottoprogetto> {
         CampoTesto(
           key: const Key('campo-ore'),
           controller: _ore,
-          etichetta: 'Ore lavorate',
+          etichetta: 'Ore già lavorate (iniziali)',
           suggerimento: '0',
           numerico: true,
           errore: _erroreOre,

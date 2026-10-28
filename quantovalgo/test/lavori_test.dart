@@ -157,9 +157,14 @@ void main() {
     expect(app.archivio.tabellaSotto.elenco, hasLength(3));
 
     // Modifica: cambio i costi della revisione e il saldo si aggiorna
-    await tocca(tester, find.text('Revisione'));
+    await tocca(
+      tester,
+      find.text('Revisione'),
+    ); // apre le ore del sottoprogetto
+    await tocca(tester, find.bySemanticsLabel('Modifica sottoprogetto'));
     await scrivi(tester, 'campo-costi', '200');
     await tocca(tester, find.text('Salva'));
+    await tocca(tester, find.bySemanticsLabel('Indietro'));
     expect(find.text('−80 €'), findsOneWidget); // revisione: 120 − 200
     expect(find.text('+360 €'), findsOneWidget); // 340 − 80 + 100
   });
@@ -176,6 +181,7 @@ void main() {
     expect(app.archivio.tabellaSotto.elenco, hasLength(1));
 
     await tocca(tester, find.text('Lavoro intero'));
+    await tocca(tester, find.bySemanticsLabel('Modifica sottoprogetto'));
     await tocca(tester, find.text('Elimina'));
     await tocca(tester, find.widgetWithText(TextButton, 'Elimina')); // conferma
     expect(app.archivio.tabellaSotto.elenco, isEmpty);

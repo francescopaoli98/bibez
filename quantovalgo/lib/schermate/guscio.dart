@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widget/banda_cronometro.dart';
 import '../widget/barra_navigazione.dart';
 import '../widget/sfondo_laguna.dart';
 import 'costi.dart';
@@ -72,10 +73,17 @@ class _GuscioState extends State<Guscio> with SingleTickerProviderStateMixin {
             ),
           ),
         ),
-        bottomNavigationBar: BarraNavigazione(
-          indice: _indice,
-          onSelezionato: _selezionaScheda,
-          onNuovoLavoro: _apriNuovoLavoro,
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Visibile solo se c'è un cronometro acceso
+            const BandaCronometro(),
+            BarraNavigazione(
+              indice: _indice,
+              onSelezionato: _selezionaScheda,
+              onNuovoLavoro: _apriNuovoLavoro,
+            ),
+          ],
         ),
       ),
     );

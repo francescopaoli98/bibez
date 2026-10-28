@@ -22,9 +22,11 @@ import '../widget/sfera_lucida.dart';
 import '../widget/stato_vuoto.dart';
 import '../widget/stile_lucido.dart';
 import 'aggiungi_giornate.dart';
+import 'cronometro_azioni.dart';
 import 'foglio_giornata.dart';
 import 'foglio_sottoprogetto.dart';
 import 'nuovo_lavoro.dart';
+import 'ore_sottoprogetto.dart';
 
 /// Un progetto: saldo, sconto regalato e sottoprogetti con ore e utile.
 class ProgettoPagina extends StatelessWidget {
@@ -381,11 +383,20 @@ class _RigaSottoprogetto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = sottoprogetto;
+    final dati = DatiScope.di(context);
     final tema = Theme.of(context).textTheme;
+    final acceso = dati.sessioneInCorso?.sottoprogettoId == s.id;
+    // Ore iniziali scritte a mano + ore registrate (cronometro e a mano)
+    final minuti = (dati.oreDelSottoprogetto(s) * 60).round();
+
     return CartaVetro(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      onTap: () =>
-          modificaSottoprogetto(context, lavoroId: lavoroId, esistente: s),
+      padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+      // Il tocco apre le ore del sottoprogetto (cronometro, sessioni, modifica)
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => OreSottoprogettoPagina(sottoprogettoId: s.id),
+        ),
+      ),
       child: Row(
         children: [
           Expanded(
@@ -394,7 +405,7 @@ class _RigaSottoprogetto extends StatelessWidget {
               children: [
                 Text(s.nome, style: tema.titleMedium),
                 Text(
-                  '${ore(s.ore)} · incasso ${euro(s.ricavo)} · costi ${euro(s.costiDiretti)}',
+                  '${durata(minuti)} · incasso ${euro(s.ricavo)} · costi ${euro(s.costiDiretti)}',
                   style: tema.labelMedium?.copyWith(
                     color: ColoriLaguna.testoSecondario,
                     fontWeight: FontWeight.w600,
@@ -411,6 +422,18 @@ class _RigaSottoprogetto extends StatelessWidget {
               fontWeight: FontWeight.w800,
               color: coloreImporto(s.utile),
             ),
+          ),
+          const SizedBox(width: 8),
+          // Avvia o ferma il cronometro senza aprire la pagina
+          SferaLucida(
+            icona: acceso ? Icons.stop_rounded : Icons.play_arrow_rounded,
+            etichetta: acceso
+                ? 'Ferma cronometro di ${s.nome}'
+                : 'Avvia cronometro su ${s.nome}',
+            stile: acceso ? StileLucido.rosso : StileLucido.verde,
+            onPressed: () => acceso
+                ? fermaCronometro(context, dati)
+                : avviaCronometro(context, dati, s),
           ),
         ],
       ),

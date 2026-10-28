@@ -8,6 +8,7 @@ import 'package:quantovalgo/modelli/costo.dart';
 import 'package:quantovalgo/modelli/giornata.dart';
 import 'package:quantovalgo/modelli/lavoro.dart';
 import 'package:quantovalgo/modelli/prezzo_mercato.dart';
+import 'package:quantovalgo/modelli/sessione_ore.dart';
 import 'package:quantovalgo/modelli/sottoprogetto.dart';
 import 'package:quantovalgo/servizi/accesso.dart';
 import 'package:quantovalgo/servizi/archivio.dart';
@@ -93,6 +94,7 @@ class FintoArchivio implements Archivio {
   final tabellaCosti = _Tabella<Costo>();
   final tabellaCategorie = _Tabella<Categoria>();
   final tabellaGiornate = _Tabella<Giornata>();
+  final tabellaSessioni = _Tabella<SessioneOre>();
   int _contatore = 0;
 
   String _nuovoId(String id) => id.isEmpty ? 'id${++_contatore}' : id;
@@ -120,6 +122,8 @@ class FintoArchivio implements Archivio {
   Stream<List<Categoria>> categorie() => tabellaCategorie.ascolta();
   @override
   Stream<List<Giornata>> giornate() => tabellaGiornate.ascolta();
+  @override
+  Stream<List<SessioneOre>> sessioni() => tabellaSessioni.ascolta();
 
   // --- Scrittura ---
   @override
@@ -134,10 +138,12 @@ class FintoArchivio implements Archivio {
     String id, {
     required List<String> idSottoprogetti,
     List<String> idGiornate = const [],
+    List<String> idSessioni = const [],
   }) {
     tabellaLavori.togli(id);
     idSottoprogetti.forEach(tabellaSotto.togli);
     idGiornate.forEach(tabellaGiornate.togli);
+    idSessioni.forEach(tabellaSessioni.togli);
   }
 
   @override
@@ -148,7 +154,10 @@ class FintoArchivio implements Archivio {
   }
 
   @override
-  void eliminaSottoprogetto(String id) => tabellaSotto.togli(id);
+  void eliminaSottoprogetto(String id, {List<String> idSessioni = const []}) {
+    tabellaSotto.togli(id);
+    idSessioni.forEach(tabellaSessioni.togli);
+  }
 
   @override
   String salvaCliente(Cliente c) {
@@ -183,6 +192,16 @@ class FintoArchivio implements Archivio {
 
   @override
   void eliminaCategoria(String id) => tabellaCategorie.togli(id);
+
+  @override
+  String salvaSessione(SessioneOre s) {
+    final id = _nuovoId(s.id);
+    tabellaSessioni.metti(id, SessioneOre.fromMap(id, s.toMap()));
+    return id;
+  }
+
+  @override
+  void eliminaSessione(String id) => tabellaSessioni.togli(id);
 
   @override
   String salvaGiornata(Giornata g) {

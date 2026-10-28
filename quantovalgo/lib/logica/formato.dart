@@ -67,3 +67,24 @@ String testoGiornate(double quante) {
   final testo = numeroPerCampo(quante);
   return quante == 1 ? '1 giornata' : '$testo giornate';
 }
+
+/// Durata in minuti scritta bene: `45 min`, `2 h`, `1 h 30 min`.
+String durata(int minuti) {
+  final m = minuti < 0 ? 0 : minuti;
+  final ore = m ~/ 60;
+  final resto = m % 60;
+  if (ore == 0) return '$resto min';
+  if (resto == 0) return '$ore h';
+  return '$ore h $resto min';
+}
+
+/// Tempo del cronometro: `00:12:34`.
+String cronometro(Duration tempo) {
+  final secondi = tempo.isNegative ? 0 : tempo.inSeconds;
+  String due(int n) => n.toString().padLeft(2, '0');
+  return '${due(secondi ~/ 3600)}:${due((secondi % 3600) ~/ 60)}:${due(secondi % 60)}';
+}
+
+/// Ora del giorno: `14:05`.
+String oraDelGiorno(DateTime data) =>
+    '${data.hour.toString().padLeft(2, '0')}:${data.minute.toString().padLeft(2, '0')}';

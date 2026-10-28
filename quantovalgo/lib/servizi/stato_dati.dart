@@ -5,12 +5,14 @@ import 'package:flutter/widgets.dart';
 import '../logica/calcoli.dart';
 import '../logica/costi.dart';
 import '../logica/giornate.dart';
+import '../logica/ore.dart';
 import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
 import '../modelli/giornata.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
+import '../modelli/sessione_ore.dart';
 import '../modelli/sottoprogetto.dart';
 import '../modelli/tipi.dart';
 import 'accesso.dart';
@@ -36,7 +38,7 @@ class StatoDati extends ChangeNotifier {
   late final StreamSubscription<Utente?> _ascoltoUtente;
   final List<StreamSubscription<Object?>> _ascolti = [];
   final Set<String> _arrivati = {};
-  static const _totaleFlussi = 7;
+  static const _totaleFlussi = 8;
 
   /// "Adesso" dell'app (sostituibile nei test).
   final DateTime Function() adesso;
@@ -48,6 +50,7 @@ class StatoDati extends ChangeNotifier {
   List<Costo> _costi = const [];
   List<Categoria> _categorie = const [];
   List<Giornata> _giornate = const [];
+  List<SessioneOre> _sessioni = const [];
 
   /// Valori di calcolo (sconti, fattori di competenza). Dal passo 8 si
   /// potranno cambiare da Impostazioni.
@@ -62,9 +65,11 @@ class StatoDati extends ChangeNotifier {
   /// Dal più recente al più vecchio.
   List<Lavoro> get lavori => _lavori;
   List<Cliente> get clienti => _clienti;
+  List<Sottoprogetto> get sottoprogetti => _sottoprogetti;
   List<Costo> get costi => _costi;
   List<Categoria> get categorie => _categorie;
   List<Giornata> get giornate => _giornate;
+  List<SessioneOre> get sessioni => _sessioni;
 
   // --- Ascolto ---
 
@@ -77,6 +82,7 @@ class StatoDati extends ChangeNotifier {
     _costi = const [];
     _categorie = const [];
     _giornate = const [];
+    _sessioni = const [];
     _arrivati.clear();
     problema = false;
 
@@ -106,6 +112,9 @@ class StatoDati extends ChangeNotifier {
       });
       _ascolta<Giornata>('giornate', _archivio.giornate(), (v) {
         _giornate = [...v]..sort((a, b) => a.data.compareTo(b.data));
+      });
+      _ascolta<SessioneOre>('sessioni', _archivio.sessioni(), (v) {
+        _sessioni = [...v]..sort((a, b) => b.inizio.compareTo(a.inizio));
       });
     }
     notifyListeners();
@@ -163,6 +172,9 @@ class StatoDati extends ChangeNotifier {
         .firstOrNull;
   }
 
+  Sottoprogetto? sottoprogetto(String id) =>
+      _sottoprogetti.where((s) => s.id == id).firstOrNull;
+
   List<Sottoprogetto> sottoprogettiDi(String lavoroId) =>
       _sottoprogetti.where((s) => s.lavoroId == lavoroId).toList();
 
@@ -176,7 +188,72 @@ class StatoDati extends ChangeNotifier {
         ore: 0,
       );
     }
-    return riepilogo(sottoprogettiDi(lavoroId));
+    // Ricavi e costi dai sottoprogetti; le ore sono quelle iniziali scritte a
+    // mano più quelle registrate (cronometro e inserimento a mano).
+    final dalleParti = riepilogo(sottoprogettiDi(lavoroId));
+    return RiepilogoLavoro(
+      ricavi: dalleParti.ricavi,
+      costi: dalleParti.costi,
+      ore:
+          dalleParti.ore +
+          oreDaMinuti(minutiConclusi(sessioniDelLavoro(lavoroId))),
+    );
+  }
+
+  // --- Ore ---
+
+  List<SessioneOre> sessioniDi(String sottoprogettoId) =>
+      _sessioni.where((s) => s.sottoprogettoId == sottoprogettoId).toList();
+
+  List<SessioneOre> sessioniDelLavoro(String lavoroId) =>
+      _sessioni.where((s) => s.lavoroId == lavoroId).toList();
+
+  /// Il cronometro acceso (uno solo alla volta), se c'è.
+  SessioneOre? get sessioneInCorso =>
+      _sessioni.where((s) => s.inCorso).firstOrNull;
+
+  /// Minuti registrati su un sottoprogetto (cronometro e inserimento a mano).
+  int minutiRegistrati(String sottoprogettoId) =>
+      minutiConclusi(sessioniDi(sottoprogettoId));
+
+  /// Ore di un sottoprogetto: quelle iniziali scritte a mano più le registrate.
+  double oreDelSottoprogetto(Sottoprogetto s) =>
+      s.ore + oreDaMinuti(minutiRegistrati(s.id));
+
+  /// Accende il cronometro su un sottoprogetto. Se ce n'era già uno acceso lo
+  /// ferma prima e lo restituisce, così la schermata può dirlo.
+  ({SessioneOre sessione, bool salvata})? avviaCronometro(Sottoprogetto s) {
+    final precedente = sessioneInCorso;
+    final fermata = precedente == null ? null : _concludi(precedente);
+    _archivio.salvaSessione(
+      SessioneOre(
+        id: '',
+        sottoprogettoId: s.id,
+        lavoroId: s.lavoroId,
+        inizio: adesso(),
+        creatoIl: adesso(),
+      ),
+    );
+    return fermata;
+  }
+
+  /// Ferma il cronometro acceso. Sotto il minuto non si salva (e `salvata`
+  /// è falso). Senza cronometro acceso restituisce null.
+  ({SessioneOre sessione, bool salvata})? fermaCronometro() {
+    final acceso = sessioneInCorso;
+    return acceso == null ? null : _concludi(acceso);
+  }
+
+  ({SessioneOre sessione, bool salvata}) _concludi(SessioneOre acceso) {
+    final fine = adesso();
+    final minuti = minutiTra(acceso.inizio, fine);
+    if (sessioneTroppoBreve(minuti)) {
+      _archivio.eliminaSessione(acceso.id);
+      return (sessione: acceso, salvata: false);
+    }
+    final conclusa = acceso.copyWith(fine: fine, minuti: minuti);
+    _archivio.salvaSessione(conclusa);
+    return (sessione: conclusa, salvata: true);
   }
 
   /// Tutte le giornate di un lavoro, dalla più vecchia.
@@ -219,13 +296,26 @@ class StatoDati extends ChangeNotifier {
     if (!costo.siDivideTraProgetti) return const [];
     final importo = quotaNelMese(costo, mese);
     if (importo <= 0) return const [];
+    // I lavori a giornata hanno un guadagno netto fisso: non prendono quote
+    final attivi = progettiAttivi(
+      _lavori.where((l) => l.tipo != TipoLavoro.aGiornata),
+      mese,
+    ).toList();
+
+    // Peso = ore registrate in quel mese. Se nel mese non ce ne sono, si
+    // guardano le ore totali del progetto (anche quelle iniziali); se non ce
+    // ne sono nemmeno quelle, si divide in parti uguali.
+    final oreDelMese = {
+      for (final l in attivi)
+        l.id: oreDaMinuti(minutiDelMese(sessioniDelLavoro(l.id), mese)),
+    };
+    final usaOreDelMese = oreDelMese.values.any((o) => o > 0);
     final quote = ripartisci(importo, [
-      // I lavori a giornata hanno un guadagno netto fisso: non prendono quote
-      for (final l in progettiAttivi(
-        _lavori.where((l) => l.tipo != TipoLavoro.aGiornata),
-        mese,
-      ))
-        PesoProgetto(l.id, riepilogoDi(l.id).ore),
+      for (final l in attivi)
+        PesoProgetto(
+          l.id,
+          usaOreDelMese ? oreDelMese[l.id]! : riepilogoDi(l.id).ore,
+        ),
     ]);
     // Dalla quota più grande alla più piccola (a parità, resta l'ordine dei progetti)
     return [...quote]..sort((a, b) => b.importo.compareTo(a.importo));
@@ -271,10 +361,14 @@ class StatoDati extends ChangeNotifier {
     id,
     idSottoprogetti: [for (final s in sottoprogettiDi(id)) s.id],
     idGiornate: [for (final g in giornateDi(id)) g.id],
+    idSessioni: [for (final s in sessioniDelLavoro(id)) s.id],
   );
 
   String salvaSottoprogetto(Sottoprogetto s) => _archivio.salvaSottoprogetto(s);
-  void eliminaSottoprogetto(String id) => _archivio.eliminaSottoprogetto(id);
+  void eliminaSottoprogetto(String id) => _archivio.eliminaSottoprogetto(
+    id,
+    idSessioni: [for (final s in sessioniDi(id)) s.id],
+  );
 
   String salvaCliente(Cliente c) => _archivio.salvaCliente(c);
   void eliminaCliente(String id) => _archivio.eliminaCliente(id);
@@ -286,6 +380,9 @@ class StatoDati extends ChangeNotifier {
 
   String salvaCategoria(Categoria c) => _archivio.salvaCategoria(c);
   void eliminaCategoria(String id) => _archivio.eliminaCategoria(id);
+
+  String salvaSessione(SessioneOre s) => _archivio.salvaSessione(s);
+  void eliminaSessione(String id) => _archivio.eliminaSessione(id);
 
   String salvaGiornata(Giornata g) => _archivio.salvaGiornata(g);
   void salvaGiornate(List<Giornata> giornate) =>

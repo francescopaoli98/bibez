@@ -9,6 +9,7 @@ import '../modelli/costo.dart';
 import '../modelli/giornata.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
+import '../modelli/sessione_ore.dart';
 import '../modelli/sottoprogetto.dart';
 import 'accesso.dart';
 import 'archivio.dart';
@@ -131,6 +132,10 @@ class ArchivioFirestore implements Archivio {
   @override
   Stream<List<Giornata>> giornate() => _ascolta('giornate', Giornata.fromMap);
 
+  @override
+  Stream<List<SessioneOre>> sessioni() =>
+      _ascolta('sessioni', SessioneOre.fromMap);
+
   // --- Scrittura (senza aspettare il cloud) ---
 
   String _salva(String raccolta, String id, Map<String, Object?> dati) {
@@ -162,6 +167,7 @@ class ArchivioFirestore implements Archivio {
     String id, {
     required List<String> idSottoprogetti,
     List<String> idGiornate = const [],
+    List<String> idSessioni = const [],
   }) {
     // Un solo "pacchetto": o spariscono tutti insieme o nessuno.
     final pacchetto = _db.batch();
@@ -171,6 +177,9 @@ class ArchivioFirestore implements Archivio {
     }
     for (final idGiornata in idGiornate) {
       pacchetto.delete(_raccolta('giornate').doc(idGiornata));
+    }
+    for (final idSessione in idSessioni) {
+      pacchetto.delete(_raccolta('sessioni').doc(idSessione));
     }
     unawaited(
       pacchetto.commit().catchError((Object e) {
@@ -184,7 +193,19 @@ class ArchivioFirestore implements Archivio {
       _salva('sottoprogetti', s.id, s.toMap());
 
   @override
-  void eliminaSottoprogetto(String id) => _elimina('sottoprogetti', id);
+  void eliminaSottoprogetto(String id, {List<String> idSessioni = const []}) {
+    // Il sottoprogetto e le sue sessioni spariscono insieme
+    final pacchetto = _db.batch();
+    pacchetto.delete(_raccolta('sottoprogetti').doc(id));
+    for (final idSessione in idSessioni) {
+      pacchetto.delete(_raccolta('sessioni').doc(idSessione));
+    }
+    unawaited(
+      pacchetto.commit().catchError((Object e) {
+        debugPrint('Eliminazione del sottoprogetto non riuscita: $e');
+      }),
+    );
+  }
 
   @override
   String salvaCliente(Cliente cliente) =>
@@ -209,6 +230,13 @@ class ArchivioFirestore implements Archivio {
 
   @override
   void eliminaCategoria(String id) => _elimina('categorie', id);
+
+  @override
+  String salvaSessione(SessioneOre sessione) =>
+      _salva('sessioni', sessione.id, sessione.toMap());
+
+  @override
+  void eliminaSessione(String id) => _elimina('sessioni', id);
 
   @override
   String salvaGiornata(Giornata giornata) =>
