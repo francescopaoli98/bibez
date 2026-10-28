@@ -124,16 +124,16 @@ double costoSostenutoFinoA(Costo costo, DateTime mese) {
   return somma;
 }
 
-/// Costi che si recuperano con lo stesso tipo di progetti.
-/// [tipo] vuoto = gli "altri costi", non legati a un tipo.
+/// Costi di una stessa categoria, che si recuperano con i progetti di quella
+/// categoria. [categoriaId] vuoto = gli "altri costi", senza categoria.
 class GruppoRecupero {
   const GruppoRecupero({
-    required this.tipo,
+    required this.categoriaId,
     required this.totale,
     required this.recuperato,
   });
 
-  final TipoLavoro? tipo;
+  final String? categoriaId;
 
   /// Quanto è costato in tutto.
   final double totale;
@@ -147,41 +147,51 @@ class GruppoRecupero {
   double get avanzamento => totale <= 0 ? 0 : recuperato / totale;
 }
 
-/// "Da recuperare", diviso per tipo di lavoro.
+/// "Da recuperare", una riga per categoria.
 ///
-/// - I costi legati a un tipo (tramite la categoria) contano **tutti** i mesi
-///   pagati e si coprono **solo** con l'utile dei progetti incassati di quel
-///   tipo. I mesi senza progetti di quel tipo non si perdono: restano lì.
-/// - Gli "altri costi" (senza tipo) contano come prima solo gli acquisti
-///   una tantum; si coprono con quello che avanza: l'utile in più dei tipi che
-///   hanno già coperto i propri costi, più l'utile dei tipi senza costi.
+/// - I costi di una categoria contano **tutti** i mesi pagati e si coprono
+///   **solo** con l'utile dei progetti incassati della stessa categoria. I mesi
+///   senza progetti di quella categoria non si perdono: restano da recuperare.
+/// - Gli "altri costi" (senza categoria) contano solo gli acquisti una tantum;
+///   si coprono con quello che avanza: l'utile in più delle categorie che hanno
+///   già coperto i propri costi, più l'utile dei progetti senza costi di
+///   categoria (anche quelli senza categoria). L'utile non si usa due volte.
 ///
-/// [utileIncassatoPerTipo]: utile (ricavi − costi diretti) dei progetti
-/// incassati, per tipo di lavoro.
+/// - [categoriaDelCosto]: id della categoria del costo, o null se non ne ha.
+/// - [utileIncassato]: utile (ricavi − costi diretti) dei progetti incassati,
+///   per categoria; la chiave null raccoglie i progetti senza categoria.
+/// - [ordine]: ordine delle righe (di solito la creazione delle categorie).
 List<GruppoRecupero> gruppiDaRecuperare({
   required Iterable<Costo> costi,
-  required TipoLavoro? Function(Costo) tipoDelCosto,
-  required Map<TipoLavoro, double> utileIncassatoPerTipo,
+  required String? Function(Costo) categoriaDelCosto,
+  required Map<String?, double> utileIncassato,
+  required List<String> ordine,
   required DateTime mese,
 }) {
-  final perTipo = <TipoLavoro, double>{};
+  final perCategoria = <String, double>{};
   var altri = 0.0;
   for (final c in costi) {
-    final tipo = tipoDelCosto(c);
-    if (tipo != null) {
-      perTipo[tipo] = (perTipo[tipo] ?? 0) + costoSostenutoFinoA(c, mese);
+    final categoria = categoriaDelCosto(c);
+    if (categoria != null) {
+      perCategoria[categoria] =
+          (perCategoria[categoria] ?? 0) + costoSostenutoFinoA(c, mese);
     } else if (c.tipo == TipoCosto.unaTantum) {
       altri += costoSostenutoFinoA(c, mese);
     }
   }
 
+  double utileDi(String? categoria) {
+    final utile = utileIncassato[categoria] ?? 0;
+    return utile < 0 ? 0 : utile;
+  }
+
   final gruppi = <GruppoRecupero>[];
-  var avanzo = 0.0; // utile che non serve ai costi del proprio tipo
-  for (final tipo in TipoLavoro.values) {
-    final utile = (utileIncassatoPerTipo[tipo] ?? 0) < 0
-        ? 0.0
-        : (utileIncassatoPerTipo[tipo] ?? 0);
-    final totale = perTipo[tipo] ?? 0;
+  var avanzo = 0.0; // utile che non serve ai costi della propria categoria
+  final viste = <String?>{};
+  for (final id in [...ordine, ...perCategoria.keys]) {
+    if (!viste.add(id)) continue;
+    final totale = perCategoria[id] ?? 0;
+    final utile = utileDi(id);
     if (totale <= 0) {
       avanzo += utile;
       continue;
@@ -189,13 +199,19 @@ List<GruppoRecupero> gruppiDaRecuperare({
     final recuperato = utile > totale ? totale : utile;
     avanzo += utile - recuperato;
     gruppi.add(
-      GruppoRecupero(tipo: tipo, totale: totale, recuperato: recuperato),
+      GruppoRecupero(categoriaId: id, totale: totale, recuperato: recuperato),
     );
+  }
+  // Utile di categorie non elencate e dei progetti senza categoria
+  for (final categoria in utileIncassato.keys) {
+    if (categoria == null || !viste.contains(categoria)) {
+      avanzo += utileDi(categoria);
+    }
   }
   if (altri > 0) {
     gruppi.add(
       GruppoRecupero(
-        tipo: null,
+        categoriaId: null,
         totale: altri,
         recuperato: avanzo > altri ? altri : avanzo,
       ),

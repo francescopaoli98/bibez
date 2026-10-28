@@ -4,11 +4,14 @@ import '../logica/calcoli.dart';
 import '../logica/formato.dart';
 import '../logica/giornate.dart';
 import '../logica/mesi.dart';
+import '../modelli/categoria.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/sottoprogetto.dart';
 import '../modelli/tipi.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
+import '../tema/palette_categorie.dart';
+import '../widget/barra_quote.dart';
 import '../widget/calendario_giorni.dart';
 import '../widget/carta_vetro.dart';
 import '../widget/foglio_laguna.dart';
@@ -87,6 +90,7 @@ class ProgettoPagina extends StatelessWidget {
         ),
       ),
       figli: [
+        _RigaCategoria(categoria: dati.categoriaDelLavoro(lavoro)),
         _HeroProgetto(numeri: numeri),
         if (lavoro.prezzoPieno > 0) ...[
           const SizedBox(height: 12),
@@ -485,6 +489,7 @@ class _ProgettoGiornateState extends State<_ProgettoGiornate> {
         ),
       ),
       figli: [
+        _RigaCategoria(categoria: dati.categoriaDelLavoro(lavoro)),
         HeroLaguna(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -658,6 +663,26 @@ class _LegendaGiorno extends StatelessWidget {
           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         ),
       ],
+    );
+  }
+}
+
+/// "● Categoria: Claude" sopra il riquadro grande (niente se non ce l'ha).
+class _RigaCategoria extends StatelessWidget {
+  const _RigaCategoria({required this.categoria});
+
+  final Categoria? categoria;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = categoria;
+    if (c == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: VoceLegenda(
+        colore: coloreDellaPalette(c.colore).colore,
+        testo: 'Categoria: ${c.nome}',
+      ),
     );
   }
 }

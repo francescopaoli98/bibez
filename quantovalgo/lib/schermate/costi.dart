@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../logica/costi.dart';
 import '../logica/formato.dart';
 import '../logica/mesi.dart';
+import '../modelli/categoria.dart';
 import '../modelli/costo.dart';
-import '../modelli/tipi.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../tema/palette_categorie.dart';
@@ -66,7 +66,7 @@ class _CostiPaginaState extends State<CostiPagina> {
         ),
         if (gruppi.isNotEmpty) ...[
           const SizedBox(height: 12),
-          _CartaDaRecuperare(gruppi: gruppi),
+          _CartaDaRecuperare(gruppi: gruppi, dati: dati),
         ],
         if (delMese.any(
           (c) => c.categoriaId != null && dati.categoria(c.categoriaId) != null,
@@ -268,12 +268,12 @@ class _CartaCosto extends StatelessWidget {
   final Costo costo;
   final DateTime mese;
 
-  String _descrizione(List<Quota> quote, TipoLavoro? tipoLegato) {
-    // "Claude": solo i progetti di quel tipo dividono il costo
-    final di = tipoLegato == null ? '' : ' ${tipoLegato.etichetta}';
-    final nessuno = tipoLegato == null
+  String _descrizione(List<Quota> quote, Categoria? categoria) {
+    // Con una categoria, solo i progetti della stessa categoria dividono il costo
+    final di = categoria == null ? '' : ' «${categoria.nome}»';
+    final nessuno = categoria == null
         ? 'nessun progetto attivo'
-        : 'nessun progetto$di attivo: si accumula da recuperare';
+        : 'nessun progetto «${categoria.nome}» attivo: si accumula da recuperare';
     switch (costo.tipo) {
       case TipoCosto.abbonamento:
         return quote.isEmpty
@@ -324,7 +324,7 @@ class _CartaCosto extends StatelessWidget {
             ],
           ),
           Text(
-            _descrizione(quote, dati.tipoDelCosto(costo)),
+            _descrizione(quote, categoria),
             style: tema.labelMedium?.copyWith(
               color: ColoriLaguna.testoSecondario,
               fontWeight: FontWeight.w600,
@@ -414,9 +414,10 @@ class _RigaAltroCosto extends StatelessWidget {
 /// "Da recuperare" diviso per tipo di lavoro: ogni riga si copre con l'utile
 /// dei progetti incassati di quel tipo (Claude con i progetti Claude…).
 class _CartaDaRecuperare extends StatelessWidget {
-  const _CartaDaRecuperare({required this.gruppi});
+  const _CartaDaRecuperare({required this.gruppi, required this.dati});
 
   final List<GruppoRecupero> gruppi;
+  final StatoDati dati;
 
   @override
   Widget build(BuildContext context) {
@@ -433,35 +434,68 @@ class _CartaDaRecuperare extends StatelessWidget {
           ),
           for (final g in gruppi) ...[
             const SizedBox(height: 10),
-            Text(
-              g.tipo == null ? 'Altri costi' : g.tipo!.etichetta,
-              style: tema.labelLarge,
-            ),
-            Text(
-              'Da recuperare ${euro(g.residuo)} di ${euro(g.totale)}',
-              style: tema.bodyMedium,
-            ),
-            const SizedBox(height: 4),
-            Semantics(
-              label: 'Recuperato il ${(g.avanzamento * 100).round()} per cento',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value: g.avanzamento,
-                  minHeight: 12,
-                  backgroundColor: const Color(0x40795500),
-                  valueColor: const AlwaysStoppedAnimation(Color(0xFF1A8F2E)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              g.tipo == null
-                  ? 'Si copre con l\'utile che avanza dagli altri progetti incassati'
-                  : 'Si copre solo con l\'utile dei progetti ${g.tipo!.etichetta} incassati',
-              style: tema.labelMedium?.copyWith(
-                color: ColoriLaguna.testoSecondario,
-              ),
+            Builder(
+              builder: (context) {
+                final categoria = dati.categoria(g.categoriaId);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        if (categoria != null) ...[
+                          ExcludeSemantics(
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: coloreDellaPalette(categoria.colore)
+                                    .colore,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        Expanded(
+                          child: Text(
+                            categoria?.nome ?? 'Altri costi',
+                            style: tema.labelLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      'Da recuperare ${euro(g.residuo)} di ${euro(g.totale)}',
+                      style: tema.bodyMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Semantics(
+                      label:
+                          'Recuperato il ${(g.avanzamento * 100).round()} per cento',
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: g.avanzamento,
+                          minHeight: 12,
+                          backgroundColor: const Color(0x40795500),
+                          valueColor: const AlwaysStoppedAnimation(
+                            Color(0xFF1A8F2E),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      categoria == null
+                          ? 'Si copre con l\'utile che avanza dagli altri progetti incassati'
+                          : 'Si copre solo con l\'utile dei progetti «${categoria.nome}» incassati',
+                      style: tema.labelMedium?.copyWith(
+                        color: ColoriLaguna.testoSecondario,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ],

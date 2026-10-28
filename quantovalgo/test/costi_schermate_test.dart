@@ -184,10 +184,10 @@ void main() {
     await tocca(tester, find.text('Aggiungi quelle di partenza'));
     expect(
       [for (final c in app.archivio.tabellaCategorie.elenco) c.nome],
-      ['Doppiaggio', 'Codice', 'Claude', 'Generale'],
+      ['Doppiaggio', 'Codice', 'Claude'],
     );
     expect(
-      find.text('Rosso · 0 costi · progetti Doppiaggio'),
+      find.text('Rosso · 0 costi · 0 progetti'),
       findsOneWidget,
     ); // Doppiaggio
 
@@ -389,7 +389,7 @@ void main() {
     expect(find.text('Doppiaggio 15 €'), findsOneWidget);
 
     await tocca(tester, find.text('Gestisci categorie'));
-    await tocca(tester, find.text('Rosso · 1 costo · tutti i progetti'));
+    await tocca(tester, find.text('Rosso · 1 costo · 0 progetti'));
     await tocca(tester, find.text('Elimina'));
     await tocca(tester, find.widgetWithText(TextButton, 'Elimina'));
     expect(app.archivio.tabellaCategorie.elenco, isEmpty);

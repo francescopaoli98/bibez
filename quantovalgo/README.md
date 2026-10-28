@@ -123,19 +123,25 @@ Il font Nunito è incluso in `assets/fonts` (licenza OFL).
   se nel mese non ce ne sono, le ore totali del progetto; se non ce ne sono, parti uguali.
 - Dati in `utenti/{uid}/sessioni`; calcoli in `logica/ore.dart`.
 
-## Costi legati a un tipo di lavoro
+## Costi e progetti per categoria
 
-- Ogni **categoria** può essere legata a un tipo di lavoro (Doppiaggio, Codice, Claude, Altro):
-  "Si recupera con i progetti…". Senza legame (**Tutti**) vale per tutti i progetti.
-- Un costo di una categoria legata (es. Claude) **si divide solo tra i progetti di quel tipo**
-  attivi nel mese, e **si recupera solo con l'utile dei progetti incassati di quel tipo**.
-  I lavori "A giornata" non portano mai costi.
-- Se in un mese non ci sono progetti di quel tipo, il costo non pesa su nessuno ("Da assegnare")
-  ma **resta nel da recuperare** del tipo: i costi legati contano tutti i mesi pagati.
-- Il riquadro **Da recuperare** ha una riga per tipo, più "Altri costi" (solo acquisti una tantum
-  senza tipo): gli altri costi si coprono con l'utile che avanza dai tipi che hanno già
-  coperto i propri costi, più l'utile dei tipi senza costi. L'utile non si usa due volte.
-- Le categorie create **prima** di questa regola non hanno il legame: vale "Tutti" finché
-  non lo scegli (Costi → Gestisci categorie → tocca la categoria).
-- Le categorie di partenza (Doppiaggio, Codice, Claude) nascono già legate al loro tipo.
-- Calcoli in `logica/costi.dart` (`gruppiDaRecuperare`, `costoSostenutoFinoA`).
+La regola vale per **tutte** le categorie (Claude, Doppiaggio, Podcast, Negozio…, anche quelle
+inventate da te):
+
+- Ogni **progetto** ha una categoria, la stessa lista dei costi (si sceglie in Nuovo lavoro,
+  "Categoria dei costi"). "Nessuna" vuol dire proprio nessuna.
+- I **costi di una categoria** si dividono e si recuperano **solo con i progetti della stessa
+  categoria**. Un costo **senza categoria** è generale: lo dividono tutti i progetti, tranne i
+  lavori "A giornata" (a meno che il costo abbia la categoria del loro lavoro).
+- Se in un mese una categoria non ha progetti attivi, il costo non pesa su nessuno ("Da
+  assegnare") ma **resta nel da recuperare** di quella categoria: contano tutti i mesi pagati.
+- **Da recuperare**: una riga per categoria (con il suo colore) e "Altri costi" (acquisti una
+  tantum senza categoria). Ogni riga si copre con l'utile dei progetti incassati **della stessa
+  categoria**; gli altri costi con l'utile che avanza (quello in più delle categorie che hanno già
+  coperto i propri costi, più quello dei progetti senza costi di categoria). L'utile non si usa
+  due volte.
+- Collegamento comodo: nel foglio di una categoria "Progetti che ne fanno parte da soli" (es.
+  Claude → tipo Claude). I progetti di quel tipo che non hanno una categoria scelta la prendono
+  da lì, anche i vecchi. Se scegli un'altra categoria (o "Nessuna") vince la tua scelta.
+- Calcoli in `logica/costi.dart` (`gruppiDaRecuperare`, `costoSostenutoFinoA`); la categoria di
+  un progetto in `StatoDati.categoriaDelLavoro`.

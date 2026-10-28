@@ -41,12 +41,12 @@ const _categorieDiPartenza = [
   ('Doppiaggio', 6, TipoLavoro.doppiaggio), // rosso, come il microfono
   ('Codice', 1, TipoLavoro.codice), // blu
   ('Claude', 8, TipoLavoro.claude), // viola
-  ('Generale', 9, null), // grigio: per tutti i progetti
 ];
 
-/// Testo che dice con quali progetti si recuperano i costi di una categoria.
-String descriviTipoCategoria(TipoLavoro? tipo) =>
-    tipo == null ? 'tutti i progetti' : 'progetti ${tipo.etichetta}';
+/// "2 costi · 1 progetto": quanto è usata una categoria.
+String descriviUsoCategoria(int costi, int progetti) =>
+    '$costi ${costi == 1 ? 'costo' : 'costi'} · '
+    '$progetti ${progetti == 1 ? 'progetto' : 'progetti'}';
 
 class _FormCategoria extends StatefulWidget {
   const _FormCategoria({this.esistente});
@@ -145,7 +145,7 @@ class _FormCategoriaState extends State<_FormCategoria> {
         ),
         const SizedBox(height: 14),
         const Text(
-          'Si recupera con i progetti…',
+          'Progetti che ne fanno parte da soli',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
@@ -154,7 +154,7 @@ class _FormCategoriaState extends State<_FormCategoria> {
           runSpacing: 8,
           children: [
             PulsanteScelta(
-              etichetta: 'Tutti',
+              etichetta: 'Nessuno',
               selezionato: _tipoLavoro == null,
               onTap: () => setState(() => _tipoLavoro = null),
             ),
@@ -171,8 +171,9 @@ class _FormCategoriaState extends State<_FormCategoria> {
         const SizedBox(height: 4),
         Text(
           _tipoLavoro == null
-              ? 'I costi di questa categoria si dividono tra tutti i progetti.'
-              : 'I costi di questa categoria pesano e si recuperano solo con i progetti ${_tipoLavoro!.etichetta}.',
+              ? 'La categoria si sceglie progetto per progetto.'
+              : 'I progetti ${_tipoLavoro!.etichetta} ne fanno parte, se non scegli un\'altra categoria. '
+                    'I costi di questa categoria si recuperano solo con i suoi progetti.',
           style: Theme.of(context).textTheme.labelMedium
               ?.copyWith(color: ColoriLaguna.testoSecondario),
         ),
@@ -334,9 +335,7 @@ class _ElencoCategorie extends StatelessWidget {
                         children: [
                           Text(c.nome, style: tema.titleMedium),
                           Text(
-                            '${coloreDellaPalette(c.colore).nome} · '
-                            '${dati.costiDellaCategoria(c.id)} ${dati.costiDellaCategoria(c.id) == 1 ? 'costo' : 'costi'} · '
-                            '${descriviTipoCategoria(c.tipoLavoro)}',
+                            '${coloreDellaPalette(c.colore).nome} · ${descriviUsoCategoria(dati.costiDellaCategoria(c.id), dati.lavoriDellaCategoria(c.id))}',
                             style: tema.labelMedium?.copyWith(
                               color: ColoriLaguna.testoSecondario,
                               fontWeight: FontWeight.w600,
@@ -371,10 +370,14 @@ class SelettoreCategoria extends StatelessWidget {
     super.key,
     required this.scelta,
     required this.onCambia,
+    this.etichetta = 'Categoria',
   });
 
   final String? scelta;
   final ValueChanged<String?> onCambia;
+
+  /// Titolo sopra le pillole (es. "Categoria dei costi" per un progetto).
+  final String etichetta;
 
   @override
   Widget build(BuildContext context) {
@@ -382,9 +385,9 @@ class SelettoreCategoria extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Categoria',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+        Text(
+          etichetta,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
         Wrap(

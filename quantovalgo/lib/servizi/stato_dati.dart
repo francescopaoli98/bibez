@@ -297,15 +297,15 @@ class StatoDati extends ChangeNotifier {
     if (!costo.siDivideTraProgetti) return const [];
     final importo = quotaNelMese(costo, mese);
     if (importo <= 0) return const [];
-    // I lavori a giornata hanno un guadagno netto fisso: non prendono quote.
-    // Se la categoria del costo è legata a un tipo (es. Claude), lo dividono
-    // solo i progetti di quel tipo.
-    final tipoLegato = tipoDelCosto(costo);
+    // Un costo con categoria lo dividono solo i progetti della stessa
+    // categoria. Un costo senza categoria lo dividono tutti i progetti, tranne
+    // i lavori "A giornata" (guadagno netto fisso, senza costi generali).
+    final categoriaDelCosto = categoria(costo.categoriaId);
     final attivi = progettiAttivi(
       _lavori.where(
-        (l) =>
-            l.tipo != TipoLavoro.aGiornata &&
-            (tipoLegato == null || l.tipo == tipoLegato),
+        (l) => categoriaDelCosto == null
+            ? l.tipo != TipoLavoro.aGiornata
+            : categoriaDelLavoro(l)?.id == categoriaDelCosto.id,
       ),
       mese,
     ).toList();
@@ -348,28 +348,42 @@ class StatoDati extends ChangeNotifier {
     return posizione < 0 ? 0 : posizione;
   }
 
-  /// Tipo di lavoro con cui si recupera un costo (dalla sua categoria).
-  /// Vuoto = tutti i progetti.
-  TipoLavoro? tipoDelCosto(Costo costo) =>
-      categoria(costo.categoriaId)?.tipoLavoro;
+  /// Categoria di un progetto: quella scelta, oppure (per i progetti senza
+  /// scelta) la prima categoria che nel suo modulo ha "I progetti di tipo X ne
+  /// fanno parte". Vuota se non ce n'è nessuna.
+  Categoria? categoriaDelLavoro(Lavoro lavoro) {
+    // Id vuoto = hai scelto "Nessuna": niente categoria, nemmeno quella del tipo
+    if (lavoro.categoriaId == '') return null;
+    return categoria(lavoro.categoriaId) ?? categoriaPredefinita(lavoro.tipo);
+  }
 
-  /// "Da recuperare" diviso per tipo di lavoro (Claude, Doppiaggio…) più gli
-  /// altri costi: ogni gruppo si copre con l'utile dei progetti incassati
-  /// del proprio tipo.
+  /// La categoria che ha "I progetti di tipo X ne fanno parte da soli".
+  Categoria? categoriaPredefinita(TipoLavoro tipo) =>
+      _categorie.where((c) => c.tipoLavoro == tipo).firstOrNull;
+
+  /// Quanti progetti hanno una categoria.
+  int lavoriDellaCategoria(String categoriaId) =>
+      _lavori.where((l) => categoriaDelLavoro(l)?.id == categoriaId).length;
+
+  /// "Da recuperare" una riga per categoria, più gli altri costi: ogni riga si
+  /// copre con l'utile dei progetti incassati della stessa categoria.
   List<GruppoRecupero> gruppiDaRecuperare() {
-    final utilePerTipo = <TipoLavoro, double>{};
+    final utilePerCategoria = <String?, double>{};
     for (final l in _lavori) {
       // Le giornate si incassano nel giorno stesso: contano quelle già fatte
       if (l.statoPagamento == StatoPagamento.incassato ||
           l.tipo == TipoLavoro.aGiornata) {
-        utilePerTipo[l.tipo] =
-            (utilePerTipo[l.tipo] ?? 0) + riepilogoDi(l.id).utile;
+        final id = categoriaDelLavoro(l)?.id;
+        utilePerCategoria[id] =
+            (utilePerCategoria[id] ?? 0) + riepilogoDi(l.id).utile;
       }
     }
     return logica_costi.gruppiDaRecuperare(
       costi: _costi,
-      tipoDelCosto: tipoDelCosto,
-      utileIncassatoPerTipo: utilePerTipo,
+      // Un costo con una categoria cancellata conta come senza categoria
+      categoriaDelCosto: (c) => categoria(c.categoriaId)?.id,
+      utileIncassato: utilePerCategoria,
+      ordine: [for (final c in _categorie) c.id],
       mese: adesso(),
     );
   }

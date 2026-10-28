@@ -197,84 +197,99 @@ void main() {
     });
   });
 
-  group('Da recuperare per tipo', () {
+  group('Da recuperare per categoria', () {
     final claude = costo(TipoCosto.abbonamento, 20, inizio: DateTime(2026, 1));
-    final doppiaggio = costo(TipoCosto.unaTantum, 90, mesi: 6);
-    final generico = costo(TipoCosto.unaTantum, 100);
+    final microfono = costo(TipoCosto.unaTantum, 90, mesi: 6);
+    final podcast = costo(TipoCosto.unaTantum, 40);
+    final scrivania = costo(TipoCosto.unaTantum, 100); // senza categoria
     final internet = costo(TipoCosto.fisso, 30, inizio: DateTime(2026, 1));
-    final costi = [claude, doppiaggio, generico, internet];
+    final costi = [claude, microfono, podcast, scrivania, internet];
 
-    TipoLavoro? tipoDi(Costo c) => c == claude
-        ? TipoLavoro.claude
-        : c == doppiaggio
-        ? TipoLavoro.doppiaggio
+    // Categorie qualsiasi, anche inventate da te
+    String? categoriaDi(Costo c) => c == claude
+        ? 'claude'
+        : c == microfono
+        ? 'doppiaggio'
+        : c == podcast
+        ? 'podcast'
         : null;
+    const ordine = ['doppiaggio', 'claude', 'podcast'];
 
-    List<GruppoRecupero> calcola(Map<TipoLavoro, double> utile) =>
+    List<GruppoRecupero> calcola(Map<String?, double> utile) =>
         gruppiDaRecuperare(
           costi: costi,
-          tipoDelCosto: tipoDi,
-          utileIncassatoPerTipo: utile,
+          categoriaDelCosto: categoriaDi,
+          utileIncassato: utile,
+          ordine: ordine,
           mese: ottobre,
         );
 
-    test('ogni tipo conta i propri costi, gli altri solo le una tantum', () {
-      final g = calcola({});
-      expect(
-        [for (final x in g) x.tipo],
-        [TipoLavoro.doppiaggio, TipoLavoro.claude, null],
-      );
-      expect(
-        [for (final x in g) x.totale],
-        [90, 200, 100],
-      ); // l'internet fisso non conta
-      expect(g.every((x) => x.recuperato == 0), isTrue);
-    });
+    test(
+      'ogni categoria conta i propri costi, gli altri solo le una tantum',
+      () {
+        final g = calcola({});
+        expect(
+          [for (final x in g) x.categoriaId],
+          ['doppiaggio', 'claude', 'podcast', null],
+        );
+        expect(
+          [for (final x in g) x.totale],
+          [90, 200, 40, 100],
+        ); // l'internet fisso non conta
+        expect(g.every((x) => x.recuperato == 0), isTrue);
+      },
+    );
 
-    test('i costi Claude si coprono solo con i progetti Claude', () {
-      // 150 € di utile sul doppiaggio non toccano il costo Claude
-      final g = calcola({TipoLavoro.doppiaggio: 150});
-      final cla = g.firstWhere((x) => x.tipo == TipoLavoro.claude);
-      expect(cla.recuperato, 0);
-      expect(cla.residuo, 200);
+    test('un costo si copre solo con i progetti della sua categoria (qualsiasi sia)', () {
+      // 150 € di utile sul doppiaggio non toccano né Claude né Podcast
+      final g = calcola({'doppiaggio': 150});
+      expect(g.firstWhere((x) => x.categoriaId == 'claude').recuperato, 0);
+      expect(g.firstWhere((x) => x.categoriaId == 'podcast').recuperato, 0);
 
-      final conClaude = calcola({TipoLavoro.claude: 120});
-      final cla2 = conClaude.firstWhere((x) => x.tipo == TipoLavoro.claude);
-      expect(cla2.recuperato, 120);
-      expect(cla2.residuo, 80);
-      expect(cla2.avanzamento, closeTo(0.6, 1e-9));
-    });
-
-    test('mai oltre il totale e mai sotto zero', () {
-      final g = calcola({TipoLavoro.claude: 999, TipoLavoro.doppiaggio: -50});
-      expect(g.firstWhere((x) => x.tipo == TipoLavoro.claude).residuo, 0);
+      final conPodcast = calcola({'podcast': 25});
+      final p = conPodcast.firstWhere((x) => x.categoriaId == 'podcast');
+      expect(p.recuperato, 25);
+      expect(p.residuo, 15);
+      expect(p.avanzamento, closeTo(0.625, 1e-9));
       expect(
-        g.firstWhere((x) => x.tipo == TipoLavoro.doppiaggio).recuperato,
+        conPodcast.firstWhere((x) => x.categoriaId == 'claude').recuperato,
         0,
       );
     });
 
+    test('mai oltre il totale e mai sotto zero', () {
+      final g = calcola({'claude': 999, 'doppiaggio': -50});
+      expect(g.firstWhere((x) => x.categoriaId == 'claude').residuo, 0);
+      expect(g.firstWhere((x) => x.categoriaId == 'doppiaggio').recuperato, 0);
+    });
+
     test('gli altri costi si coprono con l\'utile che avanza', () {
-      // Claude: costo 200, utile 260 → avanzano 60; doppiaggio: 90 con utile 0
-      // Codice non ha costi: tutto il suo utile (30) avanza → 90 per gli altri
-      final g = calcola({TipoLavoro.claude: 260, TipoLavoro.codice: 30});
-      final altri = g.firstWhere((x) => x.tipo == null);
+      // Claude: costo 200, utile 260 → avanzano 60.
+      // Progetti senza categoria (chiave null): 30. Totale che avanza: 90 su 100.
+      final g = calcola({'claude': 260, null: 30});
+      final altri = g.firstWhere((x) => x.categoriaId == null);
       expect(altri.recuperato, 90);
       expect(altri.residuo, 10);
     });
 
-    test('l\'utile di un tipo non si usa due volte', () {
-      // 200 € di utile Claude bastano giusto per il costo Claude: per gli altri non avanza nulla
-      final g = calcola({TipoLavoro.claude: 200});
-      expect(g.firstWhere((x) => x.tipo == null).recuperato, 0);
+    test('l\'utile di una categoria non si usa due volte', () {
+      // 200 € di utile Claude bastano giusto per il costo Claude
+      final g = calcola({'claude': 200});
+      expect(g.firstWhere((x) => x.categoriaId == null).recuperato, 0);
     });
 
-    test('senza costi non c\'è nessun gruppo', () {
+    test('l\'utile di una categoria senza costi avanza per gli altri', () {
+      final g = calcola({'negozio': 70}); // "negozio" non ha costi propri
+      expect(g.firstWhere((x) => x.categoriaId == null).recuperato, 70);
+    });
+
+    test('senza costi non c\'è nessuna riga', () {
       expect(
         gruppiDaRecuperare(
           costi: const [],
-          tipoDelCosto: (_) => null,
-          utileIncassatoPerTipo: {TipoLavoro.claude: 10},
+          categoriaDelCosto: (_) => null,
+          utileIncassato: {'claude': 10},
+          ordine: const ['claude'],
           mese: ottobre,
         ),
         isEmpty,

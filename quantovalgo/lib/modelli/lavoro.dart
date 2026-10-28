@@ -12,6 +12,7 @@ class Lavoro {
     required this.prezzoFinale,
     required this.creatoIl,
     this.clienteId,
+    this.categoriaId,
     this.tariffaGiornaliera,
     this.statoPagamento = StatoPagamento.daIncassare,
     this.scadenza,
@@ -25,6 +26,13 @@ class Lavoro {
   /// Cliente (può mancare). La relazione è quella di questo lavoro.
   final String? clienteId;
   final Relazione relazione;
+
+  /// Categoria del progetto (la stessa lista dei costi): i costi di una
+  /// categoria si recuperano solo con i progetti della stessa categoria.
+  /// Vuota (null) = non scelta: segue il tipo di lavoro, se una categoria ha
+  /// "I progetti di tipo X ne fanno parte". Testo vuoto ('') = hai scelto
+  /// "Nessuna" di proposito.
+  final String? categoriaId;
 
   /// Livello di competenza per questo lavoro, da 1 a 5.
   final int livello;
@@ -48,6 +56,7 @@ class Lavoro {
     String? nome,
     TipoLavoro? tipo,
     String? Function()? clienteId,
+    String? Function()? categoriaId,
     Relazione? relazione,
     int? livello,
     double? prezzoPieno,
@@ -59,6 +68,7 @@ class Lavoro {
     nome: nome ?? this.nome,
     tipo: tipo ?? this.tipo,
     clienteId: clienteId != null ? clienteId() : this.clienteId,
+    categoriaId: categoriaId != null ? categoriaId() : this.categoriaId,
     relazione: relazione ?? this.relazione,
     livello: livello ?? this.livello,
     prezzoPieno: prezzoPieno ?? this.prezzoPieno,
@@ -74,6 +84,7 @@ class Lavoro {
     'nome': nome,
     'tipo': tipo.name,
     'clienteId': clienteId,
+    'categoriaId': categoriaId,
     'relazione': relazione.name,
     'livello': livello,
     'prezzoPieno': prezzoPieno,
@@ -90,6 +101,7 @@ class Lavoro {
     nome: dati['nome'] as String? ?? '',
     tipo: TipoLavoro.da(dati['tipo']),
     clienteId: dati['clienteId'] as String?,
+    categoriaId: dati['categoriaId'] as String?,
     relazione: Relazione.da(dati['relazione']),
     livello: ((dati['livello'] as num?)?.toInt() ?? 3).clamp(1, 5),
     prezzoPieno: leggiDouble(dati['prezzoPieno']),

@@ -16,6 +16,7 @@ import '../widget/pulsante_scelta.dart';
 import '../widget/selettore_livello.dart';
 import '../widget/selettore_relazione.dart';
 import '../widget/stile_lucido.dart';
+import 'foglio_categoria.dart';
 import 'foglio_forbice.dart';
 import 'progetto.dart';
 
@@ -48,6 +49,16 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
   bool _iniziato = false;
   bool _salvato = false; // evita doppio tocco su "Salva"
 
+  /// Categoria del progetto (la stessa lista dei costi). Finché non la scegli
+  /// tu, segue il tipo di lavoro (se una categoria lo ha come "da soli").
+  String? _categoriaId;
+  bool _categoriaScelta = false;
+
+  /// Cosa si salva: l'id scelto; se hai scelto "Nessuna" di proposito, un testo
+  /// vuoto (così non torna la categoria del tipo); se non hai scelto, niente.
+  String? get _categoriaPerSalvare =>
+      _categoriaId ?? (_categoriaScelta ? '' : null);
+
   String? _erroreNome;
   String? _errorePieno;
   String? _erroreFinale;
@@ -60,8 +71,14 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     _iniziato = true;
 
     final l = widget.esistente;
-    if (l == null) return;
     final dati = DatiScope.leggi(context);
+    if (l == null) {
+      _categoriaId = dati.categoriaPredefinita(_tipo)?.id;
+      return;
+    }
+    // In modifica si parte dalla categoria che il progetto ha davvero
+    _categoriaId = dati.categoriaDelLavoro(l)?.id;
+    _categoriaScelta = true;
     _nome.text = l.nome;
     _tipo = l.tipo;
     _livello = l.livello;
@@ -125,6 +142,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
         id: vecchio?.id ?? '',
         nome: _nome.text.trim(),
         tipo: TipoLavoro.aGiornata,
+        categoriaId: _categoriaPerSalvare,
         relazione: vecchio?.relazione ?? Relazione.nuovo,
         livello: vecchio?.livello ?? 3,
         prezzoPieno: 0,
@@ -190,6 +208,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
       nome: _nome.text.trim(),
       tipo: _tipo,
       clienteId: clienteId,
+      categoriaId: _categoriaPerSalvare,
       relazione: _relazione,
       livello: _livello,
       prezzoPieno: pieno!,
@@ -291,9 +310,37 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
                 etichetta: t.etichetta,
                 selezionato: t == _tipo,
                 stileSelezionato: StileLucido.oro,
-                onTap: () => setState(() => _tipo = t),
+                onTap: () => setState(() {
+                  _tipo = t;
+                  if (!_categoriaScelta) {
+                    _categoriaId = DatiScope.leggi(context)
+                        .categoriaPredefinita(t)
+                        ?.id;
+                  }
+                }),
               ),
           ],
+        ),
+        const SizedBox(height: 12),
+        SelettoreCategoria(
+          etichetta: 'Categoria dei costi',
+          scelta: _categoriaId,
+          onCambia: (id) => setState(() {
+            _categoriaId = id;
+            _categoriaScelta = true;
+          }),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          switch ((DatiScope.di(context).categoria(_categoriaId), aGiornata)) {
+            (final categoria?, _) =>
+              'I costi della categoria «${categoria.nome}» si recuperano con questo progetto.',
+            (null, true) =>
+              'Senza categoria: il lavoro a giornata non prende costi.',
+            (null, false) => 'Senza categoria: prende una parte dei costi generali (quelli senza categoria).',
+          },
+          style: Theme.of(context).textTheme.labelMedium
+              ?.copyWith(color: ColoriLaguna.testoSecondario, fontSize: 14),
         ),
         const SizedBox(height: 12),
         if (aGiornata) ...[
