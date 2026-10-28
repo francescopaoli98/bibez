@@ -6,9 +6,11 @@ import '../logica/calcoli.dart';
 import '../logica/costi.dart';
 import '../logica/costi.dart' as logica_costi;
 import '../logica/giornate.dart';
+import '../logica/mesi.dart';
 import '../logica/ore.dart';
 import '../logica/pagamenti.dart';
 import '../logica/promemoria.dart';
+import '../logica/saldo.dart';
 import '../modelli/categoria.dart';
 import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
@@ -209,6 +211,50 @@ class StatoDati extends ChangeNotifier {
       ore:
           dalleParti.ore +
           oreDaMinuti(minutiConclusi(sessioniDelLavoro(lavoroId))),
+    );
+  }
+
+  // --- Saldo del mese (Home) ---
+
+  /// Incassi, costi, guadagno all'ora e sconti regalati di [mese].
+  /// Le regole sono spiegate in `logica/saldo.dart`.
+  SaldoMese saldoDelMese(DateTime mese) {
+    final m = primoDelMese(mese);
+    bool nelMese(DateTime? d) => d != null && primoDelMese(d) == m;
+
+    var incassato = 0.0;
+    var costiDiretti = 0.0;
+    var utile = 0.0;
+    var ore = 0.0;
+    var regalato = 0.0;
+    for (final l in _lavori) {
+      if (nelMese(l.creatoIl) && haPagamento(l)) {
+        regalato += scontoRegalato(l.prezzoPieno, l.prezzoFinale);
+      }
+      if (!haPagamento(l)) {
+        // A giornata: conta ogni giornata già fatta, nel suo mese
+        incassato += totaleGiornate([
+          for (final g in giornateFatte(l.id))
+            if (nelMese(g.data)) g,
+        ]);
+      } else if (l.statoPagamento == StatoPagamento.incassato &&
+          nelMese(l.dataIncasso)) {
+        final r = riepilogoDi(l.id);
+        incassato += importoDi(l);
+        costiDiretti += r.costi;
+        if (r.ore > 0) {
+          utile += r.utile;
+          ore += r.ore;
+        }
+      }
+    }
+    return SaldoMese(
+      incassato: incassato,
+      costiCondivisi: logica_costi.totaleCostiDelMese(_costi, m),
+      costiDiretti: costiDiretti,
+      utileProgetti: utile,
+      oreProgetti: ore,
+      regalato: regalato,
     );
   }
 

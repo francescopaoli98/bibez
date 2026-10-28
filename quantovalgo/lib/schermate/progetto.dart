@@ -14,6 +14,7 @@ import '../tema/palette_categorie.dart';
 import '../widget/barra_quote.dart';
 import '../widget/calendario_giorni.dart';
 import '../widget/carta_vetro.dart';
+import '../widget/dato_hero.dart';
 import '../widget/foglio_laguna.dart';
 import '../widget/hero_laguna.dart';
 import '../widget/pagina_secondaria.dart';
@@ -285,65 +286,23 @@ class _HeroProgetto extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _Dato(etichetta: 'Ricavi', valore: euro(numeri.ricavi)),
+                child: DatoHero(
+                  etichetta: 'Ricavi',
+                  valore: euro(numeri.ricavi),
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _Dato(etichetta: 'Costi', valore: euro(numeri.costi)),
+                child: DatoHero(etichetta: 'Costi', valore: euro(numeri.costi)),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _Dato(
+                child: DatoHero(
                   etichetta: "All'ora",
                   valore: ora == null ? '—' : '${euro(ora)}/h',
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Casella trasparente dentro il riquadro grande.
-class _Dato extends StatelessWidget {
-  const _Dato({required this.etichetta, required this.valore});
-
-  final String etichetta;
-  final String valore;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            etichetta,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: ColoriLaguna.testoChiaro,
-            ),
-          ),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              valore,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
-            ),
           ),
         ],
       ),
@@ -528,21 +487,24 @@ class _ProgettoGiornateState extends State<_ProgettoGiornate> {
               Row(
                 children: [
                   Expanded(
-                    child: _Dato(
+                    child: DatoHero(
                       etichetta: 'Giornate',
                       valore: numeroPerCampo(numeroGiornate(fatte)),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _Dato(
+                    child: DatoHero(
                       etichetta: 'In programma',
                       valore: numeroPerCampo(numeroGiornate(inProgramma)),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _Dato(etichetta: 'Al giorno', valore: euro(tariffa)),
+                    child: DatoHero(
+                      etichetta: 'Al giorno',
+                      valore: euro(tariffa),
+                    ),
                   ),
                 ],
               ),

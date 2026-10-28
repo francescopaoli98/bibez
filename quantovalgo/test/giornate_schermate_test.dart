@@ -511,7 +511,8 @@ void main() {
 
     // Home: riga del lavoro con 60 € (2 giornate fatte)
     expect(find.text('A giornata · 30 € al giorno'), findsOneWidget);
-    expect(find.text('+60 €'), findsOneWidget);
+    // Nella riga del progetto e nel saldo del mese in Home
+    expect(find.text('+60 €'), findsNWidgets(2));
   });
 
   testWidgets('Il negozio non prende quote dei costi condivisi', (

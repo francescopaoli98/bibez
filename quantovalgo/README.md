@@ -32,7 +32,8 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 4b. Lavori "A giornata" (es. negozio con mamma: 30 € netti al giorno)
 - [x] 5. Ore: cronometro e inserimento a mano
 - [x] 7. Pagamenti: da incassare, incassato, in ritardo, promemoria con notifiche
-- [ ] 6, 8–12. Vedi il brief
+- [x] 6. Home: saldo del mese, guadagno all'ora, sconti regalati
+- [ ] 8–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
 
@@ -172,3 +173,19 @@ inventate da te):
 - Codice: `logica/pagamenti.dart`, `logica/promemoria.dart`, `servizi/promemoria_*.dart`,
   `servizi/pianificatore_promemoria.dart`, `schermate/carta_pagamento.dart`,
   `schermate/pagamenti.dart`.
+
+## Home (passo 6)
+
+- **Saldo del mese** = incassato nel mese − costi del mese, con le frecce per i mesi
+  passati (non si va nel futuro). Pillola *In positivo / In negativo / In pari*.
+- **Incassato** = progetti segnati incassati in quel mese (per data di incasso) + giornate
+  del negozio già fatte in quel mese (quelle future non contano ancora).
+- **Costi** = costi condivisi del mese (come nella scheda Costi) + costi diretti dei
+  progetti incassati nel mese.
+- **All'ora** = utile dei progetti incassati nel mese ÷ le loro ore. Le giornate non hanno
+  ore e i costi condivisi non entrano qui (come nel guadagno all'ora del singolo progetto).
+  Senza ore registrate mostra "—".
+- **Sconti regalati** = prezzo pieno − prezzo applicato, dei progetti creati in quel mese.
+  Il riquadro compare solo se c'è qualcosa.
+- **Da incassare** (tutti i mesi insieme) e l'elenco dei progetti stanno sotto.
+- Codice: `logica/saldo.dart`, `StatoDati.saldoDelMese`, `schermate/home.dart`.
