@@ -29,7 +29,9 @@ flutter build apk    # APK per installarlo sul telefono
 ## Richieste aggiunte dopo il brief
 
 - **Costi una tantum**: costi presi in un certo mese, compresi nei costi totali
-  da recuperare (passo 4, con il saldo nel passo 6).
+  da recuperare (passo 4, con il saldo nel passo 6). Per ogni costo si sceglie:
+  tutto nel mese dell'acquisto, oppure spalmato su N mesi (ammortamento).
+  "Da recuperare" = costi una tantum non ancora coperti dagli incassi.
 - **Categorie dei costi** (es. "Microfono", "Doppiaggio"): create da te, ognuna
   con il suo colore (passo 4).
 - **Effetto morbido al tocco**: pulsanti che si schiacciano e rimbalzano piano,
