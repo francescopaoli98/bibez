@@ -29,10 +29,11 @@ Future<void> main() async {
     erroreAvvio = e.toString();
   }
 
+  final accesso = AccessoFirebase();
   runApp(
     QuantoValgoApp(
-      accesso: AccessoFirebase(),
-      archivio: ArchivioFirestore(),
+      accesso: accesso,
+      archivio: ArchivioFirestore(accesso: accesso),
       erroreAvvio: erroreAvvio,
     ),
   );

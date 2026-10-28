@@ -19,12 +19,16 @@ flutter build apk    # APK per installarlo sul telefono
 | `tema/` | Colori e tema "Laguna" |
 | `widget/` | Pezzi grafici riusabili: sfondo, pulsanti lucidi, carte, barra in basso |
 | `schermate/` | Le schermate dell'app |
+| `modelli/` | Lavoro, Sottoprogetto, Cliente, PrezzoMercato (puro Dart) |
+| `logica/` | Calcoli (prezzo suggerito, utile, ore) e formati (€, ore) |
+| `servizi/` | Accesso, archivio Firestore e `StatoDati` (dati in memoria per le schermate) |
 
 ## Stato dei passi
 
 - [x] 1. Progetto, tema Laguna, navigazione, schermate vuote
 - [x] 2. Login Google e database cloud (vedi sotto: serve l'SHA-1 su Firebase)
-- [ ] 3–12. Vedi il brief
+- [x] 3. Lavori, sottoprogetti e clienti, con la forbice di prezzo a mano
+- [ ] 4–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
 
@@ -53,3 +57,15 @@ Il font Nunito è incluso in `assets/fonts` (licenza OFL).
   i dati anche senza internet. In Impostazioni si vede se i dati sono sincronizzati.
 - Accesso: `servizi/accesso.dart` (interfaccia) e `accesso_firebase.dart` (vero).
   Nei test si usano versioni finte (`test/finti.dart`).
+
+## Dati (passo 3)
+
+- Sotto `utenti/{uid}`: `lavori`, `sottoprogetti`, `clienti`, `prezziMercato`.
+- `StatoDati` ascolta il cloud **una volta sola** per tutta l'app e le schermate
+  leggono da lì (meno letture, nessun caricamento aprendo una pagina).
+- Le scritture non aspettano il cloud: offline restano in coda e l'app mostra subito
+  la modifica.
+- Un lavoro nuovo con un prezzo parte con un sottoprogetto "Lavoro intero" che
+  incassa tutto il prezzo; si divide poi in parti più piccole.
+- Sconti e fattori di competenza sono in `logica/calcoli.dart` (`ParametriPrezzo`):
+  dal passo 8 si cambieranno da Impostazioni.

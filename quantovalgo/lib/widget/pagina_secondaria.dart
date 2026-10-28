@@ -11,9 +11,15 @@ class PaginaSecondaria extends StatelessWidget {
     super.key,
     required this.titolo,
     required this.figli,
+    this.sottotitolo,
+    this.destra,
   });
 
   final String titolo;
+  final String? sottotitolo;
+
+  /// Pulsante a fine riga in alto (es. "Modifica").
+  final Widget? destra;
 
   /// Contenuto della pagina, in una lista che scorre.
   final List<Widget> figli;
@@ -28,6 +34,8 @@ class PaginaSecondaria extends StatelessWidget {
             children: [
               Intestazione(
                 titolo: titolo,
+                sottotitolo: sottotitolo,
+                destra: destra,
                 sinistra: SferaLucida(
                   icona: Icons.arrow_back_rounded,
                   etichetta: 'Indietro',

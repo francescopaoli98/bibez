@@ -4,7 +4,8 @@ import '../widget/hero_laguna.dart';
 import '../widget/logo_sole.dart';
 import '../widget/pulsante_lucido.dart';
 import '../widget/sfera_lucida.dart';
-import '../widget/stato_vuoto.dart';
+import '../widget/riga_progetto.dart';
+import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import 'clienti.dart';
 import 'impostazioni.dart';
@@ -88,11 +89,7 @@ class HomePagina extends StatelessWidget {
         const SizedBox(height: 16),
         Text('Progetti', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 8),
-        const StatoVuoto(
-          icona: Icons.work_outline_rounded,
-          titolo: 'Ancora nessun progetto',
-          testo: 'Premi il + verde per registrare il primo lavoro.',
-        ),
+        ElencoProgetti(dati: DatiScope.di(context)),
       ],
     );
   }

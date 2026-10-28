@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../widget/stato_vuoto.dart';
+import '../servizi/stato_dati.dart';
+import '../widget/riga_progetto.dart';
 import 'scheda.dart';
 
-/// Scheda "Progetti" (per ora vuota).
+/// Scheda "Progetti": tutti i lavori, dal più recente.
 class ProgettiPagina extends StatelessWidget {
   const ProgettiPagina({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scheda(
+    final dati = DatiScope.di(context);
+    return Scheda(
       titolo: 'Progetti',
-      figli: [
-        StatoVuoto(
-          icona: Icons.work_outline_rounded,
-          titolo: 'Nessun progetto',
-          testo: 'Qui vedrai tutti i tuoi lavori e quanto rendono.',
-        ),
-      ],
+      figli: [ElencoProgetti(dati: dati)],
     );
   }
 }
