@@ -516,6 +516,7 @@ class StatoDati extends ChangeNotifier {
           fonti: trovata.fonti,
           manuale: false,
           domanda: trovata.domanda,
+          riferimenti: trovata.prezzi,
         ),
       );
 

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../logica/formato.dart';
+import '../logica/mesi.dart';
 import '../logica/prezzi_web.dart';
+import '../modelli/prezzo_mercato.dart';
 import '../modelli/tipi.dart';
 import '../servizi/ricerca_prezzi.dart';
 import '../servizi/servizi_app.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../widget/foglio_laguna.dart';
+import '../widget/lista_prezzi.dart';
 import '../widget/pulsante_lucido.dart';
 import '../widget/stile_lucido.dart';
 import 'foglio_forbice.dart';
@@ -86,6 +89,7 @@ Future<void> cercaPrezziWeb(
               'Se vuoi riprovare, rendi la domanda più precisa: il servizio '
               'intero, non il prodotto.',
           pulsanteScrivi: true,
+          prezzi: nonAffidabile.esito?.prezzi ?? const [],
         ),
       );
       if (scrivi == true && context.mounted) {
@@ -107,9 +111,13 @@ class _Messaggio extends StatelessWidget {
     required this.testo,
     this.vaiInImpostazioni = false,
     this.pulsanteScrivi = false,
+    this.prezzi = const [],
   });
 
   final String testo;
+
+  /// Prezzi di riferimento trovati (anche se non bastano per una forbice).
+  final List<PrezzoTrovato> prezzi;
   final bool vaiInImpostazioni;
   final bool pulsanteScrivi;
 
@@ -119,6 +127,10 @@ class _Messaggio extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(testo, style: Theme.of(context).textTheme.bodyLarge),
+        if (prezzi.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          ListaPrezzi(prezzi: prezzi),
+        ],
         const SizedBox(height: 16),
         if (vaiInImpostazioni)
           PulsanteLucido(
@@ -198,6 +210,8 @@ class _Trovata extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 16),
+        ListaPrezzi(prezzi: trovata.prezzi),
+        const SizedBox(height: 16),
         PulsanteLucido(
           etichetta: 'Usa questa forbice',
           icona: Icons.check_rounded,
@@ -216,4 +230,28 @@ class _Trovata extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Rivede i prezzi di riferimento di una forbice trovata sul web.
+Future<void> mostraRiferimenti(BuildContext context, PrezzoMercato mercato) {
+  return mostraFoglio<void>(
+    context,
+    titolo: 'Prezzi di riferimento · ${mercato.tipo.etichetta}',
+    costruttore: (contesto) {
+      final tema = Theme.of(contesto).textTheme;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Forbice ${euroForbice(mercato.minimo, mercato.massimo)} · '
+            'trovata il ${dataLunga(mercato.aggiornato)}'
+            '${mercato.domanda.isEmpty ? '' : ' cercando «${mercato.domanda}»'}.',
+            style: tema.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          ListaPrezzi(prezzi: mercato.riferimenti),
+        ],
+      );
+    },
+  );
 }

@@ -1,3 +1,4 @@
+import '../logica/prezzi_web.dart';
 import 'tipi.dart';
 
 /// Forbice di prezzo di mercato per un tipo di lavoro.
@@ -11,6 +12,7 @@ class PrezzoMercato {
     this.fonti = const [],
     this.manuale = true,
     this.domanda = '',
+    this.riferimenti = const [],
   });
 
   final TipoLavoro tipo;
@@ -28,6 +30,10 @@ class PrezzoMercato {
   /// rifare la stessa ricerca nell'aggiornamento settimanale.
   final String domanda;
 
+  /// I prezzi di riferimento trovati sul web, con sito e link, per poterli
+  /// rivedere anche dopo (vuoti se la forbice è a mano).
+  final List<PrezzoTrovato> riferimenti;
+
   String get id => tipo.name;
 
   Map<String, Object?> toMap() => {
@@ -38,6 +44,7 @@ class PrezzoMercato {
     'fonti': fonti,
     'manuale': manuale,
     'domanda': domanda,
+    'riferimenti': [for (final r in riferimenti) r.toMap()],
   };
 
   factory PrezzoMercato.fromMap(
@@ -52,5 +59,9 @@ class PrezzoMercato {
     fonti: ((dati['fonti'] as List?) ?? const []).whereType<String>().toList(),
     manuale: dati['manuale'] as bool? ?? true,
     domanda: dati['domanda'] as String? ?? '',
+    riferimenti: [
+      for (final r in (dati['riferimenti'] as List?) ?? const [])
+        if (r is Map) PrezzoTrovato.fromMap(r),
+    ],
   );
 }

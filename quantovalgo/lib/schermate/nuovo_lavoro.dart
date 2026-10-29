@@ -456,6 +456,10 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
             correzione: dati.correzioneDi(_tipo),
             staCercando: _staCercando,
             // Senza servizio di ricerca (o per "A giornata") il pulsante è spento
+            riferimenti: mercato?.riferimenti.length ?? 0,
+            onVediRiferimenti: mercato == null || mercato.riferimenti.isEmpty
+                ? null
+                : () => mostraRiferimenti(context, mercato),
             onCerca:
                 ServiziApp.di(context).ricerca == null || !tipoCercabile(_tipo)
                 ? null
@@ -535,6 +539,8 @@ class _RiquadroPrezzo extends StatelessWidget {
     required this.correzione,
     required this.staCercando,
     required this.onCerca,
+    required this.riferimenti,
+    required this.onVediRiferimenti,
     required this.suggerito,
     required this.senzaSconto,
     required this.sconto,
@@ -551,6 +557,10 @@ class _RiquadroPrezzo extends StatelessWidget {
 
   /// Vuoto: la ricerca non c'è per questo tipo e il pulsante è spento.
   final VoidCallback? onCerca;
+
+  /// Quanti prezzi di riferimento ha la forbice trovata sul web.
+  final int riferimenti;
+  final VoidCallback? onVediRiferimenti;
   final Forbice? suggerito;
   final Forbice? senzaSconto;
   final int sconto;
@@ -623,6 +633,20 @@ class _RiquadroPrezzo extends StatelessWidget {
               'Corretta del ${percentuale((correzione!.correzione * 100).round(), conSegno: true)} '
               'sui tuoi ultimi ${correzione!.lavori} lavori incassati',
               style: chiaro.copyWith(color: ColoriLaguna.cifraHero),
+            ),
+          ],
+          if (onVediRiferimenti != null) ...[
+            const SizedBox(height: 4),
+            TextButton.icon(
+              key: const Key('vedi-riferimenti'),
+              onPressed: onVediRiferimenti,
+              icon: const Icon(Icons.fact_check_outlined),
+              label: Text('Vedi i prezzi di riferimento ($riferimenti)'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                textStyle: Theme.of(context).textTheme.labelLarge
+                    ?.copyWith(fontSize: 14, fontWeight: FontWeight.w800),
+              ),
             ),
           ],
           const SizedBox(height: 10),

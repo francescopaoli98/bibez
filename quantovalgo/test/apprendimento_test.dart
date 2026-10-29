@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quantovalgo/logica/apprendimento.dart';
 import 'package:quantovalgo/logica/calcoli.dart';
@@ -11,6 +12,7 @@ import 'package:quantovalgo/modelli/tipi.dart';
 import 'package:quantovalgo/servizi/aggiornamento_prezzi.dart';
 import 'package:quantovalgo/servizi/ricerca_prezzi.dart';
 import 'package:quantovalgo/servizi/stato_dati.dart';
+import 'package:quantovalgo/widget/lista_prezzi.dart';
 
 import 'finti.dart';
 
@@ -83,6 +85,26 @@ ForbiceTrovata trovata() => const ForbiceTrovata(
   fonti: ['uno.it', 'due.com'],
   importi: 6,
   domanda: 'configurazione tablet anziani Italia prezzo euro',
+  prezzi: [
+    PrezzoTrovato(
+      importo: 90,
+      sito: 'uno.it',
+      url: 'https://uno.it/tariffe',
+      titolo: 'Tariffe tecnico a domicilio',
+    ),
+    PrezzoTrovato(
+      importo: 100,
+      sito: 'uno.it',
+      url: 'https://uno.it/tariffe',
+      titolo: 'Tariffe tecnico a domicilio',
+    ),
+    PrezzoTrovato(
+      importo: 110,
+      sito: 'due.com',
+      url: 'https://due.com/prezzi',
+      titolo: 'Prezzi assistenza',
+    ),
+  ],
 );
 
 void main() {
@@ -237,6 +259,206 @@ void main() {
         expect(archivio.impostazioniSalvate.ricercheMese, '2026-10');
       },
     );
+
+    testWidgets('Trovata: l\'elenco mostra sito, titolo, prezzi e link', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      final archivio = await conChiave();
+      await avviaApp(
+        tester,
+        archivio: archivio,
+        ricerca: FintaRicerca(RicercaTrovata(trovata())),
+        adesso: oggi,
+      );
+      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await tocca(tester, find.text('Cerca prezzi'));
+
+      expect(
+        find.text('Prezzi di riferimento · 3 prezzi da 2 pagine'),
+        findsOneWidget,
+      );
+      expect(find.text('uno.it'), findsOneWidget);
+      expect(find.text('Tariffe tecnico a domicilio'), findsOneWidget);
+      expect(find.text('90 € · 100 €'), findsOneWidget);
+      expect(find.text('due.com'), findsOneWidget);
+      expect(find.text('110 €'), findsOneWidget);
+    });
+
+    testWidgets('Non affidabile: i prezzi trovati si vedono lo stesso', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      final archivio = await conChiave();
+      await avviaApp(
+        tester,
+        archivio: archivio,
+        ricerca: FintaRicerca(
+          RicercaNonAffidabile(
+            EsitoForbice.no(
+              MotivoNonAffidabile.pochiPrezzi,
+              importi: 3,
+              siti: 2,
+              prezzi: trovata().prezzi,
+            ),
+          ),
+        ),
+        adesso: oggi,
+      );
+      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await tocca(tester, find.text('Cerca prezzi'));
+
+      expect(find.text('Numeri non affidabili'), findsOneWidget);
+      expect(
+        find.textContaining('Ho trovato solo 3 prezzi (ne servono almeno 5).'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Prezzi di riferimento · 3 prezzi da 2 pagine'),
+        findsOneWidget,
+      );
+      expect(find.text('90 € · 100 €'), findsOneWidget);
+    });
+
+    testWidgets('Toccando una riga si apre la pagina nel browser', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      final aperti = <Uri>[];
+      lanciaUrl = (uri) async {
+        aperti.add(uri);
+        return true;
+      };
+      addTearDown(
+        () => lanciaUrl = (uri) => throw StateError('browser non previsto'),
+      );
+      final archivio = await conChiave();
+      await avviaApp(
+        tester,
+        archivio: archivio,
+        ricerca: FintaRicerca(RicercaTrovata(trovata())),
+        adesso: oggi,
+      );
+      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await tocca(tester, find.text('Cerca prezzi'));
+
+      await tocca(tester, find.byKey(const Key('riferimento-due.com')));
+      expect(aperti.single.toString(), 'https://due.com/prezzi');
+      expect(find.byKey(const Key('avviso-link')), findsNothing);
+    });
+
+    testWidgets(
+      'Toccando una riga: se il browser non si apre, il link si copia',
+      (tester) async {
+        schermoAlto(tester);
+        String? copiato;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (chiamata) async {
+            if (chiamata.method == 'Clipboard.setData') {
+              copiato = (chiamata.arguments as Map)['text'] as String;
+            }
+            return null;
+          },
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          ),
+        );
+        lanciaUrl = (_) async => false; // il telefono non apre il browser
+        addTearDown(
+          () => lanciaUrl = (uri) => throw StateError('browser non previsto'),
+        );
+        final archivio = await conChiave();
+        await avviaApp(
+          tester,
+          archivio: archivio,
+          ricerca: FintaRicerca(RicercaTrovata(trovata())),
+          adesso: oggi,
+        );
+        await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+        await tocca(tester, find.text('Cerca prezzi'));
+
+        await tocca(tester, find.byKey(const Key('riferimento-uno.it')));
+        expect(copiato, 'https://uno.it/tariffe');
+        expect(
+          find.text('Non riesco ad aprire il browser: link copiato.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'Dopo "Usa questa forbice" i prezzi di riferimento si rivedono',
+      (tester) async {
+        schermoAlto(tester);
+        final archivio = await conChiave();
+        await avviaApp(
+          tester,
+          archivio: archivio,
+          ricerca: FintaRicerca(RicercaTrovata(trovata())),
+          adesso: oggi,
+        );
+        await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+        expect(find.byKey(const Key('vedi-riferimenti')), findsNothing);
+
+        await tocca(tester, find.text('Cerca prezzi'));
+        await tocca(tester, find.text('Usa questa forbice'));
+
+        final salvata = archivio.tabellaPrezzi.elenco.single;
+        expect(salvata.riferimenti.length, 3);
+        expect(salvata.riferimenti.first.url, 'https://uno.it/tariffe');
+
+        expect(find.text('Vedi i prezzi di riferimento (3)'), findsOneWidget);
+        await tocca(tester, find.byKey(const Key('vedi-riferimenti')));
+        expect(find.text('Prezzi di riferimento · Doppiaggio'), findsOneWidget);
+        expect(find.text('Tariffe tecnico a domicilio'), findsOneWidget);
+        expect(
+          find.textContaining('trovata il 28 ottobre 2026'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('Con molte pagine se ne vedono 8, poi "Mostra tutte"', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      final archivio = await conChiave();
+      final tante = [
+        for (var i = 1; i <= 11; i++)
+          PrezzoTrovato(
+            importo: 50.0 + i,
+            sito: 'sito$i.it',
+            url: 'https://sito$i.it/p',
+            titolo: 'Pagina $i',
+          ),
+      ];
+      await avviaApp(
+        tester,
+        archivio: archivio,
+        ricerca: FintaRicerca(
+          RicercaTrovata(
+            ForbiceTrovata(
+              forbice: const Forbice(55, 60),
+              fonti: [for (var i = 1; i <= 11; i++) 'sito$i.it'],
+              importi: 11,
+              prezzi: tante,
+            ),
+          ),
+        ),
+        adesso: oggi,
+      );
+      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await tocca(tester, find.text('Cerca prezzi'));
+
+      expect(find.byKey(const Key('riferimento-sito8.it')), findsOneWidget);
+      expect(find.byKey(const Key('riferimento-sito9.it')), findsNothing);
+      await tocca(tester, find.byKey(const Key('mostra-tutte-le-pagine')));
+      expect(find.byKey(const Key('riferimento-sito11.it')), findsOneWidget);
+    });
 
     testWidgets('"Non usarla" lascia tutto com\'è', (tester) async {
       schermoAlto(tester);

@@ -273,3 +273,17 @@ inventate da te):
   40–50 € (5 siti); «servizio installazione e configurazione tablet costo» → 20–35 €.
   Domande sui prodotti ("smartphone") danno prezzi dei prodotti (215–900 €): non servono.
 - Corretto un bug del passo 7: modificando un progetto si perdeva la data "Richiesto il".
+
+**Prezzi di riferimento con fonte e link**
+- Dopo ogni ricerca si vede l'elenco dei **prezzi trovati**, una riga per pagina: **sito**,
+  titolo, prezzi scritti lì e icona link. Toccando la riga si apre la pagina nel browser
+  (solo link http/https; se il telefono non riesce, il link viene copiato).
+- L'elenco c'è **sia quando la forbice è affidabile sia quando non lo è** (meno di 5 prezzi,
+  un solo sito, prezzi troppo diversi...): così si controlla di persona e si riconoscono i
+  prezzi sbagliati (es. un "100 €" preso da un articolo di giornale). Dal più economico.
+  Si vedono 8 pagine, poi "Mostra tutte".
+- Con "Usa questa forbice" i prezzi di riferimento si **salvano con la forbice**: in Nuovo
+  lavoro compare "Vedi i prezzi di riferimento (N)" con data e domanda della ricerca.
+- I risultati di Tavily **cambiano da una volta all'altra** per la stessa domanda: lo stesso
+  testo può dare una forbice oggi e "non affidabile" domani.
+- Codice: `widget/lista_prezzi.dart`, `PrezzoTrovato` in `logica/prezzi_web.dart`.

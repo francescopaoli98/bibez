@@ -114,6 +114,42 @@ List<double> importiInEuro(String testo) {
   return trovati;
 }
 
+/// Un prezzo di riferimento trovato sul web: quanto, su quale sito e dove
+/// (il link alla pagina), così lo si può controllare.
+class PrezzoTrovato {
+  const PrezzoTrovato({
+    required this.importo,
+    required this.sito,
+    this.url = '',
+    this.titolo = '',
+  });
+
+  final double importo;
+
+  /// Il sito, senza "www." (es. `esempio.it`).
+  final String sito;
+
+  /// Indirizzo della pagina in cui è scritto (vuoto se non si sa).
+  final String url;
+
+  /// Titolo della pagina, per capire di cosa parla.
+  final String titolo;
+
+  Map<String, Object?> toMap() => {
+    'importo': importo,
+    'sito': sito,
+    'url': url,
+    'titolo': titolo,
+  };
+
+  factory PrezzoTrovato.fromMap(Map<Object?, Object?> dati) => PrezzoTrovato(
+    importo: (dati['importo'] as num?)?.toDouble() ?? 0,
+    sito: dati['sito'] as String? ?? '',
+    url: dati['url'] as String? ?? '',
+    titolo: dati['titolo'] as String? ?? '',
+  );
+}
+
 /// Forbice trovata sul web, con i siti da cui arriva.
 class ForbiceTrovata {
   const ForbiceTrovata({
@@ -121,6 +157,7 @@ class ForbiceTrovata {
     required this.fonti,
     required this.importi,
     this.domanda = '',
+    this.prezzi = const [],
   });
 
   final Forbice forbice;
@@ -131,6 +168,9 @@ class ForbiceTrovata {
 
   /// La domanda mandata al web (vuota se non si sa).
   final String domanda;
+
+  /// I prezzi di riferimento, uno per uno, con sito e link.
+  final List<PrezzoTrovato> prezzi;
 }
 
 /// Percentile con interpolazione lineare su una lista già ordinata.
@@ -155,14 +195,17 @@ enum MotivoNonAffidabile {
 }
 
 /// Esito della valutazione: una forbice, oppure il motivo per cui non c'è,
-/// con i numeri per spiegarlo.
+/// con i numeri per spiegarlo. In tutti e due i casi ci sono i [prezzi] di
+/// riferimento trovati (quelli plausibili), così si possono controllare.
 class EsitoForbice {
-  const EsitoForbice.trovata(ForbiceTrovata this.trovata)
-    : motivo = null,
+  EsitoForbice.trovata(ForbiceTrovata t)
+    : trovata = t,
+      motivo = null,
       importi = 0,
       siti = 0,
       minimo = null,
-      massimo = null;
+      massimo = null,
+      prezzi = t.prezzi;
 
   const EsitoForbice.no(
     MotivoNonAffidabile this.motivo, {
@@ -170,6 +213,7 @@ class EsitoForbice {
     required this.siti,
     this.minimo,
     this.massimo,
+    this.prezzi = const [],
   }) : trovata = null;
 
   final ForbiceTrovata? trovata;
@@ -180,34 +224,45 @@ class EsitoForbice {
   final int siti;
   final double? minimo;
   final double? massimo;
+
+  /// Prezzi di riferimento trovati, dal più basso al più alto.
+  final List<PrezzoTrovato> prezzi;
 }
 
-/// Valuta i prezzi trovati, `sito → importi`: o una forbice, o il motivo del "no".
-EsitoForbice valutaForbice(
-  Map<String, List<double>> importiPerSito,
-  LimitiImporto limiti,
-) {
-  final tenuti = <String, List<double>>{};
-  for (final e in importiPerSito.entries) {
-    final buoni = [
-      for (final v in e.value)
-        if (v >= limiti.minimo && v <= limiti.massimo) v,
-    ];
-    if (buoni.isNotEmpty) tenuti[e.key] = buoni;
+/// Valuta i prezzi trovati (con sito e link): o una forbice, o il motivo del "no".
+EsitoForbice valutaPrezzi(List<PrezzoTrovato> trovati, LimitiImporto limiti) {
+  // Solo importi plausibili, dal più basso; uno stesso prezzo ripetuto sulla
+  // stessa pagina si mostra una volta sola.
+  final buoni =
+      [
+        for (final p in trovati)
+          if (p.importo >= limiti.minimo && p.importo <= limiti.massimo) p,
+      ]..sort((a, b) {
+        final c = a.importo.compareTo(b.importo);
+        return c != 0 ? c : a.sito.compareTo(b.sito);
+      });
+  final mostrati = <PrezzoTrovato>[];
+  final visti = <String>{};
+  for (final p in buoni) {
+    if (visti.add('${p.sito}|${p.url}|${p.importo}')) mostrati.add(p);
   }
-  final tutti = [for (final v in tenuti.values) ...v]..sort();
+
+  final tutti = [for (final p in buoni) p.importo];
+  final siti = {for (final p in buoni) p.sito};
+
   EsitoForbice no(MotivoNonAffidabile m, {double? da, double? a}) =>
       EsitoForbice.no(
         m,
         importi: tutti.length,
-        siti: tenuti.length,
+        siti: siti.length,
         minimo: da,
         massimo: a,
+        prezzi: mostrati,
       );
 
   if (tutti.isEmpty) return no(MotivoNonAffidabile.nessunPrezzo);
   if (tutti.length < minImporti) return no(MotivoNonAffidabile.pochiPrezzi);
-  if (tenuti.length < minFonti) return no(MotivoNonAffidabile.unSoloSito);
+  if (siti.length < minFonti) return no(MotivoNonAffidabile.unSoloSito);
 
   final minimo = _a5(_percentile(tutti, 0.25));
   final massimo = _a5(_percentile(tutti, 0.75));
@@ -221,11 +276,21 @@ EsitoForbice valutaForbice(
   return EsitoForbice.trovata(
     ForbiceTrovata(
       forbice: Forbice(minimo, massimo),
-      fonti: tenuti.keys.toList()..sort(),
+      fonti: siti.toList()..sort(),
       importi: tutti.length,
+      prezzi: mostrati,
     ),
   );
 }
+
+/// Come [valutaPrezzi], partendo da `sito → importi` (senza link).
+EsitoForbice valutaForbice(
+  Map<String, List<double>> importiPerSito,
+  LimitiImporto limiti,
+) => valutaPrezzi([
+  for (final e in importiPerSito.entries)
+    for (final v in e.value) PrezzoTrovato(importo: v, sito: e.key),
+], limiti);
 
 /// Calcola la forbice da `sito → importi trovati`. Null se i dati non bastano.
 ForbiceTrovata? forbiceDaFonti(

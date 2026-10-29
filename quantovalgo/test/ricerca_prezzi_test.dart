@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:quantovalgo/logica/prezzi_web.dart';
+import 'package:quantovalgo/modelli/prezzo_mercato.dart';
 import 'package:quantovalgo/modelli/tipi.dart';
 import 'package:quantovalgo/servizi/ricerca_prezzi.dart';
 import 'package:quantovalgo/servizi/ricerca_tavily.dart';
@@ -116,6 +117,49 @@ void main() {
     test('il sito si legge dall\'indirizzo, senza www', () {
       expect(sitoDi('https://www.esempio.it/tariffe?x=1'), 'esempio.it');
       expect(sitoDi('https://blog.esempio.com/a'), 'blog.esempio.com');
+    });
+  });
+
+  group('Prezzi di riferimento', () {
+    test('uno stesso prezzo sulla stessa pagina si mostra una volta', () {
+      final e = valutaPrezzi(const [
+        PrezzoTrovato(importo: 80, sito: 'a.it', url: 'https://a.it/x'),
+        PrezzoTrovato(importo: 80, sito: 'a.it', url: 'https://a.it/x'),
+        PrezzoTrovato(importo: 80, sito: 'a.it', url: 'https://a.it/y'),
+        PrezzoTrovato(
+          importo: 5,
+          sito: 'a.it',
+          url: 'https://a.it/z',
+        ), // fuori scala
+      ], const LimitiImporto(20, 3000));
+      expect(e.prezzi.length, 2); // x una volta, y una volta; il 5 € no
+    });
+
+    test('si salvano e si rileggono con la forbice', () {
+      final p = PrezzoMercato(
+        tipo: TipoLavoro.altro,
+        minimo: 40,
+        massimo: 50,
+        aggiornato: DateTime(2026, 10, 28),
+        manuale: false,
+        riferimenti: const [
+          PrezzoTrovato(
+            importo: 45,
+            sito: 'uno.it',
+            url: 'https://uno.it/t',
+            titolo: 'Tariffe',
+          ),
+        ],
+      );
+      final letto = PrezzoMercato.fromMap('altro', p.toMap());
+      expect(letto.riferimenti.single.importo, 45);
+      expect(letto.riferimenti.single.url, 'https://uno.it/t');
+      expect(letto.riferimenti.single.titolo, 'Tariffe');
+      // Dati vecchi senza riferimenti
+      expect(
+        PrezzoMercato.fromMap('altro', {'minimo': 1, 'massimo': 2}).riferimenti,
+        isEmpty,
+      );
     });
   });
 

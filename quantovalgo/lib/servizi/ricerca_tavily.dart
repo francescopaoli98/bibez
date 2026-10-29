@@ -100,16 +100,26 @@ class RicercaTavily implements RicercaPrezzi {
     final risultati = json is Map ? json['results'] : null;
     if (risultati is! List) return const RicercaNonAffidabile();
 
-    final importiPerSito = <String, List<double>>{};
+    final trovati = <PrezzoTrovato>[];
     for (final r in risultati) {
       if (r is! Map) continue;
-      final sito = sitoDi('${r['url'] ?? ''}');
+      final indirizzo = '${r['url'] ?? ''}';
+      final sito = sitoDi(indirizzo);
       if (sitoEscluso(sito)) continue; // criptovalute, social, video...
-      final testo = '${r['title'] ?? ''}. ${r['content'] ?? ''}';
-      importiPerSito.putIfAbsent(sito, () => []).addAll(importiInEuro(testo));
+      final titolo = '${r['title'] ?? ''}'.trim();
+      for (final importo in importiInEuro('$titolo. ${r['content'] ?? ''}')) {
+        trovati.add(
+          PrezzoTrovato(
+            importo: importo,
+            sito: sito,
+            url: indirizzo,
+            titolo: titolo,
+          ),
+        );
+      }
     }
 
-    final esito = valutaForbice(importiPerSito, limiti);
+    final esito = valutaPrezzi(trovati, limiti);
     final trovata = esito.trovata;
     if (trovata == null) return RicercaNonAffidabile(esito);
     return RicercaTrovata(
@@ -118,6 +128,7 @@ class RicercaTavily implements RicercaPrezzi {
         fonti: trovata.fonti,
         importi: trovata.importi,
         domanda: query,
+        prezzi: trovata.prezzi,
       ),
     );
   }
