@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../logica/calcoli.dart';
+import '../logica/apprendimento.dart' hide forbiceCorretta;
+import '../logica/apprendimento.dart' as apprendimento show forbiceCorretta;
 import '../logica/costi.dart';
 import '../logica/costi.dart' as logica_costi;
 import '../logica/giornate.dart';
@@ -10,6 +12,7 @@ import '../logica/mesi.dart';
 import '../logica/obiettivo.dart';
 import '../logica/ore.dart';
 import '../logica/pagamenti.dart';
+import '../logica/prezzi_web.dart';
 import '../logica/promemoria.dart';
 import '../logica/saldo.dart';
 import '../modelli/categoria.dart';
@@ -435,6 +438,94 @@ class StatoDati extends ChangeNotifier {
   /// Forbice di mercato salvata per quel tipo (null se non c'è ancora).
   PrezzoMercato? mercatoPer(TipoLavoro tipo) =>
       _prezzi.where((p) => p.tipo == tipo).firstOrNull;
+
+  // --- Autoapprendimento dei prezzi ---
+
+  /// Come si sposta la forbice di un tipo in base ai lavori già incassati
+  /// (null se non c'è la forbice o i lavori incassati sono pochi).
+  CorrezioneTipo? correzioneDi(TipoLavoro tipo) {
+    final mercato = mercatoPer(tipo);
+    if (mercato == null) return null;
+    return calcolaCorrezione(
+      tipo: tipo,
+      mercato: Forbice(mercato.minimo, mercato.massimo),
+      incassati: [
+        for (final l in _lavori)
+          if (l.tipo == tipo &&
+              haPagamento(l) &&
+              l.statoPagamento == StatoPagamento.incassato)
+            l,
+      ],
+      importo: importoDi,
+      parametri: parametri,
+    );
+  }
+
+  /// La forbice di mercato già spostata dalla correzione (quella che serve al
+  /// prezzo suggerito). Null se non c'è ancora una forbice.
+  Forbice? forbiceCorretta(TipoLavoro tipo) {
+    final mercato = mercatoPer(tipo);
+    if (mercato == null) return null;
+    return apprendimento.forbiceCorretta(
+      Forbice(mercato.minimo, mercato.massimo),
+      correzioneDi(tipo),
+    );
+  }
+
+  /// Tipi in cui incassi molto più (o meno) del prezzo di mercato: avviso in Home.
+  List<CorrezioneTipo> get correzioniDaAvvisare => [
+    for (final t in TipoLavoro.values)
+      if (correzioneDi(t) case final c? when c.daAvvisare) c,
+  ];
+
+  // --- Ricerca prezzi sul web (Tavily) ---
+
+  /// Ricerche massime al mese: un freno di sicurezza, ben sotto i 1.000
+  /// crediti gratuiti.
+  static const limiteRicercheMese = 50;
+
+  static String _chiaveMese(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}';
+
+  /// Ricerche già fatte questo mese (si azzera da solo a ogni mese nuovo).
+  int get ricercheDelMese => _impostazioni.ricercheMese == _chiaveMese(adesso())
+      ? _impostazioni.ricercheUsate
+      : 0;
+
+  /// Si può cercare: c'è la chiave e il freno mensile non è raggiunto.
+  bool get puoCercare =>
+      _impostazioni.chiaveTavily.isNotEmpty &&
+      ricercheDelMese < limiteRicercheMese;
+
+  /// Segna una ricerca fatta (1 credito).
+  void registraRicerca() => salvaImpostazioni(
+    _impostazioni.copyWith(
+      ricercheMese: _chiaveMese(adesso()),
+      ricercheUsate: ricercheDelMese + 1,
+    ),
+  );
+
+  /// Salva la forbice trovata sul web (sostituisce quella che c'era).
+  void salvaForbiceDaRicerca(TipoLavoro tipo, ForbiceTrovata trovata) =>
+      salvaPrezzoMercato(
+        PrezzoMercato(
+          tipo: tipo,
+          minimo: trovata.forbice.minimo,
+          massimo: trovata.forbice.massimo,
+          aggiornato: adesso(),
+          fonti: trovata.fonti,
+          manuale: false,
+        ),
+      );
+
+  /// Vale per l'aggiornamento settimanale: la forbice manca, oppure viene dal
+  /// web ed è più vecchia di 7 giorni. Quella scritta a mano non si tocca.
+  bool prezzoDaAggiornare(TipoLavoro tipo) {
+    final p = mercatoPer(tipo);
+    if (p == null) return true;
+    if (p.manuale) return false;
+    return adesso().difference(p.aggiornato) >= const Duration(days: 7);
+  }
 
   Categoria? categoria(String? id) =>
       id == null ? null : _categorie.where((c) => c.id == id).firstOrNull;

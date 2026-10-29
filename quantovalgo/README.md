@@ -34,7 +34,8 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 7. Pagamenti: da incassare, incassato, in ritardo, promemoria con notifiche
 - [x] 6. Home: saldo del mese, guadagno all'ora, sconti regalati
 - [x] 8. Obiettivo, pareggio, tariffa minima e Impostazioni
-- [ ] 9–12. Vedi il brief
+- [x] 9. Ricerca prezzi con Tavily e autoapprendimento
+- [ ] 10–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
 
@@ -209,3 +210,43 @@ inventate da te):
 - Codice: `modelli/impostazioni.dart`, `logica/obiettivo.dart`, `schermate/obiettivo.dart`,
   `schermate/impostazioni.dart`, `schermate/foglio_numero.dart`.
 - Ancora da fare in Impostazioni: stato della ricerca prezzi (passo 9) e backup.
+
+## Ricerca prezzi e autoapprendimento (passo 9)
+
+**Ricerca sul web (Tavily)**
+- La **chiave** si crea gratis su tavily.com (1.000 crediti al mese, senza carta) e si
+  incolla in Impostazioni → Ricerca prezzi. Sta nel cloud privato dell'utente
+  (`impostazioni/generali`), **mai nel codice né su GitHub**.
+- Parte **solo** dal pulsante "Cerca prezzi" (Nuovo lavoro) oppure, se acceso in
+  Impostazioni, **una volta a settimana quando apri l'app** (non gira in background).
+  L'aggiornamento tocca solo le forbici trovate dal web e più vecchie di 7 giorni, o
+  mancanti: **quelle scritte a mano non si toccano mai**.
+- Ricerca "basic" = **1 credito**. Freno di sicurezza: **50 ricerche al mese** (contatore
+  visibile in Impostazioni, riparte da solo a ogni mese). Tre tipi cercabili:
+  Doppiaggio, Codice, Claude (query in italiano in `logica/prezzi_web.dart`).
+  "Altro" e "A giornata" non hanno ricerca: forbice a mano.
+- Dai risultati si prendono gli **importi in euro** ("80 €", "€80", "da 80 a 120 euro",
+  "1.200 €"), si scartano quelli fuori scala per il tipo (es. doppiaggio 20–3.000 €) e
+  serve almeno **5 importi da 2 siti diversi**; la forbice è dal **25° al 75°
+  percentile**, arrotondata a 5 €, e se è più larga di 8 volte non è affidabile.
+- Se non è affidabile l'app lo dice e propone di scrivere la forbice a mano.
+  Se è affidabile **non salva da sola**: mostra forbice e siti, e si salva con
+  "Usa questa forbice" (data e fonti incluse).
+- Errori spiegati in italiano: chiave non valida, niente internet, troppe richieste,
+  crediti Tavily finiti. Gli errori non contano come ricerca.
+- La risposta si legge come UTF-8 di proposito: senza charset il pacchetto `http` usa
+  Latin-1 e il simbolo € si romperebbe.
+
+**Autoapprendimento (gratis, senza AI)**
+- Per ogni lavoro **incassato** di un tipo si confronta quanto hai incassato con il centro
+  del prezzo suggerito (forbice di mercato × livello × sconto di quella relazione).
+  Lo scarto medio degli **ultimi 5** (ne servono almeno 3) sposta la forbice di quel
+  tipo, **al massimo ±15%**. Lo scarto si misura sulla forbice di partenza, così la
+  correzione non si "mangia da sola".
+- La correzione si vede in Nuovo lavoro ("Corretta del +8% sui tuoi ultimi 4 lavori
+  incassati") e vale per il prezzo suggerito; la forbice salvata resta quella vera.
+- Se lo scarto medio supera il **20%** compare un avviso in Home: toccandolo si rivede
+  la forbice di quel tipo.
+- Codice: `logica/prezzi_web.dart`, `logica/apprendimento.dart`,
+  `servizi/ricerca_tavily.dart`, `servizi/aggiornamento_prezzi.dart`,
+  `schermate/foglio_ricerca.dart`, `schermate/foglio_chiave.dart`.

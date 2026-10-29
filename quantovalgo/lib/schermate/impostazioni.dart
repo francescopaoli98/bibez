@@ -8,6 +8,7 @@ import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../widget/carta_vetro.dart';
 import '../widget/pagina_secondaria.dart';
+import 'foglio_chiave.dart';
 import 'foglio_numero.dart';
 
 /// Impostazioni: per ora account Google, stato di sincronizzazione e uscita.
@@ -77,6 +78,8 @@ class ImpostazioniPagina extends StatelessWidget {
         const _CartaPromemoria(),
         const SizedBox(height: 16),
         const _SezioneTasseObiettivo(),
+        const SizedBox(height: 16),
+        const _SezioneRicerca(),
         const SizedBox(height: 16),
         const _SezioneSconti(),
         const SizedBox(height: 16),
@@ -442,6 +445,99 @@ class _SezioneLivelli extends StatelessWidget {
                   }
                 },
               ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Ricerca dei prezzi sul web (Tavily): chiave, aggiornamento settimanale e
+/// quante ricerche hai già usato questo mese.
+class _SezioneRicerca extends StatelessWidget {
+  const _SezioneRicerca();
+
+  @override
+  Widget build(BuildContext context) {
+    final dati = DatiScope.di(context);
+    final tema = Theme.of(context).textTheme;
+    final i = dati.impostazioni;
+    final conChiave = i.chiaveTavily.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _TitoloSezione(
+          'Ricerca prezzi',
+          'Cerca sul web i prezzi di mercato (Tavily, gratis). Parte solo '
+              'quando premi "Cerca prezzi" o se accendi l\'aggiornamento.',
+        ),
+        _Gruppo(
+          righe: [
+            _RigaValore(
+              chiave: const Key('riga-chiave'),
+              nome: 'Chiave Tavily',
+              valore: conChiave ? 'Inserita' : 'Non inserita',
+              onTap: () => modificaChiaveTavily(context),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Aggiorna ogni settimana',
+                          style: tema.titleMedium,
+                        ),
+                        Text(
+                          conChiave
+                              ? 'Solo le forbici trovate dal web; quelle scritte '
+                                    'a mano non si toccano. Parte quando apri l\'app.'
+                              : 'Prima inserisci la chiave.',
+                          style: tema.bodyMedium?.copyWith(
+                            color: ColoriLaguna.testoSecondario,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Switch(
+                    key: const Key('interruttore-aggiorna-prezzi'),
+                    value: i.aggiornaPrezzi && conChiave,
+                    onChanged: conChiave
+                        ? (acceso) => dati.salvaImpostazioni(
+                            i.copyWith(aggiornaPrezzi: acceso),
+                          )
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Ricerche questo mese',
+                      style: tema.titleMedium,
+                    ),
+                  ),
+                  Text(
+                    '${dati.ricercheDelMese} su ${StatoDati.limiteRicercheMese}',
+                    key: const Key('ricerche-del-mese'),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ],

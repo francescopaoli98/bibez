@@ -11,6 +11,10 @@ class Impostazioni {
     this.obiettivoMensile = 0,
     this.scontoRelazione = scontiPredefiniti,
     this.correzioneLivello = correzioniPredefinite,
+    this.chiaveTavily = '',
+    this.aggiornaPrezzi = false,
+    this.ricercheMese = '',
+    this.ricercheUsate = 0,
   });
 
   static const tassePredefinite = 22.0;
@@ -30,6 +34,20 @@ class Impostazioni {
   /// Correzione in % del prezzo per livello di competenza (1-5).
   final Map<int, int> correzioneLivello;
 
+  /// Chiave di Tavily per cercare i prezzi sul web (vuota = ricerca spenta).
+  /// La crea l'utente su tavily.com; sta nel suo cloud privato.
+  final String chiaveTavily;
+
+  /// Aggiorna da solo, una volta a settimana, le forbici trovate dal web
+  /// (quelle scritte a mano non si toccano). Parte quando si apre l'app.
+  final bool aggiornaPrezzi;
+
+  /// Mese (`2026-10`) a cui si riferisce [ricercheUsate].
+  final String ricercheMese;
+
+  /// Ricerche fatte in quel mese: ognuna usa 1 credito di Tavily.
+  final int ricercheUsate;
+
   /// I valori che entrano nel calcolo del prezzo suggerito.
   ParametriPrezzo get parametriPrezzo => ParametriPrezzo(
     scontoRelazione: scontoRelazione,
@@ -42,12 +60,20 @@ class Impostazioni {
     double? obiettivoMensile,
     Map<Relazione, int>? scontoRelazione,
     Map<int, int>? correzioneLivello,
+    String? chiaveTavily,
+    bool? aggiornaPrezzi,
+    String? ricercheMese,
+    int? ricercheUsate,
   }) => Impostazioni(
     promemoria: promemoria ?? this.promemoria,
     tasse: tasse ?? this.tasse,
     obiettivoMensile: obiettivoMensile ?? this.obiettivoMensile,
     scontoRelazione: scontoRelazione ?? this.scontoRelazione,
     correzioneLivello: correzioneLivello ?? this.correzioneLivello,
+    chiaveTavily: chiaveTavily ?? this.chiaveTavily,
+    aggiornaPrezzi: aggiornaPrezzi ?? this.aggiornaPrezzi,
+    ricercheMese: ricercheMese ?? this.ricercheMese,
+    ricercheUsate: ricercheUsate ?? this.ricercheUsate,
   );
 
   Map<String, Object?> toMap() => {
@@ -58,6 +84,10 @@ class Impostazioni {
     'correzioni': {
       for (final e in correzioneLivello.entries) '${e.key}': e.value,
     },
+    'chiaveTavily': chiaveTavily,
+    'aggiornaPrezzi': aggiornaPrezzi,
+    'ricercheMese': ricercheMese,
+    'ricercheUsate': ricercheUsate,
   };
 
   factory Impostazioni.fromMap(Map<String, Object?> dati) {
@@ -88,6 +118,14 @@ class Impostazioni {
             correzioniPredefinite[livello]!,
           ),
       },
+      chiaveTavily: dati['chiaveTavily'] is String
+          ? (dati['chiaveTavily'] as String).trim()
+          : '',
+      aggiornaPrezzi: dati['aggiornaPrezzi'] as bool? ?? false,
+      ricercheMese: dati['ricercheMese'] is String
+          ? dati['ricercheMese'] as String
+          : '',
+      ricercheUsate: intero(dati['ricercheUsate'], 0),
     );
   }
 }

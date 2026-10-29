@@ -6,6 +6,7 @@ import 'app.dart';
 import 'servizi/accesso_firebase.dart';
 import 'servizi/archivio_firestore.dart';
 import 'servizi/promemoria_locali.dart';
+import 'servizi/ricerca_tavily.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,7 @@ Future<void> main() async {
       archivio: ArchivioFirestore(accesso: accesso),
       erroreAvvio: erroreAvvio,
       promemoria: notificheAttive ? promemoria : null,
+      ricerca: RicercaTavily(),
     ),
   );
 }

@@ -1,0 +1,147 @@
+import '../modelli/tipi.dart';
+import 'calcoli.dart';
+
+/// Estrazione di una forbice di prezzo dai testi trovati sul web.
+///
+/// Regole (spiegate anche nel README):
+/// 1. si prendono gli importi in euro scritti nei testi ("80 €", "€80",
+///    "da 80 a 120 euro", "1.200 €");
+/// 2. si scartano quelli fuori scala per quel tipo di lavoro;
+/// 3. servono almeno [minImporti] importi da almeno [minFonti] siti diversi,
+///    altrimenti la ricerca "non è affidabile";
+/// 4. la forbice è dal 25° al 75° percentile (scarta gli estremi), arrotondata
+///    a 5 €; se resta troppo larga (più di 8 volte) non è affidabile.
+
+/// Importi plausibili per un tipo di lavoro: fuori da qui il numero si scarta.
+class LimitiImporto {
+  const LimitiImporto(this.minimo, this.massimo);
+  final double minimo;
+  final double massimo;
+}
+
+const limitiPerTipo = {
+  TipoLavoro.doppiaggio: LimitiImporto(20, 3000),
+  TipoLavoro.codice: LimitiImporto(30, 10000),
+  TipoLavoro.claude: LimitiImporto(10, 3000),
+};
+
+/// Tipi di lavoro per cui la ricerca web ha senso.
+final tipiCercabili = limitiPerTipo.keys.toList();
+
+const minImporti = 5;
+const minFonti = 2;
+const _larghezzaMassima = 8.0;
+
+/// Numero scritto all'italiana o all'inglese: `1.200`, `1.200,50`, `25,5`, `25.50`.
+double? _leggiImporto(String testo) {
+  var t = testo.replaceAll(RegExp(r'\s'), '');
+  if (t.isEmpty) return null;
+  if (t.contains(',')) {
+    t = t.replaceAll('.', '').replaceAll(',', '.');
+  } else if (RegExp(r'^\d{1,3}(\.\d{3})+$').hasMatch(t)) {
+    t = t.replaceAll('.', ''); // 1.200 → 1200
+  }
+  return double.tryParse(t);
+}
+
+// Un numero: `1.200`, `1 200,50` (migliaia a gruppi di 3) oppure `80`, `25,5`, `25.50`.
+// Gli spazi contano solo prima di tre cifre, così "10 80 €" non diventa 1080.
+const _num = r'(?:\d{1,3}(?:[. ]\d{3})+(?:,\d{1,2})?|\d+(?:[.,]\d{1,2})?)';
+
+// "80 €", "80-120 €", "da 80 a 120 euro", "80 euro"
+final _prima = RegExp(
+  '($_num)(?:\\s*(?:-|–|—|a)\\s*($_num))?\\s*(?:€|euro\\b|eur\\b)',
+  caseSensitive: false,
+);
+
+// "€80", "€ 80 - € 120"
+final _dopo = RegExp(
+  '€\\s*($_num)(?:\\s*(?:-|–|—)\\s*€?\\s*($_num))?',
+  caseSensitive: false,
+);
+
+/// Tutti gli importi in euro scritti in [testo] (anche i due estremi di un intervallo).
+List<double> importiInEuro(String testo) {
+  final trovati = <double>[];
+  for (final regola in [_prima, _dopo]) {
+    for (final m in regola.allMatches(testo)) {
+      for (final i in [1, 2]) {
+        final gruppo = m.group(i);
+        if (gruppo == null) continue;
+        final valore = _leggiImporto(gruppo);
+        if (valore != null && valore > 0) trovati.add(valore);
+      }
+    }
+  }
+  return trovati;
+}
+
+/// Forbice trovata sul web, con i siti da cui arriva.
+class ForbiceTrovata {
+  const ForbiceTrovata({
+    required this.forbice,
+    required this.fonti,
+    required this.importi,
+  });
+
+  final Forbice forbice;
+  final List<String> fonti;
+
+  /// Quanti importi sono stati usati.
+  final int importi;
+}
+
+/// Percentile con interpolazione lineare su una lista già ordinata.
+double _percentile(List<double> ordinati, double p) {
+  final posizione = (ordinati.length - 1) * p;
+  final sotto = posizione.floor();
+  final sopra = posizione.ceil();
+  return ordinati[sotto] +
+      (ordinati[sopra] - ordinati[sotto]) * (posizione - sotto);
+}
+
+/// Arrotonda al multiplo di 5 più vicino.
+double _a5(double v) => (v / 5).round() * 5.0;
+
+/// Calcola la forbice da `sito → importi trovati`. Null se i dati non bastano.
+ForbiceTrovata? forbiceDaFonti(
+  Map<String, List<double>> importiPerSito,
+  LimitiImporto limiti,
+) {
+  final tenuti = <String, List<double>>{};
+  for (final e in importiPerSito.entries) {
+    final buoni = [
+      for (final v in e.value)
+        if (v >= limiti.minimo && v <= limiti.massimo) v,
+    ];
+    if (buoni.isNotEmpty) tenuti[e.key] = buoni;
+  }
+  final tutti = [for (final v in tenuti.values) ...v]..sort();
+  if (tutti.length < minImporti || tenuti.length < minFonti) return null;
+
+  final minimo = _a5(_percentile(tutti, 0.25));
+  final massimo = _a5(_percentile(tutti, 0.75));
+  if (minimo <= 0 || massimo <= minimo) return null;
+  if (massimo / minimo > _larghezzaMassima) return null;
+
+  return ForbiceTrovata(
+    forbice: Forbice(minimo, massimo),
+    fonti: tenuti.keys.toList()..sort(),
+    importi: tutti.length,
+  );
+}
+
+/// Il sito di un indirizzo, senza "www.": `https://www.esempio.it/a` → `esempio.it`.
+String sitoDi(String indirizzo) {
+  final host = Uri.tryParse(indirizzo)?.host ?? '';
+  final pulito = host.startsWith('www.') ? host.substring(4) : host;
+  return pulito.isEmpty ? indirizzo : pulito;
+}
+
+/// Domande da fare al web, in italiano, una per tipo di lavoro.
+const queryPerTipo = {
+  TipoLavoro.doppiaggio: 'tariffe doppiatore professionista Italia prezzo audiolibro spot radio voce euro',
+  TipoLavoro.codice:
+      'tariffe sviluppatore freelance Italia prezzo sito web a progetto euro',
+  TipoLavoro.claude: 'tariffe consulenza intelligenza artificiale freelance Italia prezzo automazione chatbot euro',
+};

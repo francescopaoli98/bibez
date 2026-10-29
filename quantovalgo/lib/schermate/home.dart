@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../logica/apprendimento.dart';
 import '../logica/formato.dart';
 import '../logica/mesi.dart';
 import '../logica/saldo.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
+import '../widget/carta_vetro.dart';
 import '../widget/dato_hero.dart';
 import '../widget/hero_laguna.dart';
 import '../widget/logo_sole.dart';
@@ -16,6 +18,7 @@ import '../widget/sfera_lucida.dart';
 import '../widget/stile_lucido.dart';
 import '../widget/tessera_rapida.dart';
 import 'clienti.dart';
+import 'foglio_forbice.dart';
 import 'impostazioni.dart';
 import 'obiettivo.dart';
 import 'scheda.dart';
@@ -85,6 +88,10 @@ class _HomePaginaState extends State<HomePagina> {
             ),
           ],
         ),
+        for (final c in dati.correzioniDaAvvisare) ...[
+          const SizedBox(height: 12),
+          _AvvisoScarto(correzione: c),
+        ],
         const SizedBox(height: 16),
         Semantics(
           header: true,
@@ -200,6 +207,43 @@ class _HeroSaldo extends StatelessWidget {
               ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Avviso: in un tipo di lavoro incassi molto più (o meno) del prezzo di
+/// mercato. Toccandolo si apre la forbice di quel tipo.
+class _AvvisoScarto extends StatelessWidget {
+  const _AvvisoScarto({required this.correzione});
+
+  final CorrezioneTipo correzione;
+
+  @override
+  Widget build(BuildContext context) {
+    final scarto = (correzione.scartoMedio.abs() * 100).round();
+    final piu = correzione.scartoMedio > 0;
+    return CartaVetro(
+      key: Key('avviso-scarto-${correzione.tipo.name}'),
+      colori: const [Color(0xFFFFF6C4), Color(0xFFFFE98F)],
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      onTap: () => modificaForbice(context, correzione.tipo),
+      child: Row(
+        children: [
+          Icon(
+            piu ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+            color: const Color(0xFF6B2A10),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '${correzione.tipo.etichetta}: incassi in media il $scarto% '
+              '${piu ? 'in più' : 'in meno'} del prezzo di mercato. '
+              'Tocca per rivedere la forbice.',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+            ),
+          ),
         ],
       ),
     );

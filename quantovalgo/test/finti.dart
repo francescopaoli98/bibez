@@ -14,7 +14,9 @@ import 'package:quantovalgo/modelli/sottoprogetto.dart';
 import 'package:quantovalgo/servizi/accesso.dart';
 import 'package:quantovalgo/logica/promemoria.dart';
 import 'package:quantovalgo/servizi/archivio.dart';
+import 'package:quantovalgo/modelli/tipi.dart';
 import 'package:quantovalgo/servizi/promemoria_servizio.dart';
+import 'package:quantovalgo/servizi/ricerca_prezzi.dart';
 import 'package:quantovalgo/servizi/utente.dart';
 
 const utenteProva = Utente(
@@ -254,6 +256,23 @@ class FintoPromemoria implements ServizioPromemoria {
   }
 }
 
+/// Ricerca prezzi finta: risponde quello che le dici e ricorda le richieste.
+class FintaRicerca implements RicercaPrezzi {
+  FintaRicerca(this.esito);
+
+  RisultatoRicerca esito;
+  final richieste = <({TipoLavoro tipo, String chiave})>[];
+
+  @override
+  Future<RisultatoRicerca> cerca(
+    TipoLavoro tipo, {
+    required String chiave,
+  }) async {
+    richieste.add((tipo: tipo, chiave: chiave));
+    return esito;
+  }
+}
+
 /// Avvia l'app con servizi finti e aspetta che si assesti.
 Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   WidgetTester tester, {
@@ -262,6 +281,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   FintoArchivio? archivio,
   DateTime Function()? adesso,
   ServizioPromemoria? promemoria,
+  RicercaPrezzi? ricerca,
 }) async {
   final accesso = FintoAccesso(iniziale: utente);
   final archivioUsato = archivio ?? FintoArchivio();
@@ -272,6 +292,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
       erroreAvvio: erroreAvvio,
       adesso: adesso,
       promemoria: promemoria,
+      ricerca: ricerca,
     ),
   );
   await tester.pumpAndSettle();

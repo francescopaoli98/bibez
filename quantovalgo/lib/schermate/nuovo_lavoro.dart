@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../logica/apprendimento.dart';
 import '../logica/calcoli.dart';
 import '../logica/formato.dart';
+import '../logica/mesi.dart';
+import '../logica/prezzi_web.dart';
 import '../modelli/cliente.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/sottoprogetto.dart';
 import '../modelli/tipi.dart';
+import '../servizi/servizi_app.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
 import '../widget/campo_testo.dart';
@@ -18,6 +22,7 @@ import '../widget/selettore_relazione.dart';
 import '../widget/stile_lucido.dart';
 import 'foglio_categoria.dart';
 import 'foglio_forbice.dart';
+import 'foglio_ricerca.dart';
 import 'progetto.dart';
 
 /// Modulo "Nuovo lavoro". Con [esistente] diventa "Modifica lavoro".
@@ -48,6 +53,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
   bool _finaleScrittoAMano = false;
   bool _iniziato = false;
   bool _salvato = false; // evita doppio tocco su "Salva"
+  bool _staCercando = false; // ricerca prezzi sul web in corso
 
   /// Categoria del progetto (la stessa lista dei costi). Finché non la scegli
   /// tu, segue il tipo di lavoro (se una categoria lo ha come "da soli").
@@ -267,7 +273,8 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     Forbice? suggerito;
     Forbice? senzaSconto;
     if (mercato != null) {
-      final forbice = Forbice(mercato.minimo, mercato.massimo);
+      // La forbice di mercato spostata dalla correzione dei tuoi lavori incassati
+      final forbice = dati.forbiceCorretta(_tipo)!;
       suggerito = prezzoSuggerito(
         mercato: forbice,
         livello: _livello,
@@ -408,6 +415,22 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
                 ? null
                 : Forbice(mercato.minimo, mercato.massimo),
             manuale: mercato?.manuale ?? true,
+            fonti: mercato?.fonti.length ?? 0,
+            aggiornato: mercato?.aggiornato,
+            correzione: dati.correzioneDi(_tipo),
+            staCercando: _staCercando,
+            // "Altro" non ha una ricerca: lì la forbice si scrive a mano
+            onCerca:
+                ServiziApp.di(context).ricerca == null ||
+                    !tipiCercabili.contains(_tipo)
+                ? null
+                : () => cercaPrezziWeb(
+                    context,
+                    _tipo,
+                    inCorso: (v) {
+                      if (mounted) setState(() => _staCercando = v);
+                    },
+                  ),
             suggerito: suggerito,
             senzaSconto: senzaSconto,
             sconto: sconto,
@@ -459,6 +482,11 @@ class _RiquadroPrezzo extends StatelessWidget {
   const _RiquadroPrezzo({
     required this.mercato,
     required this.manuale,
+    required this.fonti,
+    required this.aggiornato,
+    required this.correzione,
+    required this.staCercando,
+    required this.onCerca,
     required this.suggerito,
     required this.senzaSconto,
     required this.sconto,
@@ -468,6 +496,13 @@ class _RiquadroPrezzo extends StatelessWidget {
 
   final Forbice? mercato;
   final bool manuale;
+  final int fonti;
+  final DateTime? aggiornato;
+  final CorrezioneTipo? correzione;
+  final bool staCercando;
+
+  /// Vuoto: la ricerca non c'è per questo tipo e il pulsante è spento.
+  final VoidCallback? onCerca;
   final Forbice? suggerito;
   final Forbice? senzaSconto;
   final int sconto;
@@ -514,24 +549,34 @@ class _RiquadroPrezzo extends StatelessWidget {
                   ],
                 ),
               ),
-              // La ricerca sul web arriva nel passo 9: per ora spenta.
-              const PulsanteLucido(
-                etichetta: 'Cerca prezzi',
+              PulsanteLucido(
+                etichetta: staCercando ? 'Cerco…' : 'Cerca prezzi',
                 icona: Icons.search_rounded,
                 stile: StileLucido.oro,
-                onPressed: null,
+                onPressed: staCercando ? null : onCerca,
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             mercato == null
-                ? 'Inserisci la forbice a mano. La ricerca sul web arriverà più avanti.'
+                ? (onCerca == null
+                      ? 'Per questo tipo scrivi la forbice a mano.'
+                      : 'Cerca i prezzi sul web o scrivi la forbice a mano.')
                 : manuale
                 ? 'Inserita a mano · la cambi quando vuoi'
-                : 'Da ricerca web · la aggiorni quando vuoi',
+                : 'Da ricerca web ($fonti ${fonti == 1 ? 'sito' : 'siti'})'
+                      '${aggiornato == null ? '' : ' · ${dataLunga(aggiornato!)}'}',
             style: chiaro,
           ),
+          if (correzione != null && correzione!.correzione != 0) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Corretta del ${percentuale((correzione!.correzione * 100).round(), conSegno: true)} '
+              'sui tuoi ultimi ${correzione!.lavori} lavori incassati',
+              style: chiaro.copyWith(color: ColoriLaguna.cifraHero),
+            ),
+          ],
           const SizedBox(height: 10),
           PulsanteLucido(
             etichetta: mercato == null
