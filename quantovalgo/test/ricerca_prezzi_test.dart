@@ -15,12 +15,30 @@ http.Response utf8Response(String corpo, int codice) =>
 void main() {
   group('Importi in euro nei testi', () {
     test('forme diverse di scrivere un importo', () {
-      expect(importiInEuro('costa 80 € all\'ora'), [80]);
+      expect(importiInEuro('costa 80 € a lavoro'), [80]);
       expect(importiInEuro('Solo €80 a progetto'), [80]);
       expect(importiInEuro('circa 1.200 euro'), [1200]);
       expect(importiInEuro('25,50 € a pagina'), [25.5]);
       expect(importiInEuro('prezzo 25.50 EUR'), [25.5]);
       expect(importiInEuro('1 200 € il pacchetto'), [1200]);
+    });
+
+    test('EUR davanti e migliaia all\'inglese (come nei siti stranieri)', () {
+      expect(importiInEuro('EUR 500 per sito'), [500]);
+      expect(importiInEuro('da EUR 15,000 a 60,000 euro'), [15000, 60000]);
+      expect(importiInEuro('costa 1,500 €'), [1500]);
+    });
+
+    test('prezzi all\'ora, al mese, all\'anno o al minuto non sono prezzi a lavoro', () {
+      expect(importiInEuro('50 € all\'ora'), isEmpty);
+      expect(importiInEuro('250 euro/h per le agenzie'), isEmpty);
+      expect(importiInEuro('da 30 a 70 euro l\'ora'), isEmpty);
+      expect(importiInEuro('100 € mensili di assistenza'), isEmpty);
+      expect(importiInEuro('300€ all\'anno di manutenzione'), isEmpty);
+      expect(importiInEuro('1 € al minuto'), isEmpty);
+      expect(importiInEuro('EUR 40 per hour'), isEmpty);
+      // ...ma il prezzo a lavoro nella stessa frase resta
+      expect(importiInEuro('sito base 960 euro, poi 50 € all\'ora'), [960]);
     });
 
     test('gli intervalli danno tutti e due gli estremi', () {

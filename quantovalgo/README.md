@@ -225,8 +225,10 @@ inventate da te):
   visibile in Impostazioni, riparte da solo a ogni mese). Tre tipi cercabili:
   Doppiaggio, Codice, Claude (query in italiano in `logica/prezzi_web.dart`).
   "Altro" e "A giornata" non hanno ricerca: forbice a mano.
-- Dai risultati si prendono gli **importi in euro** ("80 €", "€80", "da 80 a 120 euro",
-  "1.200 €"), si scartano quelli fuori scala per il tipo (es. doppiaggio 20–3.000 €) e
+- Dai risultati si prendono gli **importi in euro** ("80 €", "€80", "EUR 500",
+  "da 80 a 120 euro", "1.200 €", "15,000 €"); si scartano quelli **all'ora, al mese,
+  all'anno o al minuto** (la forbice è un prezzo a lavoro), quelli fuori scala per il
+  tipo (es. doppiaggio 20–3.000 €) e
   serve almeno **5 importi da 2 siti diversi**; la forbice è dal **25° al 75°
   percentile**, arrotondata a 5 €, e se è più larga di 8 volte non è affidabile.
 - Se non è affidabile l'app lo dice e propone di scrivere la forbice a mano.
@@ -250,3 +252,6 @@ inventate da te):
 - Codice: `logica/prezzi_web.dart`, `logica/apprendimento.dart`,
   `servizi/ricerca_tavily.dart`, `servizi/aggiornamento_prezzi.dart`,
   `schermate/foglio_ricerca.dart`, `schermate/foglio_chiave.dart`.
+- Prova dal vivo (ottobre 2026): Doppiaggio ≈ 30–200 €, Codice ≈ 510–2.625 € (sito
+  vetrina). **Claude** non dà numeri affidabili (i siti parlano di chatbot aziendali da
+  migliaia di euro): lì l'app lo dice e la forbice si scrive a mano. È normale.

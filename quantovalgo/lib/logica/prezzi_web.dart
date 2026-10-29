@@ -6,7 +6,8 @@ import 'calcoli.dart';
 /// Regole (spiegate anche nel README):
 /// 1. si prendono gli importi in euro scritti nei testi ("80 €", "€80",
 ///    "da 80 a 120 euro", "1.200 €");
-/// 2. si scartano quelli fuori scala per quel tipo di lavoro;
+/// 2. si scartano quelli fuori scala per quel tipo di lavoro e quelli che non
+///    sono un prezzo a lavoro (all'ora, al mese, all'anno, al minuto);
 /// 3. servono almeno [minImporti] importi da almeno [minFonti] siti diversi,
 ///    altrimenti la ricerca "non è affidabile";
 /// 4. la forbice è dal 25° al 75° percentile (scarta gli estremi), arrotondata
@@ -36,7 +37,9 @@ const _larghezzaMassima = 8.0;
 double? _leggiImporto(String testo) {
   var t = testo.replaceAll(RegExp(r'\s'), '');
   if (t.isEmpty) return null;
-  if (t.contains(',')) {
+  if (RegExp(r'^\d{1,3}(,\d{3})+(\.\d+)?$').hasMatch(t)) {
+    t = t.replaceAll(',', ''); // all'inglese: 15,000 → 15000
+  } else if (t.contains(',')) {
     t = t.replaceAll('.', '').replaceAll(',', '.');
   } else if (RegExp(r'^\d{1,3}(\.\d{3})+$').hasMatch(t)) {
     t = t.replaceAll('.', ''); // 1.200 → 1200
@@ -46,7 +49,8 @@ double? _leggiImporto(String testo) {
 
 // Un numero: `1.200`, `1 200,50` (migliaia a gruppi di 3) oppure `80`, `25,5`, `25.50`.
 // Gli spazi contano solo prima di tre cifre, così "10 80 €" non diventa 1080.
-const _num = r'(?:\d{1,3}(?:[. ]\d{3})+(?:,\d{1,2})?|\d+(?:[.,]\d{1,2})?)';
+const _num =
+    r'(?:\d{1,3}(?:[. ]\d{3})+(?:,\d{1,2})?|\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:[.,]\d{1,2})?)';
 
 // "80 €", "80-120 €", "da 80 a 120 euro", "80 euro"
 final _prima = RegExp(
@@ -56,15 +60,47 @@ final _prima = RegExp(
 
 // "€80", "€ 80 - € 120"
 final _dopo = RegExp(
-  '€\\s*($_num)(?:\\s*(?:-|–|—)\\s*€?\\s*($_num))?',
+  '(?:€|\\beur\\b)\\s*($_num)(?:\\s*(?:-|–|—)\\s*€?\\s*($_num))?',
   caseSensitive: false,
 );
 
-/// Tutti gli importi in euro scritti in [testo] (anche i due estremi di un intervallo).
+/// Parole che, subito dopo un importo, dicono che non è un prezzo a lavoro.
+const _nonAProgetto = [
+  '/h',
+  '/hr',
+  '/ora',
+  "all'ora",
+  "l'ora",
+  'per ora',
+  'orari',
+  'hour',
+  '/mese',
+  'al mese',
+  'mensil',
+  'month',
+  '/anno',
+  "all'anno",
+  'annu',
+  'year',
+  '/min',
+  'al minuto',
+  'per minuto',
+  'per minute',
+];
+
+/// Tutti gli importi in euro scritti in [testo] (anche i due estremi di un
+/// intervallo), esclusi quelli all'ora, al mese, all'anno o al minuto.
 List<double> importiInEuro(String testo) {
   final trovati = <double>[];
+  // Pezzi di testo già letti: una stessa frase non conta due volte
+  final letti = <({int da, int a})>[];
   for (final regola in [_prima, _dopo]) {
     for (final m in regola.allMatches(testo)) {
+      if (letti.any((l) => m.start < l.a && m.end > l.da)) continue;
+      final fine = (m.end + 16).clamp(0, testo.length);
+      final dopo = testo.substring(m.end, fine).toLowerCase();
+      if (_nonAProgetto.any(dopo.contains)) continue;
+      letti.add((da: m.start, a: m.end));
       for (final i in [1, 2]) {
         final gruppo = m.group(i);
         if (gruppo == null) continue;
@@ -141,7 +177,6 @@ String sitoDi(String indirizzo) {
 /// Domande da fare al web, in italiano, una per tipo di lavoro.
 const queryPerTipo = {
   TipoLavoro.doppiaggio: 'tariffe doppiatore professionista Italia prezzo audiolibro spot radio voce euro',
-  TipoLavoro.codice:
-      'tariffe sviluppatore freelance Italia prezzo sito web a progetto euro',
+  TipoLavoro.codice: 'quanto costa un sito web vetrina freelance Italia prezzo a progetto euro',
   TipoLavoro.claude: 'tariffe consulenza intelligenza artificiale freelance Italia prezzo automazione chatbot euro',
 };
