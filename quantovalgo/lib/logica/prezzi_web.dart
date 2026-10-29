@@ -145,8 +145,45 @@ double _percentile(List<double> ordinati, double p) {
 /// Arrotonda al multiplo di 5 più vicino.
 double _a5(double v) => (v / 5).round() * 5.0;
 
-/// Calcola la forbice da `sito → importi trovati`. Null se i dati non bastano.
-ForbiceTrovata? forbiceDaFonti(
+/// Perché una ricerca non dà una forbice affidabile.
+enum MotivoNonAffidabile {
+  nessunPrezzo,
+  pochiPrezzi,
+  unSoloSito,
+  troppoDiversi,
+  tuttiUguali,
+}
+
+/// Esito della valutazione: una forbice, oppure il motivo per cui non c'è,
+/// con i numeri per spiegarlo.
+class EsitoForbice {
+  const EsitoForbice.trovata(ForbiceTrovata this.trovata)
+    : motivo = null,
+      importi = 0,
+      siti = 0,
+      minimo = null,
+      massimo = null;
+
+  const EsitoForbice.no(
+    MotivoNonAffidabile this.motivo, {
+    required this.importi,
+    required this.siti,
+    this.minimo,
+    this.massimo,
+  }) : trovata = null;
+
+  final ForbiceTrovata? trovata;
+  final MotivoNonAffidabile? motivo;
+
+  /// Quanti importi plausibili e da quanti siti (per spiegare il "no").
+  final int importi;
+  final int siti;
+  final double? minimo;
+  final double? massimo;
+}
+
+/// Valuta i prezzi trovati, `sito → importi`: o una forbice, o il motivo del "no".
+EsitoForbice valutaForbice(
   Map<String, List<double>> importiPerSito,
   LimitiImporto limiti,
 ) {
@@ -159,19 +196,61 @@ ForbiceTrovata? forbiceDaFonti(
     if (buoni.isNotEmpty) tenuti[e.key] = buoni;
   }
   final tutti = [for (final v in tenuti.values) ...v]..sort();
-  if (tutti.length < minImporti || tenuti.length < minFonti) return null;
+  EsitoForbice no(MotivoNonAffidabile m, {double? da, double? a}) =>
+      EsitoForbice.no(
+        m,
+        importi: tutti.length,
+        siti: tenuti.length,
+        minimo: da,
+        massimo: a,
+      );
+
+  if (tutti.isEmpty) return no(MotivoNonAffidabile.nessunPrezzo);
+  if (tutti.length < minImporti) return no(MotivoNonAffidabile.pochiPrezzi);
+  if (tenuti.length < minFonti) return no(MotivoNonAffidabile.unSoloSito);
 
   final minimo = _a5(_percentile(tutti, 0.25));
   final massimo = _a5(_percentile(tutti, 0.75));
-  if (minimo <= 0 || massimo <= minimo) return null;
-  if (massimo / minimo > _larghezzaMassima) return null;
+  if (minimo <= 0 || massimo <= minimo) {
+    return no(MotivoNonAffidabile.tuttiUguali);
+  }
+  if (massimo / minimo > _larghezzaMassima) {
+    return no(MotivoNonAffidabile.troppoDiversi, da: minimo, a: massimo);
+  }
 
-  return ForbiceTrovata(
-    forbice: Forbice(minimo, massimo),
-    fonti: tenuti.keys.toList()..sort(),
-    importi: tutti.length,
+  return EsitoForbice.trovata(
+    ForbiceTrovata(
+      forbice: Forbice(minimo, massimo),
+      fonti: tenuti.keys.toList()..sort(),
+      importi: tutti.length,
+    ),
   );
 }
+
+/// Calcola la forbice da `sito → importi trovati`. Null se i dati non bastano.
+ForbiceTrovata? forbiceDaFonti(
+  Map<String, List<double>> importiPerSito,
+  LimitiImporto limiti,
+) => valutaForbice(importiPerSito, limiti).trovata;
+
+/// Siti che con i prezzi di un servizio non c'entrano (criptovalute, social,
+/// video): non si chiedono a Tavily e, se arrivano lo stesso, si ignorano.
+const sitiEsclusi = [
+  'coinmarketcap.com',
+  'coingecko.com',
+  'binance.com',
+  'youtube.com',
+  'instagram.com',
+  'facebook.com',
+  'tiktok.com',
+  'pinterest.com',
+  'x.com',
+  'twitter.com',
+];
+
+/// Vero se [sito] è uno dei [sitiEsclusi] (anche come sottodominio).
+bool sitoEscluso(String sito) =>
+    sitiEsclusi.any((d) => sito == d || sito.endsWith('.$d'));
 
 /// Il sito di un indirizzo, senza "www.": `https://www.esempio.it/a` → `esempio.it`.
 String sitoDi(String indirizzo) {
@@ -185,7 +264,8 @@ String sitoDi(String indirizzo) {
 const domandaPredefinita = {
   TipoLavoro.doppiaggio: 'doppiatore professionista audiolibro spot radio voce',
   TipoLavoro.codice: 'sito web vetrina freelance a progetto',
-  TipoLavoro.claude: "chatbot o automazione con intelligenza artificiale per una piccola impresa",
+  TipoLavoro.claude:
+      'quanto costa un chatbot per il sito di una piccola azienda',
 };
 
 /// Idee da toccare sotto il campo di ricerca, per tipo.
@@ -200,9 +280,10 @@ const suggerimentiPerTipo = {
     'negozio online e-commerce piccolo',
     'app mobile semplice freelance',
   ],
+  // Provata dal vivo: 170-700 € (4 siti). Le domande sull'AI "in generale" non
+  // trovano prezzi pubblici.
   TipoLavoro.claude: [
-    'chatbot per piccola impresa',
-    "automazione con intelligenza artificiale",
+    'quanto costa un chatbot per il sito di una piccola azienda',
   ],
   // Provate dal vivo: danno prezzi del servizio a intervento (40-50 € e 20-35 €)
   TipoLavoro.altro: [

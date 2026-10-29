@@ -119,6 +119,82 @@ void main() {
     });
   });
 
+  group('Perché non è affidabile', () {
+    const l = LimitiImporto(20, 3000);
+    MotivoNonAffidabile? motivo(Map<String, List<double>> m) =>
+        valutaForbice(m, l).motivo;
+
+    test('i motivi, nell\'ordine', () {
+      expect(
+        motivo({
+          'a.it': [],
+          'b.it': [5, 90000],
+        }),
+        MotivoNonAffidabile.nessunPrezzo,
+      );
+      expect(
+        motivo({
+          'a.it': [80],
+          'b.it': [100],
+        }),
+        MotivoNonAffidabile.pochiPrezzi,
+      );
+      expect(
+        motivo({
+          'a.it': [80, 90, 100, 110, 120],
+        }),
+        MotivoNonAffidabile.unSoloSito,
+      );
+      expect(
+        motivo({
+          'a.it': [100, 100, 100],
+          'b.it': [100, 100],
+        }),
+        MotivoNonAffidabile.tuttiUguali,
+      );
+      final largo = valutaForbice({
+        'a.it': [20, 20, 25],
+        'b.com': [2500, 2800, 3000],
+      }, l);
+      expect(largo.motivo, MotivoNonAffidabile.troppoDiversi);
+      expect(largo.minimo, lessThan(largo.massimo!));
+    });
+
+    test('la spiegazione dice i numeri veri', () {
+      const poco = RicercaNonAffidabile(
+        EsitoForbice.no(MotivoNonAffidabile.pochiPrezzi, importi: 3, siti: 2),
+      );
+      expect(
+        poco.spiegazione,
+        'Ho trovato solo 3 prezzi (ne servono almeno 5).',
+      );
+
+      const largo = RicercaNonAffidabile(
+        EsitoForbice.no(
+          MotivoNonAffidabile.troppoDiversi,
+          importi: 11,
+          siti: 4,
+          minimo: 25,
+          massimo: 2800,
+        ),
+      );
+      expect(largo.spiegazione, contains('11 prezzi da 4 siti'));
+      expect(largo.spiegazione, contains('da 25 a 2800 €'));
+
+      expect(
+        const RicercaNonAffidabile().spiegazione,
+        contains('pochi o troppo diversi'),
+      );
+    });
+
+    test('siti fuori tema (criptovalute, social) si riconoscono', () {
+      expect(sitoEscluso('coinmarketcap.com'), isTrue);
+      expect(sitoEscluso('it.coinmarketcap.com'), isTrue);
+      expect(sitoEscluso('youtube.com'), isTrue);
+      expect(sitoEscluso('studiosamo.it'), isFalse);
+    });
+  });
+
   group('Domanda personalizzata', () {
     test('aggiunge da sola Italia, prezzo ed euro se mancano', () {
       expect(

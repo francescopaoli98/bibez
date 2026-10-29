@@ -22,7 +22,37 @@ class RicercaTrovata extends RisultatoRicerca {
 /// La ricerca è andata a buon fine ma i numeri non bastano o non sono coerenti:
 /// l'app lo dice e lascia scrivere la forbice a mano.
 class RicercaNonAffidabile extends RisultatoRicerca {
-  const RicercaNonAffidabile();
+  const RicercaNonAffidabile([this.esito]);
+
+  /// Perché non è affidabile, con i numeri (vuoto se non si sa).
+  final EsitoForbice? esito;
+
+  /// Spiegazione in italiano di cosa è andato storto.
+  String get spiegazione {
+    final e = esito;
+    if (e == null || e.motivo == null) {
+      return 'Ho cercato, ma i prezzi trovati sono pochi o troppo diversi '
+          'tra loro per fidarmi.';
+    }
+    String soldi(double v) => '${v.round()}';
+    return switch (e.motivo!) {
+      MotivoNonAffidabile.nessunPrezzo =>
+        'Nelle pagine trovate non ci sono prezzi in euro che sembrino quelli '
+            'di questo lavoro.',
+      MotivoNonAffidabile.pochiPrezzi =>
+        'Ho trovato solo ${e.importi} ${e.importi == 1 ? 'prezzo' : 'prezzi'} '
+            '(ne servono almeno $minImporti).',
+      MotivoNonAffidabile.unSoloSito =>
+        'I ${e.importi} prezzi trovati arrivano da un solo sito '
+            '(ne servono almeno $minFonti diversi).',
+      MotivoNonAffidabile.troppoDiversi =>
+        'Ho trovato ${e.importi} prezzi da ${e.siti} siti, ma vanno da '
+            '${soldi(e.minimo!)} a ${soldi(e.massimo!)} €: troppo diversi tra '
+            'loro per fidarmi.',
+      MotivoNonAffidabile.tuttiUguali =>
+        'I prezzi trovati sono quasi tutti uguali: non fanno una forbice.',
+    };
+  }
 
   @override
   bool get consumaCredito => true;

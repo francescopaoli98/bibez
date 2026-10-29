@@ -49,6 +49,7 @@ class RicercaTavily implements RicercaPrezzi {
               'max_results': 10,
               'include_answer': false,
               'include_raw_content': false,
+              'exclude_domains': sitiEsclusi,
             }),
           )
           .timeout(const Duration(seconds: 25));
@@ -103,20 +104,21 @@ class RicercaTavily implements RicercaPrezzi {
     for (final r in risultati) {
       if (r is! Map) continue;
       final sito = sitoDi('${r['url'] ?? ''}');
+      if (sitoEscluso(sito)) continue; // criptovalute, social, video...
       final testo = '${r['title'] ?? ''}. ${r['content'] ?? ''}';
       importiPerSito.putIfAbsent(sito, () => []).addAll(importiInEuro(testo));
     }
 
-    final trovata = forbiceDaFonti(importiPerSito, limiti);
-    return trovata == null
-        ? const RicercaNonAffidabile()
-        : RicercaTrovata(
-            ForbiceTrovata(
-              forbice: trovata.forbice,
-              fonti: trovata.fonti,
-              importi: trovata.importi,
-              domanda: query,
-            ),
-          );
+    final esito = valutaForbice(importiPerSito, limiti);
+    final trovata = esito.trovata;
+    if (trovata == null) return RicercaNonAffidabile(esito);
+    return RicercaTrovata(
+      ForbiceTrovata(
+        forbice: trovata.forbice,
+        fonti: trovata.fonti,
+        importi: trovata.importi,
+        domanda: query,
+      ),
+    );
   }
 }

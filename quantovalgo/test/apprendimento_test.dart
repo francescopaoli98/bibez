@@ -261,12 +261,25 @@ void main() {
       await avviaApp(
         tester,
         archivio: archivio,
-        ricerca: FintaRicerca(const RicercaNonAffidabile()),
+        ricerca: FintaRicerca(
+          const RicercaNonAffidabile(
+            EsitoForbice.no(
+              MotivoNonAffidabile.pochiPrezzi,
+              importi: 3,
+              siti: 2,
+            ),
+          ),
+        ),
         adesso: oggi,
       );
       await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
       await tocca(tester, find.text('Cerca prezzi'));
       expect(find.text('Numeri non affidabili'), findsOneWidget);
+      // Dice perché, con i numeri
+      expect(
+        find.textContaining('Ho trovato solo 3 prezzi (ne servono almeno 5).'),
+        findsOneWidget,
+      );
       // Ha usato un credito di Tavily anche se non ha trovato niente di buono
       expect(archivio.impostazioniSalvate.ricercheUsate, 1);
 

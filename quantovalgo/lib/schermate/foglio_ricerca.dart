@@ -76,14 +76,15 @@ Future<void> cercaPrezziWeb(
         titolo: 'Prezzi trovati · ${tipo.etichetta}',
         costruttore: (_) => _Trovata(tipo: tipo, trovata: trovata),
       );
-    case RicercaNonAffidabile():
+    case RicercaNonAffidabile nonAffidabile:
       final scrivi = await mostraFoglio<bool>(
         context,
         titolo: 'Numeri non affidabili',
-        costruttore: (_) => const _Messaggio(
+        costruttore: (_) => _Messaggio(
           testo:
-              'Ho cercato, ma i prezzi trovati sono pochi o troppo diversi '
-              'tra loro per fidarmi. Meglio scrivere la forbice a mano.',
+              '${nonAffidabile.spiegazione}\n\nMeglio scrivere la forbice a mano. '
+              'Se vuoi riprovare, rendi la domanda più precisa: il servizio '
+              'intero, non il prodotto.',
           pulsanteScrivi: true,
         ),
       );

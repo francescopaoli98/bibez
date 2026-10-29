@@ -253,8 +253,13 @@ inventate da te):
   `servizi/ricerca_tavily.dart`, `servizi/aggiornamento_prezzi.dart`,
   `schermate/foglio_ricerca.dart`, `schermate/foglio_chiave.dart`.
 - Prova dal vivo (ottobre 2026): Doppiaggio ≈ 30–200 €, Codice ≈ 510–2.625 € (sito
-  vetrina). **Claude** non dà numeri affidabili (i siti parlano di chatbot aziendali da
-  migliaia di euro): lì l'app lo dice e la forbice si scrive a mano. È normale.
+  vetrina). **Claude**: «quanto costa un chatbot per il sito di una piccola azienda» →
+  170–700 € (4 siti). Domande sull'AI "in generale" (automazione, miglioramento vendite,
+  consulenza) **non trovano prezzi pubblici**: sul web ci sono solo grandi aziende senza
+  cifre e, peggio, i prezzi delle criptovalute "AI" (per questo coinmarketcap e simili sono
+  esclusi). In quei casi l'app lo dice e la forbice si scrive a mano.
+- Quando la ricerca non è affidabile l'app dice **perché**: nessun prezzo, pochi prezzi
+  (ne servono 5), un solo sito (ne servono 2), prezzi troppo diversi o tutti uguali.
 
 **Ricerca personalizzata**
 - In Nuovo lavoro, sopra il riquadro blu, il campo **"Cosa vuoi cercare?"**: parte dalla
