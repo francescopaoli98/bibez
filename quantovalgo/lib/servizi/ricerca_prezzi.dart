@@ -45,5 +45,11 @@ class RicercaFallita extends RisultatoRicerca {
 /// Cerca sul web il prezzo di mercato di un tipo di lavoro. Un'interfaccia
 /// sola, così i test usano una versione finta e l'app usa Tavily.
 abstract interface class RicercaPrezzi {
-  Future<RisultatoRicerca> cerca(TipoLavoro tipo, {required String chiave});
+  /// [domanda] è cosa cercare (scritta dall'utente); se manca si usa quella di
+  /// partenza del tipo. Per "Altro" una domanda ci vuole.
+  Future<RisultatoRicerca> cerca(
+    TipoLavoro tipo, {
+    required String chiave,
+    String? domanda,
+  });
 }

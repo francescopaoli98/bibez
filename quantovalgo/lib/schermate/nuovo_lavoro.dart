@@ -45,6 +45,11 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
   final _finale = TextEditingController();
   final _tariffa = TextEditingController(text: '30');
 
+  /// Cosa cercare sul web per il prezzo (modificabile; parte da quella del tipo).
+  final _domanda = TextEditingController();
+  bool _domandaModificata = false; // se l'hai scritta tu, il tipo non la cambia
+  String? _erroreDomanda;
+
   TipoLavoro _tipo = TipoLavoro.doppiaggio;
   int _livello = 3;
   Relazione _relazione = Relazione.nuovo;
@@ -65,6 +70,12 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
   String? get _categoriaPerSalvare =>
       _categoriaId ?? (_categoriaScelta ? '' : null);
 
+  /// La domanda si salva solo se è diversa da quella di partenza del tipo.
+  String? get _domandaPerSalvare {
+    final testo = _domanda.text.trim();
+    return testo.isEmpty || testo == domandaPredefinita[_tipo] ? null : testo;
+  }
+
   String? _erroreNome;
   String? _errorePieno;
   String? _erroreFinale;
@@ -80,6 +91,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     final dati = DatiScope.leggi(context);
     if (l == null) {
       _categoriaId = dati.categoriaPredefinita(_tipo)?.id;
+      _domanda.text = domandaPredefinita[_tipo] ?? '';
       return;
     }
     // In modifica si parte dalla categoria che il progetto ha davvero
@@ -93,6 +105,8 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     _pieno.text = l.prezzoPieno == 0 ? '' : numeroPerCampo(l.prezzoPieno);
     _finale.text = l.prezzoFinale == 0 ? '' : numeroPerCampo(l.prezzoFinale);
     _finaleScrittoAMano = true; // in modifica non si tocca da solo
+    _domandaModificata = l.domandaRicerca != null;
+    _domanda.text = l.domandaRicerca ?? domandaPredefinita[l.tipo] ?? '';
     if (l.tariffaGiornaliera != null) {
       _tariffa.text = numeroPerCampo(l.tariffaGiornaliera!);
     }
@@ -105,6 +119,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     _pieno.dispose();
     _finale.dispose();
     _tariffa.dispose();
+    _domanda.dispose();
     super.dispose();
   }
 
@@ -222,6 +237,8 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
       statoPagamento: vecchio?.statoPagamento ?? StatoPagamento.daIncassare,
       scadenza: vecchio?.scadenza,
       dataIncasso: vecchio?.dataIncasso,
+      richiestoIl: vecchio?.richiestoIl,
+      domandaRicerca: _domandaPerSalvare,
       creatoIl: vecchio?.creatoIl ?? DateTime.now(),
     );
     final id = dati.salvaLavoro(lavoro);
@@ -319,6 +336,10 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
                 stileSelezionato: StileLucido.oro,
                 onTap: () => setState(() {
                   _tipo = t;
+                  _erroreDomanda = null;
+                  if (!_domandaModificata) {
+                    _domanda.text = domandaPredefinita[t] ?? '';
+                  }
                   if (!_categoriaScelta) {
                     _categoriaId = DatiScope.leggi(context)
                         .categoriaPredefinita(t)
@@ -410,6 +431,21 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
             }),
           ),
           const SizedBox(height: 12),
+          _RicercaPersonalizzata(
+            controller: _domanda,
+            tipo: _tipo,
+            errore: _erroreDomanda,
+            onCambia: (_) => setState(() {
+              _domandaModificata = true;
+              _erroreDomanda = null;
+            }),
+            onSuggerimento: (testo) => setState(() {
+              _domanda.text = testo;
+              _domandaModificata = true;
+              _erroreDomanda = null;
+            }),
+          ),
+          const SizedBox(height: 12),
           _RiquadroPrezzo(
             mercato: mercato == null
                 ? null
@@ -419,18 +455,30 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
             aggiornato: mercato?.aggiornato,
             correzione: dati.correzioneDi(_tipo),
             staCercando: _staCercando,
-            // "Altro" non ha una ricerca: lì la forbice si scrive a mano
+            // Senza servizio di ricerca (o per "A giornata") il pulsante è spento
             onCerca:
-                ServiziApp.di(context).ricerca == null ||
-                    !tipiCercabili.contains(_tipo)
+                ServiziApp.di(context).ricerca == null || !tipoCercabile(_tipo)
                 ? null
-                : () => cercaPrezziWeb(
-                    context,
-                    _tipo,
-                    inCorso: (v) {
-                      if (mounted) setState(() => _staCercando = v);
-                    },
-                  ),
+                : () {
+                    final testo = _domanda.text.trim();
+                    // "Altro" non ha una domanda di partenza: la scrivi tu
+                    if (testo.isEmpty &&
+                        !domandaPredefinita.containsKey(_tipo)) {
+                      setState(
+                        () => _erroreDomanda = 'Scrivi cosa vuoi cercare',
+                      );
+                      return;
+                    }
+                    setState(() => _erroreDomanda = null);
+                    cercaPrezziWeb(
+                      context,
+                      _tipo,
+                      domanda: testo,
+                      inCorso: (v) {
+                        if (mounted) setState(() => _staCercando = v);
+                      },
+                    );
+                  },
             suggerito: suggerito,
             senzaSconto: senzaSconto,
             sconto: sconto,
@@ -561,7 +609,7 @@ class _RiquadroPrezzo extends StatelessWidget {
           Text(
             mercato == null
                 ? (onCerca == null
-                      ? 'Per questo tipo scrivi la forbice a mano.'
+                      ? 'Scrivi la forbice a mano.'
                       : 'Cerca i prezzi sul web o scrivi la forbice a mano.')
                 : manuale
                 ? 'Inserita a mano · la cambi quando vuoi'
@@ -623,6 +671,114 @@ class _RiquadroPrezzo extends StatelessWidget {
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Cosa vuoi cercare?": la domanda per il prezzo di mercato, con idee da
+/// toccare e l'anteprima di quello che verrà cercato davvero.
+class _RicercaPersonalizzata extends StatelessWidget {
+  const _RicercaPersonalizzata({
+    required this.controller,
+    required this.tipo,
+    required this.errore,
+    required this.onCambia,
+    required this.onSuggerimento,
+  });
+
+  final TextEditingController controller;
+  final TipoLavoro tipo;
+  final String? errore;
+  final ValueChanged<String> onCambia;
+  final ValueChanged<String> onSuggerimento;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context).textTheme;
+    final grigio = tema.labelMedium?.copyWith(
+      color: ColoriLaguna.testoSecondario,
+      fontWeight: FontWeight.w600,
+    );
+    final testo = controller.text.trim();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CampoTesto(
+          key: const Key('campo-domanda'),
+          controller: controller,
+          etichetta: 'Cosa vuoi cercare? (prezzo di mercato)',
+          suggerimento: 'Es. servizio installazione e configurazione tablet',
+          maiuscole: TextCapitalization.none,
+          errore: errore,
+          onChanged: onCambia,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Cerca il prezzo del servizio intero (a intervento o a lavoro), non '
+          'le tariffe orarie né i prodotti. Aggiungo io "Italia", "prezzo" ed "euro".',
+          style: grigio,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final idea in suggerimentiPerTipo[tipo] ?? const <String>[])
+              _Idea(
+                testo: idea,
+                scelta: testo == idea,
+                onTap: () => onSuggerimento(idea),
+              ),
+          ],
+        ),
+        if (testo.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Cercherò: «${costruisciQuery(testo)}»',
+            key: const Key('anteprima-domanda'),
+            style: grigio,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Un'idea di ricerca da toccare: il testo va a capo, non si taglia.
+class _Idea extends StatelessWidget {
+  const _Idea({required this.testo, required this.scelta, required this.onTap});
+
+  final String testo;
+  final bool scelta;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: scelta ? const Color(0xFFFFE98F) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: scelta ? const Color(0xFFD9A400) : const Color(0xFF6FCBEF),
+          width: 2,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Text(
+            testo,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: ColoriLaguna.testo,
+            ),
+          ),
+        ),
       ),
     );
   }

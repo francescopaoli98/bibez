@@ -18,6 +18,7 @@ class Lavoro {
     this.scadenza,
     this.dataIncasso,
     this.richiestoIl,
+    this.domandaRicerca,
   });
 
   final String id;
@@ -60,6 +61,10 @@ class Lavoro {
   /// hai creato il lavoro.
   final DateTime? richiestoIl;
 
+  /// Cosa hai cercato sul web per il prezzo di questo lavoro (vuota = la
+  /// domanda di partenza del tipo). Resta qui per rifare la stessa ricerca.
+  final String? domandaRicerca;
+
   final DateTime creatoIl;
 
   Lavoro copyWith({
@@ -76,6 +81,7 @@ class Lavoro {
     DateTime? Function()? scadenza,
     DateTime? Function()? dataIncasso,
     DateTime? Function()? richiestoIl,
+    String? Function()? domandaRicerca,
   }) => Lavoro(
     id: id,
     nome: nome ?? this.nome,
@@ -91,6 +97,9 @@ class Lavoro {
     scadenza: scadenza != null ? scadenza() : this.scadenza,
     dataIncasso: dataIncasso != null ? dataIncasso() : this.dataIncasso,
     richiestoIl: richiestoIl != null ? richiestoIl() : this.richiestoIl,
+    domandaRicerca: domandaRicerca != null
+        ? domandaRicerca()
+        : this.domandaRicerca,
     creatoIl: creatoIl,
   );
 
@@ -108,6 +117,7 @@ class Lavoro {
     'scadenza': scadenza,
     'dataIncasso': dataIncasso,
     'richiestoIl': richiestoIl,
+    'domandaRicerca': domandaRicerca,
     'creatoIl': creatoIl,
   };
 
@@ -126,6 +136,7 @@ class Lavoro {
     scadenza: leggiData(dati['scadenza']),
     dataIncasso: leggiData(dati['dataIncasso']),
     richiestoIl: leggiData(dati['richiestoIl']),
+    domandaRicerca: dati['domandaRicerca'] as String?,
     creatoIl:
         leggiData(dati['creatoIl']) ?? DateTime.fromMillisecondsSinceEpoch(0),
   );

@@ -261,14 +261,15 @@ class FintaRicerca implements RicercaPrezzi {
   FintaRicerca(this.esito);
 
   RisultatoRicerca esito;
-  final richieste = <({TipoLavoro tipo, String chiave})>[];
+  final richieste = <({TipoLavoro tipo, String chiave, String? domanda})>[];
 
   @override
   Future<RisultatoRicerca> cerca(
     TipoLavoro tipo, {
     required String chiave,
+    String? domanda,
   }) async {
-    richieste.add((tipo: tipo, chiave: chiave));
+    richieste.add((tipo: tipo, chiave: chiave, domanda: domanda));
     return esito;
   }
 }

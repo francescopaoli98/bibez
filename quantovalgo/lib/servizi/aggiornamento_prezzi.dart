@@ -28,9 +28,16 @@ class AggiornamentoPrezzi {
     final i = dati.impostazioni;
     if (!i.aggiornaPrezzi || i.chiaveTavily.isEmpty) return;
 
+    // Si rifà la ricerca di prima (anche quella personalizzata); per un tipo
+    // senza forbice si parte dalla domanda di partenza, se ce n'è una.
     final da = [
-      for (final t in tipiCercabili)
-        if (!_provati.contains(t) && dati.prezzoDaAggiornare(t)) t,
+      for (final t in TipoLavoro.values)
+        if (tipoCercabile(t) &&
+            !_provati.contains(t) &&
+            dati.prezzoDaAggiornare(t) &&
+            (domandaPredefinita.containsKey(t) ||
+                (dati.mercatoPer(t)?.domanda.isNotEmpty ?? false)))
+          t,
     ];
     if (da.isEmpty) return;
 
@@ -46,6 +53,7 @@ class AggiornamentoPrezzi {
         final esito = await ricerca.cerca(
           tipo,
           chiave: dati.impostazioni.chiaveTavily,
+          domanda: dati.mercatoPer(tipo)?.domanda,
         );
         if (esito.consumaCredito) dati.registraRicerca();
         if (esito is RicercaTrovata) {

@@ -24,10 +24,12 @@ const limitiPerTipo = {
   TipoLavoro.doppiaggio: LimitiImporto(20, 3000),
   TipoLavoro.codice: LimitiImporto(30, 10000),
   TipoLavoro.claude: LimitiImporto(10, 3000),
+  // "Altro" è per servizi di ogni genere (assistenza, consulenze...)
+  TipoLavoro.altro: LimitiImporto(10, 5000),
 };
 
-/// Tipi di lavoro per cui la ricerca web ha senso.
-final tipiCercabili = limitiPerTipo.keys.toList();
+/// Ricerca web possibile per ogni tipo tranne "A giornata" (guadagno fisso).
+bool tipoCercabile(TipoLavoro tipo) => limitiPerTipo.containsKey(tipo);
 
 const minImporti = 5;
 const minFonti = 2;
@@ -118,6 +120,7 @@ class ForbiceTrovata {
     required this.forbice,
     required this.fonti,
     required this.importi,
+    this.domanda = '',
   });
 
   final Forbice forbice;
@@ -125,6 +128,9 @@ class ForbiceTrovata {
 
   /// Quanti importi sono stati usati.
   final int importi;
+
+  /// La domanda mandata al web (vuota se non si sa).
+  final String domanda;
 }
 
 /// Percentile con interpolazione lineare su una lista già ordinata.
@@ -174,9 +180,50 @@ String sitoDi(String indirizzo) {
   return pulito.isEmpty ? indirizzo : pulito;
 }
 
-/// Domande da fare al web, in italiano, una per tipo di lavoro.
-const queryPerTipo = {
-  TipoLavoro.doppiaggio: 'tariffe doppiatore professionista Italia prezzo audiolibro spot radio voce euro',
-  TipoLavoro.codice: 'quanto costa un sito web vetrina freelance Italia prezzo a progetto euro',
-  TipoLavoro.claude: 'tariffe consulenza intelligenza artificiale freelance Italia prezzo automazione chatbot euro',
+/// Cosa si cerca di partenza per ogni tipo (modificabile da chi usa l'app).
+/// "Altro" non ha una domanda di partenza: la scrive l'utente.
+const domandaPredefinita = {
+  TipoLavoro.doppiaggio: 'doppiatore professionista audiolibro spot radio voce',
+  TipoLavoro.codice: 'sito web vetrina freelance a progetto',
+  TipoLavoro.claude: "chatbot o automazione con intelligenza artificiale per una piccola impresa",
 };
+
+/// Idee da toccare sotto il campo di ricerca, per tipo.
+const suggerimentiPerTipo = {
+  TipoLavoro.doppiaggio: [
+    'audiolibro prezzo per ora di registrato',
+    'doppiaggio spot radio locale',
+    'voce per video aziendale',
+  ],
+  TipoLavoro.codice: [
+    'sito web vetrina freelance',
+    'negozio online e-commerce piccolo',
+    'app mobile semplice freelance',
+  ],
+  TipoLavoro.claude: [
+    'chatbot per piccola impresa',
+    "automazione con intelligenza artificiale",
+  ],
+  // Provate dal vivo: danno prezzi del servizio a intervento (40-50 € e 20-35 €)
+  TipoLavoro.altro: [
+    'assistenza informatica privati costo intervento a domicilio',
+    'servizio installazione e configurazione tablet costo',
+  ],
+};
+
+/// Prepara la domanda da mandare al web: aggiunge da sola le parole che fanno
+/// uscire prezzi italiani in euro (Italia, prezzo, euro) se mancano.
+///
+/// `assistenza configurazione smartphone` →
+/// `assistenza configurazione smartphone Italia prezzo euro`
+String costruisciQuery(String domanda) {
+  var q = domanda.trim().replaceAll(RegExp(r'\s+'), ' ');
+  final minuscola = q.toLowerCase();
+  bool ha(List<String> parole) => parole.any(minuscola.contains);
+  if (!ha(['italia', 'italian'])) q += ' Italia';
+  if (!ha(['prezzo', 'prezzi', 'costo', 'costi', 'costa', 'tariff'])) {
+    q += ' prezzo';
+  }
+  if (!ha(['euro', '€'])) q += ' euro';
+  return q;
+}

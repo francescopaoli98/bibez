@@ -10,6 +10,7 @@ class PrezzoMercato {
     required this.aggiornato,
     this.fonti = const [],
     this.manuale = true,
+    this.domanda = '',
   });
 
   final TipoLavoro tipo;
@@ -23,6 +24,10 @@ class PrezzoMercato {
   /// Vero se l'hai inserita tu a mano.
   final bool manuale;
 
+  /// Cosa è stato cercato sul web (vuota se la forbice è a mano). Serve a
+  /// rifare la stessa ricerca nell'aggiornamento settimanale.
+  final String domanda;
+
   String get id => tipo.name;
 
   Map<String, Object?> toMap() => {
@@ -32,6 +37,7 @@ class PrezzoMercato {
     'aggiornato': aggiornato,
     'fonti': fonti,
     'manuale': manuale,
+    'domanda': domanda,
   };
 
   factory PrezzoMercato.fromMap(
@@ -45,5 +51,6 @@ class PrezzoMercato {
         leggiData(dati['aggiornato']) ?? DateTime.fromMillisecondsSinceEpoch(0),
     fonti: ((dati['fonti'] as List?) ?? const []).whereType<String>().toList(),
     manuale: dati['manuale'] as bool? ?? true,
+    domanda: dati['domanda'] as String? ?? '',
   );
 }

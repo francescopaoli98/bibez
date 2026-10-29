@@ -119,6 +119,47 @@ void main() {
     });
   });
 
+  group('Domanda personalizzata', () {
+    test('aggiunge da sola Italia, prezzo ed euro se mancano', () {
+      expect(
+        costruisciQuery('assistenza configurazione smartphone'),
+        'assistenza configurazione smartphone Italia prezzo euro',
+      );
+    });
+
+    test('non ripete quello che hai già scritto', () {
+      expect(
+        costruisciQuery('quanto costa un tablet configurato in Italia, euro'),
+        'quanto costa un tablet configurato in Italia, euro',
+      );
+      expect(
+        costruisciQuery('tariffe tecnico a domicilio'),
+        'tariffe tecnico a domicilio Italia euro',
+      );
+    });
+
+    test('spazi e a capo in più si ripuliscono', () {
+      expect(
+        costruisciQuery('  consulenza   acquisto\nelettronica '),
+        'consulenza acquisto elettronica Italia prezzo euro',
+      );
+    });
+
+    test('ogni tipo ha idee da toccare; Altro non ha domanda di partenza', () {
+      for (final t in [
+        TipoLavoro.doppiaggio,
+        TipoLavoro.codice,
+        TipoLavoro.claude,
+        TipoLavoro.altro,
+      ]) {
+        expect(suggerimentiPerTipo[t], isNotEmpty);
+      }
+      expect(domandaPredefinita.containsKey(TipoLavoro.altro), isFalse);
+      expect(tipoCercabile(TipoLavoro.altro), isTrue);
+      expect(tipoCercabile(TipoLavoro.aGiornata), isFalse);
+    });
+  });
+
   group('Client Tavily', () {
     String corpo(List<Map<String, String>> risultati) =>
         jsonEncode({'results': risultati});
@@ -210,17 +251,57 @@ void main() {
       expect((esito as RicercaFallita).messaggio, contains('internet'));
     });
 
-    test('tipi senza ricerca (Altro) non chiamano Tavily', () async {
-      var chiamato = false;
+    test('"Altro" senza domanda non chiama Tavily; con domanda sì', () async {
+      var chiamate = 0;
+      late http.Request vista;
       final ricerca = RicercaTavily(
-        client: MockClient((_) async {
-          chiamato = true;
-          return http.Response('{}', 200);
+        client: MockClient((r) async {
+          chiamate++;
+          vista = r;
+          return utf8Response(buoni, 200);
         }),
       );
-      final esito = await ricerca.cerca(TipoLavoro.altro, chiave: 'k');
-      expect(esito, isA<RicercaFallita>());
-      expect(chiamato, isFalse);
+      final senza = await ricerca.cerca(TipoLavoro.altro, chiave: 'k');
+      expect(senza, isA<RicercaFallita>());
+      expect((senza as RicercaFallita).messaggio, contains('Scrivi cosa'));
+      expect(chiamate, 0);
+
+      final con = await ricerca.cerca(
+        TipoLavoro.altro,
+        chiave: 'k',
+        domanda: 'configurazione tablet anziani',
+      );
+      expect(chiamate, 1);
+      expect(
+        (jsonDecode(vista.body) as Map)['query'],
+        'configurazione tablet anziani Italia prezzo euro',
+      );
+      expect(con, isA<RicercaTrovata>());
+      expect(
+        (con as RicercaTrovata).trovata.domanda,
+        'configurazione tablet anziani Italia prezzo euro',
+      );
     });
+
+    test(
+      'con una domanda tua usa quella, non quella di partenza del tipo',
+      () async {
+        late http.Request vista;
+        final ricerca = RicercaTavily(
+          client: MockClient((r) async {
+            vista = r;
+            return utf8Response(buoni, 200);
+          }),
+        );
+        await ricerca.cerca(
+          TipoLavoro.doppiaggio,
+          chiave: 'k',
+          domanda: 'voce per centralino telefonico',
+        );
+        final query = (jsonDecode(vista.body) as Map)['query'] as String;
+        expect(query, startsWith('voce per centralino telefonico'));
+        expect(query, isNot(contains('audiolibro')));
+      },
+    );
   });
 }

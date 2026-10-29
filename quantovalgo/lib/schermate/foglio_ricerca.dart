@@ -20,6 +20,7 @@ Future<void> cercaPrezziWeb(
   BuildContext context,
   TipoLavoro tipo, {
   required ValueChanged<bool> inCorso,
+  String? domanda,
 }) async {
   final dati = DatiScope.leggi(context);
   final ricerca = ServiziApp.di(context).ricerca;
@@ -56,7 +57,11 @@ Future<void> cercaPrezziWeb(
   inCorso(true);
   final RisultatoRicerca esito;
   try {
-    esito = await ricerca.cerca(tipo, chiave: dati.impostazioni.chiaveTavily);
+    esito = await ricerca.cerca(
+      tipo,
+      chiave: dati.impostazioni.chiaveTavily,
+      domanda: domanda,
+    );
   } finally {
     inCorso(false);
   }
@@ -172,6 +177,14 @@ class _Trovata extends StatelessWidget {
           '${trovata.fonti.join(', ')}',
           style: tema.bodyMedium?.copyWith(color: ColoriLaguna.testoSecondario),
         ),
+        if (trovata.domanda.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text(
+            'Cercato: «${trovata.domanda}»',
+            key: const Key('domanda-cercata'),
+            style: tema.bodyMedium,
+          ),
+        ],
         if (attuale != null) ...[
           const SizedBox(height: 6),
           Text(

@@ -515,6 +515,7 @@ class StatoDati extends ChangeNotifier {
           aggiornato: adesso(),
           fonti: trovata.fonti,
           manuale: false,
+          domanda: trovata.domanda,
         ),
       );
 

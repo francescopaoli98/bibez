@@ -82,6 +82,7 @@ ForbiceTrovata trovata() => const ForbiceTrovata(
   forbice: Forbice(90, 110),
   fonti: ['uno.it', 'due.com'],
   importi: 6,
+  domanda: 'configurazione tablet anziani Italia prezzo euro',
 );
 
 void main() {
@@ -342,9 +343,58 @@ void main() {
       );
     });
 
-    testWidgets('"Altro" non ha ricerca: pulsante spento e testo che lo dice', (
-      tester,
-    ) async {
+    testWidgets('Ricerca personalizzata: "Altro" chiede cosa cercare, poi cerca '
+        'e il lavoro si ricorda la domanda', (tester) async {
+      schermoAlto(tester);
+      final archivio = await conChiave();
+      final ricerca = FintaRicerca(RicercaTrovata(trovata()));
+      await avviaApp(
+        tester,
+        archivio: archivio,
+        ricerca: ricerca,
+        adesso: oggi,
+      );
+      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await tocca(tester, find.text('Altro'));
+
+      // Per "Altro" non c'è una domanda di partenza: senza testo non parte
+      await tocca(tester, find.text('Cerca prezzi'));
+      expect(find.text('Scrivi cosa vuoi cercare'), findsOneWidget);
+      expect(ricerca.richieste, isEmpty);
+
+      // Si può toccare un'idea, e l'anteprima mostra cosa verrà cercato davvero
+      await tocca(
+        tester,
+        find.text(
+          'assistenza informatica privati costo intervento a domicilio',
+        ),
+      );
+      expect(
+        tester.widget<Text>(find.byKey(const Key('anteprima-domanda'))).data,
+        'Cercherò: «assistenza informatica privati costo intervento a domicilio '
+        'Italia euro»',
+      );
+
+      // ...oppure si scrive a mano
+      await scrivi(tester, 'campo-domanda', 'configurazione tablet anziani');
+      await tocca(tester, find.text('Cerca prezzi'));
+      expect(ricerca.richieste.single.tipo, TipoLavoro.altro);
+      expect(ricerca.richieste.single.domanda, 'configurazione tablet anziani');
+      expect(find.byKey(const Key('domanda-cercata')), findsOneWidget);
+
+      await tocca(tester, find.text('Usa questa forbice'));
+      expect(archivio.tabellaPrezzi.elenco.single.tipo, TipoLavoro.altro);
+
+      // Salvando il lavoro la domanda resta con lui
+      await scrivi(tester, 'campo-nome', 'Amici: cellulare e tablet');
+      await tocca(tester, find.text('Salva lavoro'));
+      final salvato = archivio.tabellaLavori.elenco.single;
+      expect(salvato.tipo, TipoLavoro.altro);
+      expect(salvato.domandaRicerca, 'configurazione tablet anziani');
+    });
+
+    testWidgets('La domanda parte da quella del tipo e la tua non viene '
+        'cambiata dal tipo', (tester) async {
       schermoAlto(tester);
       final archivio = await conChiave();
       await avviaApp(
@@ -354,11 +404,68 @@ void main() {
         adesso: oggi,
       );
       await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
-      await tocca(tester, find.text('Altro'));
-      expect(
-        find.text('Per questo tipo scrivi la forbice a mano.'),
-        findsOneWidget,
+      String campo() => tester
+          .widget<TextField>(
+            find.descendant(
+              of: find.byKey(const Key('campo-domanda')),
+              matching: find.byType(TextField),
+            ),
+          )
+          .controller!
+          .text;
+
+      expect(campo(), domandaPredefinita[TipoLavoro.doppiaggio]);
+      await tocca(tester, find.text('Codice'));
+      expect(campo(), domandaPredefinita[TipoLavoro.codice]);
+
+      await scrivi(tester, 'campo-domanda', 'sito per ristorante');
+      await tocca(tester, find.text('Claude'));
+      expect(campo(), 'sito per ristorante'); // l'hai scritta tu: resta
+
+      // Se è quella di partenza non si salva nel lavoro
+      await tocca(tester, find.text('Codice'));
+      await scrivi(
+        tester,
+        'campo-domanda',
+        domandaPredefinita[TipoLavoro.codice]!,
       );
+      await scrivi(tester, 'campo-nome', 'Sito');
+      await tocca(tester, find.text('Salva lavoro'));
+      expect(archivio.tabellaLavori.elenco.single.domandaRicerca, isNull);
+    });
+
+    testWidgets('Modificando un lavoro si ritrova la domanda e la data '
+        '"Richiesto il" non si perde', (tester) async {
+      schermoAlto(tester);
+      final archivio = await conChiave();
+      archivio.salvaLavoro(
+        Lavoro(
+          id: '',
+          nome: 'Amici',
+          tipo: TipoLavoro.altro,
+          relazione: Relazione.amico,
+          livello: 3,
+          prezzoPieno: 100,
+          prezzoFinale: 70,
+          richiestoIl: DateTime(2026, 10, 20),
+          domandaRicerca: 'configurazione tablet anziani',
+          creatoIl: DateTime(2026, 10, 1),
+        ),
+      );
+      await avviaApp(
+        tester,
+        archivio: archivio,
+        ricerca: FintaRicerca(RicercaTrovata(trovata())),
+        adesso: oggi,
+      );
+      await tocca(tester, find.text('Amici'));
+      await tocca(tester, find.bySemanticsLabel('Modifica lavoro'));
+      expect(find.text('configurazione tablet anziani'), findsOneWidget);
+
+      await tocca(tester, find.text('Salva modifiche'));
+      final l = archivio.tabellaLavori.elenco.single;
+      expect(l.richiestoIl, DateTime(2026, 10, 20));
+      expect(l.domandaRicerca, 'configurazione tablet anziani');
     });
 
     testWidgets('Impostazioni: chiave e aggiornamento settimanale', (
@@ -442,12 +549,15 @@ void main() {
       await agg.fatto;
       expect(
         ricerca.richieste.map((r) => r.tipo).toSet(),
-        tipiCercabili.toSet(),
+        domandaPredefinita.keys.toSet(),
       );
-      expect(archivio.tabellaPrezzi.elenco.length, tipiCercabili.length);
+      expect(archivio.tabellaPrezzi.elenco.length, domandaPredefinita.length);
       expect(archivio.tabellaPrezzi.elenco.every((p) => !p.manuale), isTrue);
       // Un credito per ricerca
-      expect(archivio.impostazioniSalvate.ricercheUsate, tipiCercabili.length);
+      expect(
+        archivio.impostazioniSalvate.ricercheUsate,
+        domandaPredefinita.length,
+      );
       agg.dispose();
       dati.dispose();
     });
@@ -479,6 +589,76 @@ void main() {
             .aggiornato,
         oggi(),
       );
+      agg.dispose();
+      dati.dispose();
+    });
+  });
+
+  group('Aggiornamento settimanale con domanda personalizzata', () {
+    test(
+      'rifà la stessa ricerca dell\'ultima volta, anche per "Altro"',
+      () async {
+        final archivio = FintoArchivio();
+        archivio.salvaImpostazioni(
+          const Impostazioni().copyWith(
+            chiaveTavily: 'tvly-prova-123456',
+            aggiornaPrezzi: true,
+          ),
+        );
+        archivio.salvaPrezzoMercato(
+          PrezzoMercato(
+            tipo: TipoLavoro.altro,
+            minimo: 80,
+            massimo: 120,
+            aggiornato: DateTime(2026, 10, 1), // vecchia di 27 giorni
+            manuale: false,
+            domanda: 'configurazione tablet anziani Italia prezzo euro',
+          ),
+        );
+        final dati = StatoDati(
+          accesso: FintoAccesso(iniziale: utenteProva),
+          archivio: archivio,
+          adesso: oggi,
+        );
+        for (var i = 0; i < 20 && !dati.caricato; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+        final ricerca = FintaRicerca(RicercaTrovata(trovata()));
+        final agg = AggiornamentoPrezzi(dati: dati, ricerca: ricerca);
+        await agg.fatto;
+
+        final altro = ricerca.richieste.where(
+          (r) => r.tipo == TipoLavoro.altro,
+        );
+        expect(
+          altro.single.domanda,
+          'configurazione tablet anziani Italia prezzo euro',
+        );
+        agg.dispose();
+        dati.dispose();
+      },
+    );
+
+    test('"Altro" senza una ricerca di prima non si cerca da solo', () async {
+      final archivio = FintoArchivio();
+      archivio.salvaImpostazioni(
+        const Impostazioni().copyWith(
+          chiaveTavily: 'tvly-prova-123456',
+          aggiornaPrezzi: true,
+        ),
+      );
+      final dati = StatoDati(
+        accesso: FintoAccesso(iniziale: utenteProva),
+        archivio: archivio,
+        adesso: oggi,
+      );
+      for (var i = 0; i < 20 && !dati.caricato; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      final ricerca = FintaRicerca(RicercaTrovata(trovata()));
+      final agg = AggiornamentoPrezzi(dati: dati, ricerca: ricerca);
+      await agg.fatto;
+      expect(ricerca.richieste.any((r) => r.tipo == TipoLavoro.altro), isFalse);
       agg.dispose();
       dati.dispose();
     });

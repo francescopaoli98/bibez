@@ -255,3 +255,16 @@ inventate da te):
 - Prova dal vivo (ottobre 2026): Doppiaggio ≈ 30–200 €, Codice ≈ 510–2.625 € (sito
   vetrina). **Claude** non dà numeri affidabili (i siti parlano di chatbot aziendali da
   migliaia di euro): lì l'app lo dice e la forbice si scrive a mano. È normale.
+
+**Ricerca personalizzata**
+- In Nuovo lavoro, sopra il riquadro blu, il campo **"Cosa vuoi cercare?"**: parte dalla
+  domanda del tipo (modificabile), ci sono **idee da toccare** e l'anteprima di quello che
+  verrà cercato davvero. L'app aggiunge da sola "Italia", "prezzo" ed "euro" se mancano
+  (`costruisciQuery`). Funziona anche per **Altro** (lì la domanda la scrivi tu).
+- La domanda si salva nel lavoro (solo se diversa da quella di partenza) e nella forbice
+  trovata: così l'aggiornamento settimanale rifà **la stessa ricerca**, anche per Altro.
+- Conviene cercare il **prezzo del servizio intero**, non tariffe orarie né prodotti.
+  Provate dal vivo: «assistenza informatica privati costo intervento a domicilio» →
+  40–50 € (5 siti); «servizio installazione e configurazione tablet costo» → 20–35 €.
+  Domande sui prodotti ("smartphone") danno prezzi dei prodotti (215–900 €): non servono.
+- Corretto un bug del passo 7: modificando un progetto si perdeva la data "Richiesto il".

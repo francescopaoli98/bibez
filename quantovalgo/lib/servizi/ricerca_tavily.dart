@@ -21,14 +21,18 @@ class RicercaTavily implements RicercaPrezzi {
   Future<RisultatoRicerca> cerca(
     TipoLavoro tipo, {
     required String chiave,
+    String? domanda,
   }) async {
-    final domanda = queryPerTipo[tipo];
     final limiti = limitiPerTipo[tipo];
-    if (domanda == null || limiti == null) {
+    final scritta = domanda?.trim() ?? '';
+    final base = scritta.isNotEmpty ? scritta : domandaPredefinita[tipo];
+    if (base == null || limiti == null) {
       return const RicercaFallita(
-        'Per questo tipo di lavoro la ricerca non c\'è: scrivi la forbice a mano.',
+        'Scrivi cosa vuoi cercare (per esempio "assistenza configurazione '
+        'smartphone a domicilio"), oppure inserisci la forbice a mano.',
       );
     }
+    final query = costruisciQuery(base);
 
     final http.Response risposta;
     try {
@@ -40,7 +44,7 @@ class RicercaTavily implements RicercaPrezzi {
               'Content-Type': 'application/json',
             },
             body: jsonEncode({
-              'query': domanda,
+              'query': query,
               'search_depth': 'basic', // 1 credito
               'max_results': 10,
               'include_answer': false,
@@ -61,6 +65,7 @@ class RicercaTavily implements RicercaPrezzi {
         return _leggi(
           utf8.decode(risposta.bodyBytes, allowMalformed: true),
           limiti,
+          query,
         );
       case 401:
         return const RicercaFallita(
@@ -84,7 +89,7 @@ class RicercaTavily implements RicercaPrezzi {
   }
 
   /// Dai risultati di Tavily alla forbice (o a "non affidabile").
-  RisultatoRicerca _leggi(String corpo, LimitiImporto limiti) {
+  RisultatoRicerca _leggi(String corpo, LimitiImporto limiti, String query) {
     final Object? json;
     try {
       json = jsonDecode(corpo);
@@ -105,6 +110,13 @@ class RicercaTavily implements RicercaPrezzi {
     final trovata = forbiceDaFonti(importiPerSito, limiti);
     return trovata == null
         ? const RicercaNonAffidabile()
-        : RicercaTrovata(trovata);
+        : RicercaTrovata(
+            ForbiceTrovata(
+              forbice: trovata.forbice,
+              fonti: trovata.fonti,
+              importi: trovata.importi,
+              domanda: query,
+            ),
+          );
   }
 }
