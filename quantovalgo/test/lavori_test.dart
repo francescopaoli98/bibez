@@ -30,8 +30,7 @@ Future<void> tocca(WidgetTester tester, Finder cosa) async {
 }
 
 /// Apre "Nuovo lavoro" con il + verde della barra.
-Future<void> apriNuovoLavoro(WidgetTester tester) =>
-    tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+Future<void> apriNuovoLavoro(WidgetTester tester) => apriModulo(tester);
 
 void main() {
   testWidgets('Lavoro nuovo: forbice a mano, prezzo suggerito e salvataggio', (

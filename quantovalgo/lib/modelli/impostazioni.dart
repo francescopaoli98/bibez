@@ -15,9 +15,17 @@ class Impostazioni {
     this.aggiornaPrezzi = false,
     this.ricercheMese = '',
     this.ricercheUsate = 0,
+    this.tariffaOraria = tariffaOrariaPredefinita,
+    this.rimborsoKm = rimborsoKmPredefinito,
   });
 
   static const tassePredefinite = 22.0;
+
+  /// Quanto vale un'ora del tuo tempo, di partenza (€).
+  static const tariffaOrariaPredefinita = 25.0;
+
+  /// Rimborso per ogni km di trasferta, di partenza (€).
+  static const rimborsoKmPredefinito = 0.30;
 
   /// Promemoria dei pagamenti con notifiche sul telefono.
   final bool promemoria;
@@ -48,6 +56,13 @@ class Impostazioni {
   /// Ricerche fatte in quel mese: ognuna usa 1 credito di Tavily.
   final int ricercheUsate;
 
+  /// Quanto vale un'ora del tuo tempo (€): serve a calcolare quanto chiedere
+  /// da ore di lavoro.
+  final double tariffaOraria;
+
+  /// Quanto chiedere per ogni km di trasferta (andata e ritorno contati).
+  final double rimborsoKm;
+
   /// I valori che entrano nel calcolo del prezzo suggerito.
   ParametriPrezzo get parametriPrezzo => ParametriPrezzo(
     scontoRelazione: scontoRelazione,
@@ -64,6 +79,8 @@ class Impostazioni {
     bool? aggiornaPrezzi,
     String? ricercheMese,
     int? ricercheUsate,
+    double? tariffaOraria,
+    double? rimborsoKm,
   }) => Impostazioni(
     promemoria: promemoria ?? this.promemoria,
     tasse: tasse ?? this.tasse,
@@ -74,6 +91,8 @@ class Impostazioni {
     aggiornaPrezzi: aggiornaPrezzi ?? this.aggiornaPrezzi,
     ricercheMese: ricercheMese ?? this.ricercheMese,
     ricercheUsate: ricercheUsate ?? this.ricercheUsate,
+    tariffaOraria: tariffaOraria ?? this.tariffaOraria,
+    rimborsoKm: rimborsoKm ?? this.rimborsoKm,
   );
 
   Map<String, Object?> toMap() => {
@@ -88,6 +107,8 @@ class Impostazioni {
     'aggiornaPrezzi': aggiornaPrezzi,
     'ricercheMese': ricercheMese,
     'ricercheUsate': ricercheUsate,
+    'tariffaOraria': tariffaOraria,
+    'rimborsoKm': rimborsoKm,
   };
 
   factory Impostazioni.fromMap(Map<String, Object?> dati) {
@@ -126,6 +147,12 @@ class Impostazioni {
           ? dati['ricercheMese'] as String
           : '',
       ricercheUsate: intero(dati['ricercheUsate'], 0),
+      tariffaOraria: dati['tariffaOraria'] is num
+          ? (dati['tariffaOraria'] as num).toDouble()
+          : tariffaOrariaPredefinita,
+      rimborsoKm: dati['rimborsoKm'] is num
+          ? (dati['rimborsoKm'] as num).toDouble()
+          : rimborsoKmPredefinito,
     );
   }
 }

@@ -31,9 +31,22 @@ import 'progetto.dart';
 /// Mostra la forbice di mercato (inserita a mano) e il prezzo suggerito:
 /// forbice × fattore competenza × (1 − sconto della relazione).
 class NuovoLavoroPagina extends StatefulWidget {
-  const NuovoLavoroPagina({super.key, this.esistente});
+  const NuovoLavoroPagina({
+    super.key,
+    this.esistente,
+    this.tipoIniziale,
+    this.clienteIniziale,
+    this.relazioneIniziale,
+  });
 
   final Lavoro? esistente;
+
+  /// Per un lavoro nuovo: il tipo già scelto nel percorso guidato.
+  final TipoLavoro? tipoIniziale;
+
+  /// Per un lavoro nuovo: il cliente già scelto (o la sola relazione).
+  final Cliente? clienteIniziale;
+  final Relazione? relazioneIniziale;
 
   @override
   State<NuovoLavoroPagina> createState() => _NuovoLavoroPaginaState();
@@ -91,6 +104,12 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     final l = widget.esistente;
     final dati = DatiScope.leggi(context);
     if (l == null) {
+      _tipo = widget.tipoIniziale ?? _tipo;
+      _relazione =
+          widget.clienteIniziale?.relazione ??
+          widget.relazioneIniziale ??
+          _relazione;
+      _cliente.text = widget.clienteIniziale?.nome ?? '';
       _categoriaId = dati.categoriaPredefinita(_tipo)?.id;
       _domanda.text = domandaPredefinita[_tipo] ?? '';
       return;

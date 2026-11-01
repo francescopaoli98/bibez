@@ -338,3 +338,20 @@ Future<void> tornaAllaHome(WidgetTester tester) async {
     await tester.pumpAndSettle();
   }
 }
+
+/// Dal pulsante verde arriva al **modulo completo** del nuovo lavoro (quello
+/// con i prezzi di mercato), passando dal percorso guidato: sceglie [tipo],
+/// "Senza cliente" e "Non lo so: guarda i prezzi di mercato".
+Future<void> apriModulo(
+  WidgetTester tester, {
+  String tipo = 'Doppiaggio',
+}) async {
+  await tester.tap(find.bySemanticsLabel('Nuovo lavoro'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(tipo));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const Key('chi-nessuno')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Non lo so: guarda i prezzi di mercato'));
+  await tester.pumpAndSettle();
+}

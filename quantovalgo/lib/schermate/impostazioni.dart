@@ -79,6 +79,8 @@ class ImpostazioniPagina extends StatelessWidget {
         const SizedBox(height: 16),
         const _SezioneTasseObiettivo(),
         const SizedBox(height: 16),
+        const _SezioneTariffa(),
+        const SizedBox(height: 16),
         const _SezioneRicerca(),
         const SizedBox(height: 16),
         const _SezioneSconti(),
@@ -537,6 +539,72 @@ class _SezioneRicerca extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Quanto vale il tuo tempo: serve a calcolare quanto chiedere dalle ore.
+class _SezioneTariffa extends StatelessWidget {
+  const _SezioneTariffa();
+
+  @override
+  Widget build(BuildContext context) {
+    final dati = DatiScope.di(context);
+    final i = dati.impostazioni;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _TitoloSezione(
+          'Il tuo prezzo',
+          'Per calcolare quanto chiedere dalle ore di lavoro.',
+        ),
+        _Gruppo(
+          righe: [
+            _RigaValore(
+              chiave: const Key('riga-tariffa'),
+              nome: 'Tariffa oraria',
+              valore: '${euro(i.tariffaOraria)}/h',
+              onTap: () async {
+                final nuova = await chiediNumero(
+                  context,
+                  titolo: 'Tariffa oraria',
+                  etichetta: 'Quanto vale un\'ora del tuo tempo (€)',
+                  iniziale: i.tariffaOraria,
+                  minimo: 1,
+                  massimo: 500,
+                  aiuto:
+                      'Con gli amici e la famiglia lo sconto si toglie da qui.',
+                );
+                if (nuova != null) {
+                  dati.salvaImpostazioni(
+                    dati.impostazioni.copyWith(tariffaOraria: nuova),
+                  );
+                }
+              },
+            ),
+            _RigaValore(
+              chiave: const Key('riga-km'),
+              nome: 'Rimborso al km',
+              valore: euro(i.rimborsoKm),
+              onTap: () async {
+                final nuovo = await chiediNumero(
+                  context,
+                  titolo: 'Rimborso al km',
+                  etichetta: 'Quanto chiedere per ogni km (€)',
+                  iniziale: i.rimborsoKm,
+                  massimo: 5,
+                  aiuto: 'Per la trasferta: si conta andata e ritorno, senza sconto.',
+                );
+                if (nuovo != null) {
+                  dati.salvaImpostazioni(
+                    dati.impostazioni.copyWith(rimborsoKm: nuovo),
+                  );
+                }
+              },
             ),
           ],
         ),

@@ -5,7 +5,7 @@ import '../widget/pulsante_lucido.dart';
 import '../widget/sfondo_laguna.dart';
 import '../widget/stile_lucido.dart';
 import 'home.dart';
-import 'nuovo_lavoro.dart';
+import 'nuovo_tipo.dart';
 
 /// Struttura principale: sfondo Laguna, la Home e il pulsante verde
 /// "Nuovo lavoro" che galleggia in basso. Niente barra di schede: il resto
@@ -14,9 +14,8 @@ class Guscio extends StatelessWidget {
   const Guscio({super.key});
 
   void _apriNuovoLavoro(BuildContext context) {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const NuovoLavoroPagina()));
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const PassoTipo()));
   }
 
   @override

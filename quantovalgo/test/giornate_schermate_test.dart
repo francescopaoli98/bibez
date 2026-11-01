@@ -61,7 +61,7 @@ void main() {
   ) async {
     schermoAlto(tester);
     final app = await avviaApp(tester, adesso: oggi);
-    await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+    await apriModulo(tester);
 
     await tocca(tester, find.text('A giornata'));
     // I campi dei lavori normali spariscono
@@ -87,7 +87,7 @@ void main() {
   testWidgets('Il guadagno al giorno si può cambiare', (tester) async {
     schermoAlto(tester);
     final app = await avviaApp(tester, adesso: oggi);
-    await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+    await apriModulo(tester);
     await tocca(tester, find.text('A giornata'));
     await scrivi(tester, 'campo-nome', 'Mercatino');
     await scrivi(tester, 'campo-tariffa', '45,5');
@@ -98,7 +98,7 @@ void main() {
   testWidgets('Validazione: nome e importo obbligatori', (tester) async {
     schermoAlto(tester);
     final app = await avviaApp(tester, adesso: oggi);
-    await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+    await apriModulo(tester);
     await tocca(tester, find.text('A giornata'));
     await scrivi(tester, 'campo-tariffa', '0');
     await tocca(tester, find.text('Salva lavoro'));

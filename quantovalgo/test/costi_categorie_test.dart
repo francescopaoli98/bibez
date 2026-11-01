@@ -430,7 +430,7 @@ void main() {
       final claude = categoria(a, 'Claude', colore: 8, tipo: TipoLavoro.claude);
       final podcast = categoria(a, 'Podcast', colore: 7, giorno: 2);
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
 
       expect(find.text('Categoria dei costi'), findsOneWidget);
       expect(

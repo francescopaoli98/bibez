@@ -9,9 +9,10 @@ import '../widget/pulsante_lucido.dart';
 import '../widget/selettore_relazione.dart';
 import '../widget/stile_lucido.dart';
 
-/// Apre il foglio per aggiungere o modificare un cliente.
-Future<void> modificaCliente(BuildContext context, {Cliente? esistente}) {
-  return mostraFoglio<void>(
+/// Apre il foglio per aggiungere o modificare un cliente. Restituisce il
+/// cliente salvato (vuoto se chiudi senza salvare o se lo elimini).
+Future<Cliente?> modificaCliente(BuildContext context, {Cliente? esistente}) {
+  return mostraFoglio<Cliente>(
     context,
     titolo: esistente == null ? 'Nuovo cliente' : 'Modifica cliente',
     costruttore: (_) => _FormCliente(esistente: esistente),
@@ -53,15 +54,21 @@ class _FormClienteState extends State<_FormCliente> {
     if (errore != null) return;
 
     final vecchio = widget.esistente;
-    dati.salvaCliente(
+    final cliente = Cliente(
+      id: vecchio?.id ?? '',
+      nome: nome,
+      relazione: _relazione,
+      creatoIl: vecchio?.creatoIl ?? DateTime.now(),
+    );
+    final id = dati.salvaCliente(cliente);
+    Navigator.of(context).pop(
       Cliente(
-        id: vecchio?.id ?? '',
-        nome: nome,
-        relazione: _relazione,
-        creatoIl: vecchio?.creatoIl ?? DateTime.now(),
+        id: id,
+        nome: cliente.nome,
+        relazione: cliente.relazione,
+        creatoIl: cliente.creatoIl,
       ),
     );
-    Navigator.of(context).pop();
   }
 
   Future<void> _elimina() async {

@@ -301,3 +301,31 @@ L'app non ha più la barra di schede: **una Home sola** e un pulsante verde "Nuo
   (parti, ore, prezzo pieno, sconti, spese, modifica ed elimina).
 - Guadagno all'ora e sconti regalati del mese ora stanno in **Obiettivo → "Il mese di …"**.
 - Il tipo di lavoro "A giornata" si apre direttamente sul suo calendario.
+
+## Nuovo lavoro in tre domande (tappa 2)
+
+Il pulsante verde apre un percorso guidato, una domanda a schermo pieno:
+1. **Che lavoro è?** Cinque tasselli (Doppiaggio, Codice, Claude, A giornata, Altro).
+   "A giornata" va al modulo breve del negozio (nome e guadagno al giorno).
+2. **Per chi è?** I clienti (più recenti prima) con relazione e sconto già indicati,
+   "Una persona nuova" (nome e relazione, poi si prosegue da solo) e "Senza cliente".
+3. **Quanto tempo ci metti?** Numero grande con + e − (scatti da 15 min), scorciatoie
+   1 ora / Mezza giornata / Giornata, interruttore **Trasferta** (km andata e ritorno,
+   toccando la riga si cambiano). "Non lo so: guarda i prezzi di mercato" apre il
+   **modulo completo** di prima, con forbice e Cerca prezzi, già con tipo e cliente scelti.
+4. **Il prezzo giusto**: una cifra grande e il conto, con "Cambia la cifra" e il nome
+   del lavoro (di partenza «Tipo per Cliente»). "Va bene, crea il lavoro" salva tutto e
+   apre la pagina del lavoro; Indietro porta alla Home.
+
+**Come si calcola** (`logica/prezzo_da_ore.dart`):
+- **Il tuo tempo** = ore × tariffa oraria (di partenza **25 €/h**).
+- **Sconto** = % della relazione (amico 30%, famiglia 50%...) **solo sul tempo**.
+- **Trasferta** = km × rimborso al km (di partenza **0,30 €**), **senza sconto**: è una
+  spesa vera. Si salva come costo diretto, quindi non conta come guadagno.
+- **Prezzo** = totale arrotondato ai **5 €** più vicini. Le righe mostrate sono in euro
+  interi e sommano sempre esattamente al prezzo (la differenza è "Arrotondo" o "Cifra
+  scelta da te"). "A te restano circa N €/h" = (prezzo − trasferta) ÷ ore.
+- Esempio: 5 h 45, amico, 20 km → 144 − 43 + 6 − 2 = **105 €**, a te ~17 €/h.
+- Si salva un lavoro con una parte "Lavoro intero" (ricavo = prezzo, ore, spese di
+  trasferta); prezzo pieno = tempo + trasferta senza sconto, così i regali si contano.
+- Tariffa oraria e rimborso al km si cambiano in **Impostazioni → Il tuo prezzo**.

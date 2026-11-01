@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'finti.dart';
@@ -43,18 +42,17 @@ void main() {
     await apriEChiudi('Impostazioni', 'Impostazioni');
   });
 
-  testWidgets(
-    'Il pulsante verde apre Nuovo lavoro e Indietro torna alla Home',
-    (tester) async {
-      await avviaApp(tester);
+  testWidgets('Il pulsante verde apre il percorso e Chiudi torna alla Home', (
+    tester,
+  ) async {
+    await avviaApp(tester);
 
-      await tester.tap(find.bySemanticsLabel('Nuovo lavoro'));
-      await tester.pumpAndSettle();
-      expect(find.byType(TextField), findsWidgets);
+    await tester.tap(find.bySemanticsLabel('Nuovo lavoro'));
+    await tester.pumpAndSettle();
+    expect(find.text('Che lavoro è?'), findsOneWidget);
 
-      await tester.tap(find.bySemanticsLabel('Indietro'));
-      await tester.pumpAndSettle();
-      expect(find.text('Questo mese ti resta'), findsOneWidget);
-    },
-  );
+    await tester.tap(find.bySemanticsLabel('Chiudi'));
+    await tester.pumpAndSettle();
+    expect(find.text('Questo mese ti resta'), findsOneWidget);
+  });
 }

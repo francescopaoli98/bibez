@@ -214,7 +214,7 @@ void main() {
       final ricerca = FintaRicerca(RicercaTrovata(trovata()));
       await avviaApp(tester, ricerca: ricerca, adesso: oggi);
 
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
       expect(find.text('Serve la chiave di Tavily'), findsOneWidget);
       expect(ricerca.richieste, isEmpty);
@@ -236,7 +236,7 @@ void main() {
           adesso: oggi,
         );
 
-        await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+        await apriModulo(tester);
         await tocca(tester, find.text('Cerca prezzi'));
         expect(ricerca.richieste.single.tipo, TipoLavoro.doppiaggio);
         expect(ricerca.richieste.single.chiave, 'tvly-prova-123456');
@@ -271,7 +271,7 @@ void main() {
         ricerca: FintaRicerca(RicercaTrovata(trovata())),
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
 
       expect(
@@ -305,7 +305,7 @@ void main() {
         ),
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
 
       expect(find.text('Numeri non affidabili'), findsOneWidget);
@@ -339,7 +339,7 @@ void main() {
         ricerca: FintaRicerca(RicercaTrovata(trovata())),
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
 
       await tocca(tester, find.byKey(const Key('riferimento-due.com')));
@@ -378,7 +378,7 @@ void main() {
           ricerca: FintaRicerca(RicercaTrovata(trovata())),
           adesso: oggi,
         );
-        await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+        await apriModulo(tester);
         await tocca(tester, find.text('Cerca prezzi'));
 
         await tocca(tester, find.byKey(const Key('riferimento-uno.it')));
@@ -401,7 +401,7 @@ void main() {
           ricerca: FintaRicerca(RicercaTrovata(trovata())),
           adesso: oggi,
         );
-        await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+        await apriModulo(tester);
         expect(find.byKey(const Key('vedi-riferimenti')), findsNothing);
 
         await tocca(tester, find.text('Cerca prezzi'));
@@ -451,7 +451,7 @@ void main() {
         ),
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
 
       expect(find.byKey(const Key('riferimento-sito8.it')), findsOneWidget);
@@ -469,7 +469,7 @@ void main() {
         ricerca: FintaRicerca(RicercaTrovata(trovata())),
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
       await tocca(tester, find.text('Non usarla'));
       expect(archivio.tabellaPrezzi.elenco, isEmpty);
@@ -494,7 +494,7 @@ void main() {
         ),
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
       expect(find.text('Numeri non affidabili'), findsOneWidget);
       // Dice perché, con i numeri
@@ -524,7 +524,7 @@ void main() {
         ),
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
       expect(find.text('Ricerca non riuscita'), findsOneWidget);
       expect(
@@ -553,7 +553,7 @@ void main() {
         ricerca: ricerca,
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Cerca prezzi'));
       expect(find.text('Limite del mese raggiunto'), findsOneWidget);
       expect(ricerca.richieste, isEmpty);
@@ -589,7 +589,7 @@ void main() {
         ricerca: ricerca,
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       await tocca(tester, find.text('Altro'));
 
       // Per "Altro" non c'è una domanda di partenza: senza testo non parte
@@ -638,7 +638,7 @@ void main() {
         ricerca: FintaRicerca(RicercaTrovata(trovata())),
         adesso: oggi,
       );
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       String campo() => tester
           .widget<TextField>(
             find.descendant(
@@ -930,7 +930,7 @@ void main() {
       );
 
       // Il prezzo suggerito usa la forbice spostata del massimo, +15%: 92 – 138 €
-      await tocca(tester, find.bySemanticsLabel('Nuovo lavoro'));
+      await apriModulo(tester);
       expect(find.text('92 – 138 €'), findsOneWidget);
       expect(
         find.textContaining('Corretta del +15% sui tuoi ultimi 3 lavori'),
