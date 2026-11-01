@@ -63,7 +63,7 @@ void main() {
       progetto(archivio, 'Spot', scadenza: DateTime(2026, 11, 10));
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Spot'));
+      await apriLavoroPerNome(tester, 'Spot');
       expect(find.text('Da incassare'), findsOneWidget);
 
       await tocca(tester, find.text('Segna incassato'));
@@ -88,7 +88,7 @@ void main() {
       progetto(archivio, 'Spot', scadenza: DateTime(2026, 10, 10));
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Spot'));
+      await apriLavoroPerNome(tester, 'Spot');
       expect(find.text('In ritardo di 18 giorni'), findsOneWidget);
     });
 
@@ -100,7 +100,7 @@ void main() {
       progetto(archivio, 'Spot');
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Spot'));
+      await apriLavoroPerNome(tester, 'Spot');
       expect(find.text('Nessuna scadenza'), findsOneWidget);
 
       // La scadenza si sceglie da un foglio che si apre toccando la riga
@@ -135,7 +135,7 @@ void main() {
       );
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Spot'));
+      await apriLavoroPerNome(tester, 'Spot');
       expect(find.textContaining('pagato dopo 10 giorni'), findsOneWidget);
       expect(find.text('Richiesto il 1 ottobre 2026'), findsOneWidget);
     });
@@ -151,7 +151,7 @@ void main() {
       progetto(archivio, 'Beta', scadenza: DateTime(2026, 10, 10));
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Clienti'));
+      await apriDalMenu(tester, 'Clienti');
       expect(find.text('2 lavori · 1 in ritardo'), findsOneWidget);
       await tocca(tester, find.text('Vedi'));
 
@@ -216,7 +216,7 @@ void main() {
       );
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Clienti'));
+      await apriDalMenu(tester, 'Clienti');
       expect(find.text('Pagano in media'), findsOneWidget);
       expect(find.text('10 giorni'), findsOneWidget);
       expect(find.text('I migliori'), findsOneWidget);
@@ -245,7 +245,7 @@ void main() {
       progetto(archivio, 'Spot', scadenza: DateTime(2026, 11, 20));
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Clienti'));
+      await apriDalMenu(tester, 'Clienti');
       expect(find.text('Ritardatari'), findsNothing);
       expect(find.text('I migliori'), findsNothing);
       expect(find.text('—'), findsOneWidget); // nessuno ha ancora pagato
@@ -271,7 +271,7 @@ void main() {
       expect(finto.programmati.first.quando, DateTime(2026, 11, 4, 9));
       expect(finto.permessiChiesti, 1);
 
-      await tocca(tester, find.text('Spot'));
+      await apriLavoroPerNome(tester, 'Spot');
       await tocca(tester, find.text('Segna incassato'));
       expect(finto.programmati, isEmpty);
       // Il permesso si chiede una sola volta
@@ -311,7 +311,7 @@ void main() {
       );
       expect(finto.programmati, isNotEmpty);
 
-      await tocca(tester, find.bySemanticsLabel('Impostazioni'));
+      await apriDalMenu(tester, 'Impostazioni');
       expect(find.text('Promemoria pagamenti'), findsOneWidget);
 
       await tocca(tester, find.byKey(const Key('interruttore-promemoria')));

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widget/stato_vuoto.dart';
-import 'scheda.dart';
+import '../widget/pagina_secondaria.dart';
 
 /// Scheda "Preventivi" (per ora vuota).
 class PreventiviPagina extends StatelessWidget {
@@ -9,7 +9,7 @@ class PreventiviPagina extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scheda(
+    return const PaginaSecondaria(
       titolo: 'Preventivi',
       figli: [
         StatoVuoto(

@@ -23,6 +23,7 @@ import '../widget/stile_lucido.dart';
 import 'foglio_categoria.dart';
 import 'foglio_forbice.dart';
 import 'foglio_ricerca.dart';
+import 'lavoro.dart';
 import 'progetto.dart';
 
 /// Modulo "Nuovo lavoro". Con [esistente] diventa "Modifica lavoro".
@@ -265,7 +266,7 @@ class _NuovoLavoroPaginaState extends State<NuovoLavoroPagina> {
     }
     // Si apre subito il progetto appena creato
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => ProgettoPagina(lavoroId: id)),
+      MaterialPageRoute<void>(builder: (_) => LavoroPagina(lavoroId: id)),
     );
   }
 

@@ -75,7 +75,7 @@ void main() {
   ) async {
     schermoAlto(tester);
     final app = await avviaApp(tester, archivio: archivioConTreProgetti());
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
     expect(find.text('Nessun costo'), findsOneWidget);
 
     await tocca(tester, find.text('Aggiungi costo'));
@@ -102,7 +102,7 @@ void main() {
     (tester) async {
       schermoAlto(tester);
       final app = await avviaApp(tester, archivio: archivioConTreProgetti());
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       // Microfono 90 € spalmato su 6 mesi
       await tocca(tester, find.text('Aggiungi costo'));
@@ -166,7 +166,7 @@ void main() {
         ),
       );
       await avviaApp(tester, archivio: archivio);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       expect(find.text('Da recuperare 90 € di 90 €'), findsOneWidget);
     },
@@ -177,7 +177,7 @@ void main() {
   ) async {
     schermoAlto(tester);
     final app = await avviaApp(tester, archivio: archivioConTreProgetti());
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     // Categorie di partenza con un tocco
     await tocca(tester, find.text('Gestisci categorie'));
@@ -231,7 +231,7 @@ void main() {
     (tester) async {
       schermoAlto(tester);
       final app = await avviaApp(tester, archivio: archivioConTreProgetti());
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       await tocca(tester, find.text('Aggiungi costo'));
       await scrivi(tester, 'campo-nome', 'Software audio');
@@ -256,7 +256,7 @@ void main() {
   ) async {
     schermoAlto(tester);
     final app = await avviaApp(tester, archivio: archivioConTreProgetti());
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     await tocca(tester, find.text('Aggiungi costo'));
     await tocca(tester, find.text('Salva'));
@@ -283,7 +283,7 @@ void main() {
   ) async {
     schermoAlto(tester);
     await avviaApp(tester);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     await tocca(tester, find.text('Aggiungi costo'));
     await scrivi(tester, 'campo-nome', 'Abbonamento Claude');
@@ -310,7 +310,7 @@ void main() {
       ),
     );
     final app = await avviaApp(tester, archivio: archivio);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     await tocca(tester, find.text('Software audio'));
     await scrivi(tester, 'campo-importo', '15');
@@ -352,7 +352,7 @@ void main() {
     );
     await avviaApp(tester, archivio: archivio);
 
-    await tocca(tester, find.text('Il bosco'));
+    await apriLavoroPerNome(tester, 'Il bosco');
     expect(
       find.text('Costi condivisi di ${nomeMese(meseCorrente)}: 11 €'),
       findsOneWidget,
@@ -385,7 +385,7 @@ void main() {
       ),
     );
     final app = await avviaApp(tester, archivio: archivio);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
     expect(find.text('Doppiaggio 15 €'), findsOneWidget);
 
     await tocca(tester, find.text('Gestisci categorie'));

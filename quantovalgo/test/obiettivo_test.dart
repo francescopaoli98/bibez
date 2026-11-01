@@ -135,7 +135,7 @@ void main() {
       schermoAlto(tester);
       final archivio = FintoArchivio();
       await avviaApp(tester, archivio: archivio, adesso: oggi);
-      await tocca(tester, find.bySemanticsLabel('Impostazioni'));
+      await apriDalMenu(tester, 'Impostazioni');
 
       expect(find.text('22%'), findsOneWidget);
       await tocca(tester, find.byKey(const Key('riga-tasse')));
@@ -166,7 +166,7 @@ void main() {
       schermoAlto(tester);
       final archivio = FintoArchivio();
       await avviaApp(tester, archivio: archivio, adesso: oggi);
-      await tocca(tester, find.bySemanticsLabel('Impostazioni'));
+      await apriDalMenu(tester, 'Impostazioni');
 
       await tocca(tester, find.byKey(const Key('riga-tasse')));
       await scriviNumero(tester, '150');
@@ -198,6 +198,7 @@ void main() {
         ),
       );
       await avviaApp(tester, archivio: archivio, adesso: oggi);
+      await apriDalMenu(tester, 'Lavori');
       expect(find.textContaining('Amico −45%'), findsOneWidget);
     });
 
@@ -259,7 +260,7 @@ void main() {
       );
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Obiettivo'));
+      await apriDalMenu(tester, 'Obiettivo');
       // Saldo 1.500, tasse 22% = 330, netto 1.170 su 1.500 = 78%
       expect(find.text('78%'), findsOneWidget);
       expect(find.text('Netto 1.170 € su 1.500 €'), findsOneWidget);
@@ -279,7 +280,7 @@ void main() {
       final archivio = FintoArchivio();
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Obiettivo'));
+      await apriDalMenu(tester, 'Obiettivo');
       expect(find.text('Imposta obiettivo'), findsOneWidget);
       expect(
         find.text("Imposta l'obiettivo mensile per calcolarla."),

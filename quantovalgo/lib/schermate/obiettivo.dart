@@ -56,6 +56,8 @@ class _ObiettivoPaginaState extends State<ObiettivoPagina> {
           onPressed: () => modificaObiettivo(context),
         ),
         const SizedBox(height: 16),
+        _CartaMese(piano: piano, mese: mese),
+        const SizedBox(height: 12),
         _CartaPareggio(piano: piano),
         const SizedBox(height: 12),
         _CartaTariffa(piano: piano),
@@ -272,6 +274,58 @@ class _CartaTariffa extends StatelessWidget {
               '${ore(piano.oreMese)}.',
               style: grigio,
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Come è andato il mese, in quattro righe: quanto hai incassato e speso,
+/// quanto guadagni all'ora e quanti sconti hai regalato.
+class _CartaMese extends StatelessWidget {
+  const _CartaMese({required this.piano, required this.mese});
+
+  final PianoObiettivo piano;
+  final DateTime mese;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context).textTheme;
+    final saldo = piano.saldoMese;
+
+    Widget riga(String nome, String valore, {Color? colore}) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(nome, style: tema.titleMedium)),
+          Text(
+            valore,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: colore,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return CartaVetro(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            header: true,
+            child: Text('Il mese di ${nomeMese(mese)}', style: tema.titleLarge),
+          ),
+          riga('Incassato', euro(saldo.incassato)),
+          riga('Spese', euro(saldo.costi)),
+          riga(
+            "All'ora",
+            saldo.guadagnoOra == null ? '—' : '${euro(saldo.guadagnoOra!)}/h',
+          ),
+          riga('Sconti regalati', euro(saldo.regalato)),
         ],
       ),
     );

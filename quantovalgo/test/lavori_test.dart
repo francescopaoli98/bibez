@@ -77,7 +77,12 @@ void main() {
 
     await tocca(tester, find.text('Salva lavoro'));
 
-    // Si apre il progetto: +700 € (sottoprogetto "Lavoro intero"), 300 € regalati
+    // Si apre la pagina semplice; i dettagli hanno le parti e i regali
+    expect(find.text('Ti devono'), findsOneWidget);
+    expect(find.text('700 €'), findsOneWidget);
+    await tocca(tester, find.byKey(const Key('tutti-i-dettagli')));
+
+    // Il progetto: +700 € (sottoprogetto "Lavoro intero"), 300 € regalati
     expect(find.text('Audiolibro «Il bosco»'), findsWidgets);
     expect(find.text('+700 €'), findsWidgets);
     expect(find.text('Lavoro intero'), findsOneWidget);
@@ -126,6 +131,7 @@ void main() {
       tester,
       find.text('Salva lavoro'),
     ); // senza prezzo: nessuna parte
+    await tocca(tester, find.byKey(const Key('tutti-i-dettagli')));
     expect(find.text('Nessun sottoprogetto'), findsOneWidget);
 
     Future<void> aggiungi(
@@ -179,6 +185,7 @@ void main() {
     await scrivi(tester, 'campo-pieno', '100');
     await tocca(tester, find.text('Salva lavoro'));
     expect(app.archivio.tabellaSotto.elenco, hasLength(1));
+    await tocca(tester, find.byKey(const Key('tutti-i-dettagli')));
 
     await tocca(tester, find.text('Lavoro intero'));
     await tocca(tester, find.bySemanticsLabel('Modifica sottoprogetto'));
@@ -194,42 +201,42 @@ void main() {
     await tocca(tester, find.text('Elimina progetto'));
     await tocca(tester, find.widgetWithText(TextButton, 'Elimina'));
     expect(app.archivio.tabellaLavori.elenco, isEmpty);
-    expect(
-      find.text('Ancora nessun progetto'),
-      findsOneWidget,
-    ); // di nuovo in Home
+    // Di nuovo in Home, senza più niente da incassare
+    expect(find.text('Nessuno ti deve soldi'), findsOneWidget);
   });
 
-  testWidgets('I progetti compaiono in Home e nella scheda Progetti', (
-    tester,
-  ) async {
-    schermoAlto(tester);
-    final archivio = FintoArchivio();
-    archivio.salvaLavoro(
-      Lavoro(
-        id: '',
-        nome: 'Spot radio',
-        tipo: TipoLavoro.doppiaggio,
-        relazione: Relazione.nuovo,
-        livello: 3,
-        prezzoPieno: 0,
-        prezzoFinale: 0,
-        creatoIl: DateTime(2026, 10, 1),
-      ),
-    );
-    await avviaApp(tester, archivio: archivio);
+  testWidgets(
+    'Un lavoro da incassare sta in Home, tutti i lavori stanno in "Lavori"',
+    (tester) async {
+      schermoAlto(tester);
+      final archivio = FintoArchivio();
+      archivio.salvaLavoro(
+        Lavoro(
+          id: '',
+          nome: 'Spot radio',
+          tipo: TipoLavoro.doppiaggio,
+          relazione: Relazione.nuovo,
+          livello: 3,
+          prezzoPieno: 0,
+          prezzoFinale: 0,
+          creatoIl: DateTime(2026, 10, 1),
+        ),
+      );
+      await avviaApp(tester, archivio: archivio);
 
-    expect(find.text('Spot radio'), findsOneWidget); // Home
-    expect(find.text('Doppiaggio · Nuovo'), findsOneWidget);
+      // Home: è da incassare, quindi compare tra "Ti devono"
+      expect(find.text('Spot radio · 0 €'), findsOneWidget);
 
-    await tocca(tester, find.text('Progetti').last);
-    expect(find.text('Spot radio'), findsOneWidget);
-  });
+      await apriDalMenu(tester, 'Lavori');
+      expect(find.text('Spot radio'), findsOneWidget);
+      expect(find.text('Doppiaggio · Nuovo'), findsOneWidget);
+    },
+  );
 
   testWidgets('Clienti: si crea, si modifica e si elimina', (tester) async {
     schermoAlto(tester);
     final app = await avviaApp(tester);
-    await tocca(tester, find.text('Clienti')); // pulsante in Home
+    await apriDalMenu(tester, 'Clienti'); // pulsante in Home
     expect(find.text('Nessun cliente'), findsOneWidget);
 
     await tocca(tester, find.text('+ Nuovo'));
@@ -288,7 +295,7 @@ void main() {
       ),
     );
     await avviaApp(tester, archivio: archivio);
-    await tocca(tester, find.text('Clienti'));
+    await apriDalMenu(tester, 'Clienti');
 
     expect(find.text('Amico −30% · 1 lavoro'), findsOneWidget);
     // Totale dei suoi lavori: nella riga del cliente e nel riquadro "Da incassare"
@@ -314,16 +321,16 @@ void main() {
       ),
     );
     final app = await avviaApp(tester, archivio: archivio);
-    expect(find.text('Privato'), findsOneWidget);
+    expect(find.textContaining('Privato'), findsOneWidget);
 
-    await tocca(tester, find.bySemanticsLabel('Impostazioni'));
+    await apriDalMenu(tester, 'Impostazioni');
     await tocca(tester, find.text('Esci'));
     expect(find.text('Accedi con Google'), findsOneWidget);
-    expect(find.text('Privato'), findsNothing);
+    expect(find.textContaining('Privato'), findsNothing);
 
     // Rientrando i dati tornano
     await tocca(tester, find.text('Accedi con Google'));
     expect(app.accesso.accessiRichiesti, 1);
-    expect(find.text('Privato'), findsOneWidget);
+    expect(find.textContaining('Privato'), findsOneWidget);
   });
 }

@@ -571,7 +571,7 @@ void main() {
       );
       final app = await avviaApp(tester, archivio: archivio, adesso: oggi);
       expect(app.archivio.impostazioniSalvate.ricercheUsate, 49);
-      await tocca(tester, find.bySemanticsLabel('Impostazioni'));
+      await apriDalMenu(tester, 'Impostazioni');
       expect(
         tester.widget<Text>(find.byKey(const Key('ricerche-del-mese'))).data,
         '0 su 50',
@@ -693,7 +693,7 @@ void main() {
         ricerca: FintaRicerca(RicercaTrovata(trovata())),
         adesso: oggi,
       );
-      await tocca(tester, find.text('Amici'));
+      await apriLavoroPerNome(tester, 'Amici');
       await tocca(tester, find.bySemanticsLabel('Modifica lavoro'));
       expect(find.text('configurazione tablet anziani'), findsOneWidget);
 
@@ -709,7 +709,7 @@ void main() {
       schermoAlto(tester);
       final archivio = FintoArchivio();
       await avviaApp(tester, archivio: archivio, adesso: oggi);
-      await tocca(tester, find.bySemanticsLabel('Impostazioni'));
+      await apriDalMenu(tester, 'Impostazioni');
 
       expect(find.text('Non inserita'), findsOneWidget);
       expect(find.text('Prima inserisci la chiave.'), findsOneWidget);

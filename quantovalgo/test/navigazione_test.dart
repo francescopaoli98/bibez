@@ -1,65 +1,60 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'finti.dart';
 
 void main() {
-  testWidgets('L\'app si apre sulla Home', (tester) async {
-    await avviaApp(tester);
-
-    expect(find.text('QuantoValgo'), findsOneWidget);
-    expect(find.text('Saldo del mese'), findsOneWidget);
-  });
-
-  testWidgets('La barra in basso cambia scheda', (tester) async {
-    await avviaApp(tester);
-
-    for (final nome in ['Progetti', 'Preventivi', 'Costi']) {
-      // Il testo compare anche nella barra: si tocca quello della barra.
-      await tester.tap(find.text(nome).last);
-      await tester.pumpAndSettle();
-      expect(find.text(nome), findsWidgets);
-    }
-
-    await tester.tap(find.text('Home'));
-    await tester.pumpAndSettle();
-    expect(find.text('Saldo del mese'), findsOneWidget);
-  });
-
-  testWidgets('Il + apre Nuovo lavoro e Indietro torna alla Home', (
+  testWidgets('L\'app si apre sulla Home, senza barra in basso', (
     tester,
   ) async {
     await avviaApp(tester);
 
-    await tester.tap(find.bySemanticsLabel('Nuovo lavoro'));
-    await tester.pumpAndSettle();
+    expect(find.text('Ciao Francesco'), findsOneWidget);
+    expect(find.text('Questo mese ti resta'), findsOneWidget);
     expect(find.text('Nuovo lavoro'), findsOneWidget);
-
-    await tester.tap(find.bySemanticsLabel('Indietro'));
-    await tester.pumpAndSettle();
-    expect(find.text('Saldo del mese'), findsOneWidget);
+    // Le vecchie schede non ci sono più: tutto sta in "Altro"
+    expect(find.text('Preventivi'), findsNothing);
+    expect(find.text('Progetti'), findsNothing);
   });
 
-  testWidgets('Dalla Home si aprono Clienti, Obiettivo e Impostazioni', (
+  testWidgets('"Altro" apre sei tasselli e ognuno apre la sua pagina', (
     tester,
   ) async {
     await avviaApp(tester);
 
-    Future<void> apriEChiudi(
-      Future<void> Function() tocca,
-      String titolo,
-    ) async {
-      await tocca();
+    // Siamo già nel menu: si tocca il tassello e si torna indietro
+    Future<void> apriEChiudi(String voce, String titolo) async {
+      await tester.tap(find.text(voce));
       await tester.pumpAndSettle();
       expect(find.text(titolo), findsWidgets);
       await tester.tap(find.bySemanticsLabel('Indietro'));
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(); // torna al menu
     }
 
-    await apriEChiudi(() => tester.tap(find.text('Clienti')), 'Clienti');
-    await apriEChiudi(() => tester.tap(find.text('Obiettivo')), 'Obiettivo');
-    await apriEChiudi(
-      () => tester.tap(find.bySemanticsLabel('Impostazioni')),
-      'Impostazioni',
-    );
+    await tester.tap(find.bySemanticsLabel('Altro'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cosa cerchi?'), findsOneWidget);
+
+    await apriEChiudi('Lavori', 'Lavori');
+    await apriEChiudi('Spese', 'Spese');
+    await apriEChiudi('Clienti', 'Clienti');
+    await apriEChiudi('Obiettivo', 'Obiettivo');
+    await apriEChiudi('Preventivi', 'Preventivi');
+    await apriEChiudi('Impostazioni', 'Impostazioni');
   });
+
+  testWidgets(
+    'Il pulsante verde apre Nuovo lavoro e Indietro torna alla Home',
+    (tester) async {
+      await avviaApp(tester);
+
+      await tester.tap(find.bySemanticsLabel('Nuovo lavoro'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsWidgets);
+
+      await tester.tap(find.bySemanticsLabel('Indietro'));
+      await tester.pumpAndSettle();
+      expect(find.text('Questo mese ti resta'), findsOneWidget);
+    },
+  );
 }

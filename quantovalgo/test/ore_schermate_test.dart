@@ -79,7 +79,7 @@ void main() {
 
   /// Apre il progetto "Il bosco" dalla Home.
   Future<void> apriProgetto(WidgetTester tester) =>
-      tocca(tester, find.text('Il bosco').first);
+      apriLavoroPerNome(tester, 'Il bosco');
 
   testWidgets('Cronometro: avvia, corre, ferma e salva i minuti', (
     tester,
@@ -106,7 +106,7 @@ void main() {
     );
 
     // Torno alla Home: la banda in basso mostra il cronometro
-    await tocca(tester, find.bySemanticsLabel('Indietro'));
+    await tornaAllaHome(tester);
     expect(find.text('00:00:00'), findsOneWidget);
 
     // Passa 1 ora e 5 minuti
@@ -404,7 +404,7 @@ void main() {
       ),
     );
     await avviaApp(tester, archivio: a, adesso: adesso);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     // 3 h : 1 h → 15 € e 5 €, non secondo le ore iniziali (1 : 9)
     expect(find.text('Il bosco 15 €'), findsOneWidget);

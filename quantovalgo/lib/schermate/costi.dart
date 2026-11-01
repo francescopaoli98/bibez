@@ -18,7 +18,7 @@ import '../widget/stato_vuoto.dart';
 import '../widget/stile_lucido.dart';
 import 'foglio_categoria.dart';
 import 'foglio_costo.dart';
-import 'scheda.dart';
+import '../widget/pagina_secondaria.dart';
 
 /// Scheda Costi: i costi di un mese, divisi tra i progetti e per categoria.
 class CostiPagina extends StatefulWidget {
@@ -52,8 +52,8 @@ class _CostiPaginaState extends State<CostiPagina> {
     final totale = dati.costiDelMese(mese);
     final gruppi = dati.gruppiDaRecuperare();
 
-    return Scheda(
-      titolo: 'Costi',
+    return PaginaSecondaria(
+      titolo: 'Spese',
       sottotitolo: 'Abbonamenti e spese, divisi sui progetti',
       figli: [
         SelettoreMese(mese: mese, onCambia: _vaiA),

@@ -9,7 +9,7 @@ import 'aspetto_tipo.dart';
 import 'carta_vetro.dart';
 import 'sfera_lucida.dart';
 import 'stato_vuoto.dart';
-import '../schermate/progetto.dart';
+import '../schermate/lavoro.dart';
 
 /// Colore di un importo: verde se positivo, rosso se negativo.
 Color coloreImporto(double valore) => valore > 0
@@ -44,11 +44,7 @@ class RigaProgetto extends StatelessWidget {
 
     return CartaVetro(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => ProgettoPagina(lavoroId: lavoro.id),
-        ),
-      ),
+      onTap: () => apriLavoro(context, lavoro),
       child: Row(
         children: [
           IconaSfera(icona: lavoro.tipo.icona, stile: lavoro.tipo.stile),

@@ -13,7 +13,7 @@ import '../widget/riquadro_da_incassare.dart';
 import '../widget/sfera_lucida.dart';
 import '../widget/stato_vuoto.dart';
 import '../widget/stile_lucido.dart';
-import 'progetto.dart';
+import 'lavoro.dart';
 
 /// Tutti i progetti ancora da incassare: prima i più in ritardo.
 /// Da qui si segna "incassato" con un tocco.
@@ -84,11 +84,7 @@ class _RigaPagamento extends StatelessWidget {
 
     return CartaVetro(
       padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => ProgettoPagina(lavoroId: lavoro.id),
-        ),
-      ),
+      onTap: () => apriLavoro(context, lavoro),
       child: Row(
         children: [
           Expanded(

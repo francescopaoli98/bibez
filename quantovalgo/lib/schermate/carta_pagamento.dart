@@ -97,11 +97,7 @@ class CartaPagamento extends StatelessWidget {
             InkWell(
               key: const Key('scadenza-riga'),
               borderRadius: BorderRadius.circular(12),
-              onTap: () => mostraFoglio<void>(
-                context,
-                titolo: 'Scadenza del pagamento',
-                costruttore: (_) => _ScelteScadenza(lavoroId: lavoro.id),
-              ),
+              onTap: () => cambiaScadenza(context, lavoro.id),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(
@@ -157,6 +153,15 @@ class CartaPagamento extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Apre il foglio per cambiare la scadenza di un pagamento.
+Future<void> cambiaScadenza(BuildContext context, String lavoroId) {
+  return mostraFoglio<void>(
+    context,
+    titolo: 'Scadenza del pagamento',
+    costruttore: (_) => _ScelteScadenza(lavoroId: lavoroId),
+  );
 }
 
 /// Dentro il foglio: scorciatoie per la scadenza, data a scelta o nessuna.

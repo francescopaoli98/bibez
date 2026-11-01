@@ -115,7 +115,7 @@ void main() {
       final id = archivio.salvaLavoro(negozio());
       await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-      await tocca(tester, find.text('Negozio con mamma'));
+      await apriLavoroPerNome(tester, 'Negozio con mamma');
       await tocca(tester, find.text('+ Aggiungi'));
 
       // Lo schema di partenza (lun–ven, 10 giorni) si adatta a 5
@@ -157,7 +157,7 @@ void main() {
       final archivio = FintoArchivio();
       archivio.salvaLavoro(negozio());
       await avviaApp(tester, archivio: archivio, adesso: oggi);
-      await tocca(tester, find.text('Negozio con mamma'));
+      await apriLavoroPerNome(tester, 'Negozio con mamma');
       await tocca(tester, find.text('+ Aggiungi'));
 
       // Solo martedì, giovedì e sabato per 3 giorni: gio 29, sab 31, mar 3
@@ -191,7 +191,7 @@ void main() {
     final archivio = FintoArchivio();
     archivio.salvaLavoro(negozio());
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Negozio con mamma'));
+    await apriLavoroPerNome(tester, 'Negozio con mamma');
     await tocca(tester, find.text('+ Aggiungi'));
     await scrivi(tester, 'campo-numero-giorni', '3'); // 28, 29, 30 ottobre
 
@@ -234,7 +234,7 @@ void main() {
     final archivio = FintoArchivio();
     archivio.salvaLavoro(negozio());
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Negozio con mamma'));
+    await apriLavoroPerNome(tester, 'Negozio con mamma');
     await tocca(tester, find.text('+ Aggiungi'));
 
     await tocca(tester, find.text('Mezze giornate'));
@@ -258,7 +258,7 @@ void main() {
     final archivio = FintoArchivio();
     archivio.salvaLavoro(negozio());
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Negozio con mamma'));
+    await apriLavoroPerNome(tester, 'Negozio con mamma');
     await tocca(tester, find.text('+ Aggiungi'));
     await scrivi(tester, 'campo-numero-giorni', '3');
     await tocca(tester, find.bySemanticsLabel('giovedì 29 ottobre, scelto'));
@@ -284,7 +284,7 @@ void main() {
       final archivio = FintoArchivio();
       archivio.salvaLavoro(negozio());
       await avviaApp(tester, archivio: archivio, adesso: oggi);
-      await tocca(tester, find.text('Negozio con mamma'));
+      await apriLavoroPerNome(tester, 'Negozio con mamma');
 
       await tocca(
         tester,
@@ -353,7 +353,7 @@ void main() {
       ),
     );
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Mercatino'));
+    await apriLavoroPerNome(tester, 'Mercatino');
     await tocca(
       tester,
       find.bySemanticsLabel('martedì 27 ottobre, libero: tocca per aggiungere'),
@@ -370,7 +370,7 @@ void main() {
     final archivio = FintoArchivio();
     archivio.salvaLavoro(negozio());
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Negozio con mamma'));
+    await apriLavoroPerNome(tester, 'Negozio con mamma');
     await tocca(tester, find.text('+ Aggiungi'));
 
     await tocca(tester, find.text('Tutti'));
@@ -401,7 +401,7 @@ void main() {
       final id = archivio.salvaLavoro(negozio());
       archivio.salvaGiornata(giornata(id, DateTime(2026, 10, 28)));
       await avviaApp(tester, archivio: archivio, adesso: oggi);
-      await tocca(tester, find.text('Negozio con mamma'));
+      await apriLavoroPerNome(tester, 'Negozio con mamma');
       await tocca(tester, find.text('+ Aggiungi'));
       await scrivi(
         tester,
@@ -423,7 +423,7 @@ void main() {
     final archivio = FintoArchivio();
     archivio.salvaLavoro(negozio());
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Negozio con mamma'));
+    await apriLavoroPerNome(tester, 'Negozio con mamma');
     await tocca(tester, find.text('+ Aggiungi'));
 
     await scrivi(tester, 'campo-numero-giorni', 'abc');
@@ -440,7 +440,7 @@ void main() {
       final archivio = FintoArchivio();
       archivio.salvaLavoro(negozio());
       await avviaApp(tester, archivio: archivio, adesso: oggi);
-      await tocca(tester, find.text('Negozio con mamma'));
+      await apriLavoroPerNome(tester, 'Negozio con mamma');
 
       // Aggiungo il 27 (ieri): importo di partenza 30 €
       await tocca(
@@ -486,7 +486,7 @@ void main() {
       }
       archivio.salvaGiornata(giornata(id, DateTime(2026, 11, 2), 40));
       await avviaApp(tester, archivio: archivio, adesso: oggi);
-      await tocca(tester, find.text('Negozio con mamma'));
+      await apriLavoroPerNome(tester, 'Negozio con mamma');
 
       expect(find.text('2 giornate a ottobre'), findsOneWidget);
       await tocca(tester, find.bySemanticsLabel('Mese successivo'));
@@ -509,10 +509,12 @@ void main() {
     ); // domani: in programma
     await avviaApp(tester, archivio: archivio, adesso: oggi);
 
-    // Home: riga del lavoro con 60 € (2 giornate fatte)
+    // Home: il saldo del mese ha 60 € (2 giornate fatte)
+    expect(find.text('+60 €'), findsOneWidget);
+    // Nell'elenco dei lavori la riga dice lo stesso
+    await apriDalMenu(tester, 'Lavori');
     expect(find.text('A giornata · 30 € al giorno'), findsOneWidget);
-    // Nella riga del progetto e nel saldo del mese in Home
-    expect(find.text('+60 €'), findsNWidgets(2));
+    expect(find.text('+60 €'), findsOneWidget);
   });
 
   testWidgets('Il negozio non prende quote dei costi condivisi', (
@@ -555,7 +557,7 @@ void main() {
       ),
     );
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     // Tutti i 20 € vanno al solo progetto normale
     expect(find.text('Abbonamento · usato su 1 progetto'), findsOneWidget);
@@ -572,7 +574,7 @@ void main() {
     archivio.salvaGiornata(giornata(id, DateTime(2026, 10, 27)));
     archivio.salvaGiornata(giornata(id, DateTime(2026, 10, 28)));
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Negozio con mamma'));
+    await apriLavoroPerNome(tester, 'Negozio con mamma');
 
     await tocca(tester, find.text('Elimina progetto'));
     await tocca(tester, find.widgetWithText(TextButton, 'Elimina'));
@@ -588,7 +590,7 @@ void main() {
     final id = archivio.salvaLavoro(negozio());
     archivio.salvaGiornata(giornata(id, DateTime(2026, 10, 27)));
     await avviaApp(tester, archivio: archivio, adesso: oggi);
-    await tocca(tester, find.text('Negozio con mamma'));
+    await apriLavoroPerNome(tester, 'Negozio con mamma');
 
     await tocca(tester, find.bySemanticsLabel('Modifica lavoro'));
     expect(find.text('Doppiaggio'), findsNothing); // il tipo non si cambia

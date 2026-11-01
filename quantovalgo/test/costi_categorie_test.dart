@@ -140,7 +140,7 @@ void main() {
     );
     abbonamento(a, 'Hosting podcast', 20, categoriaId: podcast);
     await avviaApp(tester, archivio: a, adesso: oggi);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     // 3 h : 1 h → 15 € e 5 €: il progetto Claude non prende niente
     expect(
@@ -171,7 +171,7 @@ void main() {
       );
       abbonamento(a, 'Claude Pro', 20, categoriaId: claude);
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       expect(find.text('Assistente 20 €'), findsOneWidget);
       expect(find.textContaining('Il bosco'), findsNothing);
@@ -194,7 +194,7 @@ void main() {
       ); // senza categoria
       abbonamento(a, 'Internet fibra', 30);
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       expect(find.text('Abbonamento · usato su 2 progetti'), findsOneWidget);
       expect(find.text('Assistente 15 €'), findsOneWidget);
@@ -217,7 +217,7 @@ void main() {
       progetto(a, 'Il bosco', TipoLavoro.doppiaggio, ore: 1, giorno: 2);
       abbonamento(a, 'Claude Pro', 20, categoriaId: claude);
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       expect(find.text('Assistente 20 €'), findsOneWidget);
       expect(find.textContaining('Il bosco'), findsNothing);
@@ -233,7 +233,7 @@ void main() {
     progetto(a, 'Il bosco', TipoLavoro.doppiaggio, ore: 5);
     abbonamento(a, 'Hosting podcast', 20, categoriaId: podcast);
     await avviaApp(tester, archivio: a, adesso: oggi);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     expect(
       find.text(
@@ -305,7 +305,7 @@ void main() {
         ),
       );
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       // Claude: 120 di utile su 200 → restano 80. I 500 € del doppiaggio non servono.
       expect(find.text('Da recuperare 80 € di 200 €'), findsOneWidget);
@@ -352,7 +352,7 @@ void main() {
       ),
     );
     await avviaApp(tester, archivio: a, adesso: oggi);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
 
     // 300 − 90 = 210 avanzano per la scrivania (150 €): coperta
     expect(find.text('Altri costi'), findsOneWidget);
@@ -389,7 +389,7 @@ void main() {
       abbonamento(a, 'Registratore di cassa', 10, categoriaId: negozio);
       abbonamento(a, 'Internet', 30); // generale: il negozio non lo prende
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       expect(
         find.text('Negozio con mamma 10 €'),
@@ -413,7 +413,7 @@ void main() {
       abbonamento(a, 'Hosting', 20, categoriaId: podcast);
       a.tabellaCategorie.togli(podcast);
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
 
       // Ora è un costo generale: lo dividono tutti i progetti
       expect(find.text('Abbonamento · usato su 2 progetti'), findsOneWidget);
@@ -482,7 +482,7 @@ void main() {
       ); // senza scelta: segue il tipo
       abbonamento(a, 'Claude Pro', 20, categoriaId: claude);
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Assistente'));
+      await apriLavoroPerNome(tester, 'Assistente');
       expect(find.text('Categoria: Claude'), findsOneWidget);
 
       await tocca(tester, find.bySemanticsLabel('Modifica lavoro'));
@@ -498,8 +498,8 @@ void main() {
       // "Nessuna" è una scelta: non torna la categoria del tipo
       expect(a.tabellaLavori.elenco.single.categoriaId, '');
       expect(find.textContaining('Categoria:'), findsNothing);
-      await tocca(tester, find.bySemanticsLabel('Indietro'));
-      await tocca(tester, find.text('Costi').last);
+      await tornaAllaHome(tester);
+      await apriDalMenu(tester, 'Spese');
       expect(
         find.text(
           'Abbonamento · nessun progetto «Claude» attivo: si accumula da recuperare',
@@ -516,10 +516,10 @@ void main() {
     progetto(a, 'Puntata', TipoLavoro.altro, categoriaId: podcast, ore: 1);
     progetto(a, 'Il bosco', TipoLavoro.doppiaggio, ore: 1, giorno: 2);
     await avviaApp(tester, archivio: a, adesso: oggi);
-    await tocca(tester, find.text('Puntata'));
+    await apriLavoroPerNome(tester, 'Puntata');
     expect(find.text('Categoria: Podcast'), findsOneWidget);
-    await tocca(tester, find.bySemanticsLabel('Indietro'));
-    await tocca(tester, find.text('Il bosco'));
+    await tornaAllaHome(tester);
+    await apriLavoroPerNome(tester, 'Il bosco');
     expect(find.textContaining('Categoria:'), findsNothing);
   });
 
@@ -533,7 +533,7 @@ void main() {
       progetto(a, 'Seconda', TipoLavoro.altro, categoriaId: podcast, giorno: 2);
       abbonamento(a, 'Hosting', 20, categoriaId: podcast);
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
       await tocca(tester, find.text('Gestisci categorie'));
 
       expect(find.text('Rosa · 1 costo · 2 progetti'), findsOneWidget);
@@ -561,7 +561,7 @@ void main() {
       schermoAlto(tester);
       final a = FintoArchivio();
       await avviaApp(tester, archivio: a, adesso: oggi);
-      await tocca(tester, find.text('Costi').last);
+      await apriDalMenu(tester, 'Spese');
       await tocca(tester, find.text('Gestisci categorie'));
       await tocca(tester, find.text('Aggiungi quelle di partenza'));
 
@@ -584,7 +584,7 @@ void main() {
     final a = FintoArchivio();
     categoria(a, 'Podcast', colore: 7);
     await avviaApp(tester, archivio: a, adesso: oggi);
-    await tocca(tester, find.text('Costi').last);
+    await apriDalMenu(tester, 'Spese');
     await tocca(tester, find.text('Aggiungi costo'));
 
     expect(find.textContaining('Pesa e si recupera solo con'), findsNothing);

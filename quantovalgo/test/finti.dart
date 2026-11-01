@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -298,4 +300,41 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   );
   await tester.pumpAndSettle();
   return (accesso: accesso, archivio: archivioUsato);
+}
+
+/// Apre una voce del menu "Altro": Lavori, Spese, Clienti, Obiettivo,
+/// Preventivi o Impostazioni (la Home non ha più la barra in basso).
+Future<void> apriDalMenu(WidgetTester tester, String voce) async {
+  await tester.tap(find.bySemanticsLabel('Altro'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(voce));
+  await tester.pumpAndSettle();
+}
+
+/// Apre un lavoro per nome, dal menu "Lavori". Con [dettagli] (di partenza)
+/// entra anche in "Tutti i dettagli", la pagina completa con parti e ore.
+/// I lavori "A giornata" hanno una pagina sola e si fermano lì.
+Future<void> apriLavoroPerNome(
+  WidgetTester tester,
+  String nome, {
+  bool dettagli = true,
+}) async {
+  await apriDalMenu(tester, 'Lavori');
+  await tester.tap(find.text(nome).first);
+  await tester.pumpAndSettle();
+  final tutti = find.byKey(const Key('tutti-i-dettagli'));
+  if (dettagli && tutti.evaluate().isNotEmpty) {
+    await tester.tap(tutti);
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Torna indietro fino alla Home, qualunque pagina sia aperta.
+Future<void> tornaAllaHome(WidgetTester tester) async {
+  for (var i = 0; i < 8; i++) {
+    final indietro = find.bySemanticsLabel('Indietro');
+    if (indietro.evaluate().isEmpty) break;
+    await tester.tap(indietro.first);
+    await tester.pumpAndSettle();
+  }
 }

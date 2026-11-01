@@ -287,3 +287,17 @@ inventate da te):
 - I risultati di Tavily **cambiano da una volta all'altra** per la stessa domanda: lo stesso
   testo può dare una forbice oggi e "non affidabile" domani.
 - Codice: `widget/lista_prezzi.dart`, `PrezzoTrovato` in `logica/prezzi_web.dart`.
+
+## Aspetto "facilissimo" (tappa 1)
+
+L'app non ha più la barra di schede: **una Home sola** e un pulsante verde "Nuovo lavoro".
+- **Home**: anello con "Questo mese ti resta" e la % dell'obiettivo (tocco = il mese in
+  dettaglio), chip *Incassato* / *Spese*, e **Ti devono** con un segno di spunta per dire
+  "mi ha pagato". Il mese si cambia toccando il nome del mese (ultimi 12 mesi).
+- **Altro** (icona in alto a destra): sei tasselli — Lavori, Spese, Clienti, Obiettivo,
+  Preventivi, Impostazioni — ognuno con un numero vivo.
+- **Un lavoro** (pagina semplice): *Ti devono* + "Mi hanno pagato", ore con cronometro,
+  *Ti resta*, "Cambia la scadenza". **Tutti i dettagli** apre la pagina completa di prima
+  (parti, ore, prezzo pieno, sconti, spese, modifica ed elimina).
+- Guadagno all'ora e sconti regalati del mese ora stanno in **Obiettivo → "Il mese di …"**.
+- Il tipo di lavoro "A giornata" si apre direttamente sul suo calendario.

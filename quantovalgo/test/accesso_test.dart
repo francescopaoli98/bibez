@@ -9,7 +9,7 @@ void main() {
     await avviaApp(tester, utente: null);
 
     expect(find.text('Accedi con Google'), findsOneWidget);
-    expect(find.text('Saldo del mese'), findsNothing);
+    expect(find.text('Questo mese ti resta'), findsNothing);
   });
 
   testWidgets('Con l\'utente già salvato si apre direttamente la Home', (
@@ -17,7 +17,7 @@ void main() {
   ) async {
     final servizi = await avviaApp(tester);
 
-    expect(find.text('Saldo del mese'), findsOneWidget);
+    expect(find.text('Questo mese ti resta'), findsOneWidget);
     expect(find.text('Accedi con Google'), findsNothing);
     // Il profilo viene creato/aggiornato nel cloud
     expect(servizi.archivio.profiliSalvati, ['u1']);
@@ -30,7 +30,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(servizi.accesso.accessiRichiesti, 1);
-    expect(find.text('Saldo del mese'), findsOneWidget);
+    expect(find.text('Questo mese ti resta'), findsOneWidget);
     expect(servizi.archivio.profiliSalvati, ['u1']);
   });
 
@@ -46,13 +46,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Serve internet per il primo accesso.'), findsOneWidget);
-    expect(find.text('Saldo del mese'), findsNothing);
+    expect(find.text('Questo mese ti resta'), findsNothing);
 
     // Riprovando senza errore si entra
     servizi.accesso.erroreProssimoAccesso = null;
     await tester.tap(find.text('Accedi con Google'));
     await tester.pumpAndSettle();
-    expect(find.text('Saldo del mese'), findsOneWidget);
+    expect(find.text('Questo mese ti resta'), findsOneWidget);
   });
 
   testWidgets('Impostazioni mostra l\'account e Esci riporta al login', (
@@ -60,8 +60,7 @@ void main() {
   ) async {
     final servizi = await avviaApp(tester);
 
-    await tester.tap(find.bySemanticsLabel('Impostazioni'));
-    await tester.pumpAndSettle();
+    await apriDalMenu(tester, 'Impostazioni');
     expect(find.text('Francesco Prova'), findsOneWidget);
     expect(find.text('prova@example.com'), findsOneWidget);
     expect(find.text('Dati sincronizzati col cloud'), findsOneWidget);
@@ -83,8 +82,7 @@ void main() {
     final accessoArchivio = await avviaApp(tester);
     accessoArchivio.archivio.stato = StatoSincronizzazione.inAttesa;
 
-    await tester.tap(find.bySemanticsLabel('Impostazioni'));
-    await tester.pumpAndSettle();
+    await apriDalMenu(tester, 'Impostazioni');
 
     expect(find.text('Dati sul telefono, in attesa del cloud'), findsOneWidget);
   });
@@ -93,8 +91,7 @@ void main() {
     final servizi = await avviaApp(tester);
     servizi.archivio.stato = StatoSincronizzazione.problema;
 
-    await tester.tap(find.bySemanticsLabel('Impostazioni'));
-    await tester.pumpAndSettle();
+    await apriDalMenu(tester, 'Impostazioni');
 
     expect(
       find.text('Il cloud rifiuta i dati: controlla le regole di Firestore'),
