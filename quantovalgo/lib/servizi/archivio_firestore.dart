@@ -10,6 +10,7 @@ import '../modelli/giornata.dart';
 import '../modelli/impostazioni.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
+import '../modelli/preventivo.dart';
 import '../modelli/sessione_ore.dart';
 import '../modelli/sottoprogetto.dart';
 import 'accesso.dart';
@@ -127,6 +128,10 @@ class ArchivioFirestore implements Archivio {
   Stream<List<Costo>> costi() => _ascolta('costi', Costo.fromMap);
 
   @override
+  Stream<List<Preventivo>> preventivi() =>
+      _ascolta('preventivi', Preventivo.fromMap);
+
+  @override
   Stream<List<Categoria>> categorie() =>
       _ascolta('categorie', Categoria.fromMap);
 
@@ -184,6 +189,7 @@ class ArchivioFirestore implements Archivio {
     required List<String> idSottoprogetti,
     List<String> idGiornate = const [],
     List<String> idSessioni = const [],
+    List<String> idPreventivi = const [],
   }) {
     // Un solo "pacchetto": o spariscono tutti insieme o nessuno.
     final pacchetto = _db.batch();
@@ -196,6 +202,9 @@ class ArchivioFirestore implements Archivio {
     }
     for (final idSessione in idSessioni) {
       pacchetto.delete(_raccolta('sessioni').doc(idSessione));
+    }
+    for (final idPreventivo in idPreventivi) {
+      pacchetto.delete(_raccolta('preventivi').doc(idPreventivo));
     }
     unawaited(
       pacchetto.commit().catchError((Object e) {
@@ -239,6 +248,13 @@ class ArchivioFirestore implements Archivio {
 
   @override
   void eliminaCosto(String id) => _elimina('costi', id);
+
+  @override
+  String salvaPreventivo(Preventivo preventivo) =>
+      _salva('preventivi', preventivo.id, preventivo.toMap());
+
+  @override
+  void eliminaPreventivo(String id) => _elimina('preventivi', id);
 
   @override
   String salvaCategoria(Categoria categoria) =>

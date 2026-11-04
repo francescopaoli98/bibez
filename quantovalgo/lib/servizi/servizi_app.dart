@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'accesso.dart';
 import 'archivio.dart';
+import 'esportazione.dart';
 import 'ricerca_prezzi.dart';
 
 /// Rende disponibili accesso e archivio a tutte le schermate, senza
@@ -12,6 +13,7 @@ class ServiziApp extends InheritedWidget {
     required this.accesso,
     required this.archivio,
     this.ricerca,
+    this.esportazione,
     required super.child,
   });
 
@@ -20,6 +22,9 @@ class ServiziApp extends InheritedWidget {
 
   /// Ricerca dei prezzi sul web (vuota: il pulsante "Cerca prezzi" è spento).
   final RicercaPrezzi? ricerca;
+
+  /// Salvataggio e condivisione dell'immagine del preventivo.
+  final ServizioEsportazione? esportazione;
 
   static ServiziApp di(BuildContext context) {
     final servizi = context.dependOnInheritedWidgetOfExactType<ServiziApp>();
@@ -31,5 +36,6 @@ class ServiziApp extends InheritedWidget {
   bool updateShouldNotify(ServiziApp vecchio) =>
       accesso != vecchio.accesso ||
       archivio != vecchio.archivio ||
-      ricerca != vecchio.ricerca;
+      ricerca != vecchio.ricerca ||
+      esportazione != vecchio.esportazione;
 }

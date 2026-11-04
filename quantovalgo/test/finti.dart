@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 
 import 'dart:async';
@@ -11,12 +13,14 @@ import 'package:quantovalgo/modelli/giornata.dart';
 import 'package:quantovalgo/modelli/impostazioni.dart';
 import 'package:quantovalgo/modelli/lavoro.dart';
 import 'package:quantovalgo/modelli/prezzo_mercato.dart';
+import 'package:quantovalgo/modelli/preventivo.dart';
 import 'package:quantovalgo/modelli/sessione_ore.dart';
 import 'package:quantovalgo/modelli/sottoprogetto.dart';
 import 'package:quantovalgo/servizi/accesso.dart';
 import 'package:quantovalgo/logica/promemoria.dart';
 import 'package:quantovalgo/servizi/archivio.dart';
 import 'package:quantovalgo/modelli/tipi.dart';
+import 'package:quantovalgo/servizi/esportazione.dart';
 import 'package:quantovalgo/servizi/promemoria_servizio.dart';
 import 'package:quantovalgo/servizi/ricerca_prezzi.dart';
 import 'package:quantovalgo/servizi/utente.dart';
@@ -102,6 +106,7 @@ class FintoArchivio implements Archivio {
   final tabellaCategorie = _Tabella<Categoria>();
   final tabellaGiornate = _Tabella<Giornata>();
   final tabellaSessioni = _Tabella<SessioneOre>();
+  final tabellaPreventivi = _Tabella<Preventivo>();
   var impostazioniSalvate = const Impostazioni();
   final _flussoImpostazioni = StreamController<Impostazioni>.broadcast();
   int _contatore = 0;
@@ -134,6 +139,8 @@ class FintoArchivio implements Archivio {
   @override
   Stream<List<SessioneOre>> sessioni() => tabellaSessioni.ascolta();
   @override
+  Stream<List<Preventivo>> preventivi() => tabellaPreventivi.ascolta();
+  @override
   Stream<Impostazioni> impostazioni() async* {
     yield impostazioniSalvate;
     yield* _flussoImpostazioni.stream;
@@ -153,8 +160,10 @@ class FintoArchivio implements Archivio {
     required List<String> idSottoprogetti,
     List<String> idGiornate = const [],
     List<String> idSessioni = const [],
+    List<String> idPreventivi = const [],
   }) {
     tabellaLavori.togli(id);
+    idPreventivi.forEach(tabellaPreventivi.togli);
     idSottoprogetti.forEach(tabellaSotto.togli);
     idGiornate.forEach(tabellaGiornate.togli);
     idSessioni.forEach(tabellaSessioni.togli);
@@ -212,6 +221,16 @@ class FintoArchivio implements Archivio {
     impostazioniSalvate = i;
     _flussoImpostazioni.add(i);
   }
+
+  @override
+  String salvaPreventivo(Preventivo p) {
+    final id = _nuovoId(p.id);
+    tabellaPreventivi.metti(id, p.copyWith(id: id));
+    return id;
+  }
+
+  @override
+  void eliminaPreventivo(String id) => tabellaPreventivi.togli(id);
 
   @override
   String salvaSessione(SessioneOre s) {
@@ -276,6 +295,25 @@ class FintaRicerca implements RicercaPrezzi {
   }
 }
 
+/// Esportazione finta: ricorda cosa è stato salvato e condiviso.
+class FintaEsportazione implements ServizioEsportazione {
+  final salvati = <({String nome, int byte})>[];
+  final condivisi = <({String nome, int byte, String? testo})>[];
+  bool permessoConcesso = true;
+
+  @override
+  Future<bool> salvaInGalleria(Uint8List png, String nome) async {
+    if (!permessoConcesso) return false;
+    salvati.add((nome: nome, byte: png.length));
+    return true;
+  }
+
+  @override
+  Future<void> condividi(Uint8List png, String nome, {String? testo}) async {
+    condivisi.add((nome: nome, byte: png.length, testo: testo));
+  }
+}
+
 /// Avvia l'app con servizi finti e aspetta che si assesti.
 Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   WidgetTester tester, {
@@ -285,6 +323,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   DateTime Function()? adesso,
   ServizioPromemoria? promemoria,
   RicercaPrezzi? ricerca,
+  ServizioEsportazione? esportazione,
 }) async {
   final accesso = FintoAccesso(iniziale: utente);
   final archivioUsato = archivio ?? FintoArchivio();
@@ -296,6 +335,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
       adesso: adesso,
       promemoria: promemoria,
       ricerca: ricerca,
+      esportazione: esportazione,
     ),
   );
   await tester.pumpAndSettle();

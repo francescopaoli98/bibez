@@ -5,6 +5,7 @@ import '../modelli/giornata.dart';
 import '../modelli/impostazioni.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
+import '../modelli/preventivo.dart';
 import '../modelli/sessione_ore.dart';
 import '../modelli/sottoprogetto.dart';
 import 'utente.dart';
@@ -42,6 +43,7 @@ abstract interface class Archivio {
   Stream<List<Categoria>> categorie();
   Stream<List<Giornata>> giornate();
   Stream<List<SessioneOre>> sessioni();
+  Stream<List<Preventivo>> preventivi();
 
   /// Le impostazioni: emette subito quelle attuali (o quelle di partenza).
   Stream<Impostazioni> impostazioni();
@@ -55,6 +57,7 @@ abstract interface class Archivio {
     required List<String> idSottoprogetti,
     List<String> idGiornate = const [],
     List<String> idSessioni = const [],
+    List<String> idPreventivi = const [],
   });
 
   String salvaSottoprogetto(Sottoprogetto sottoprogetto);
@@ -72,6 +75,9 @@ abstract interface class Archivio {
 
   String salvaCategoria(Categoria categoria);
   void eliminaCategoria(String id);
+
+  String salvaPreventivo(Preventivo preventivo);
+  void eliminaPreventivo(String id);
 
   String salvaSessione(SessioneOre sessione);
   void eliminaSessione(String id);

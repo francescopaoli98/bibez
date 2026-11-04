@@ -35,7 +35,8 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 6. Home: saldo del mese, guadagno all'ora, sconti regalati
 - [x] 8. Obiettivo, pareggio, tariffa minima e Impostazioni
 - [x] 9. Ricerca prezzi con Tavily e autoapprendimento
-- [ ] 10–12. Vedi il brief
+- [x] 10. Preventivi in PNG con 4 stili
+- [ ] 11–12. Vedi il brief
 
 ## Richieste aggiunte dopo il brief
 
@@ -329,3 +330,34 @@ Il pulsante verde apre un percorso guidato, una domanda a schermo pieno:
 - Si salva un lavoro con una parte "Lavoro intero" (ricavo = prezzo, ore, spese di
   trasferta); prezzo pieno = tempo + trasferta senza sconto, così i regali si contano.
 - Tariffa oraria e rimborso al km si cambiano in **Impostazioni → Il tuo prezzo**.
+
+## Preventivi in PNG (passo 10)
+
+- **Dove**: dal lavoro ("Fai il preventivo") oppure da *Altro → Preventivi → Nuovo
+  preventivo → scegli il lavoro*. I lavori "A giornata" non hanno preventivo.
+- **Domande a scelta rapida** (una pagina): il progetto (di partenza il nome del lavoro),
+  come lavori (fasi da toccare, di partenza tutte), consegna in (2 giorni / 1 settimana /
+  2 settimane / 1 mese, o scritta a mano), cosa ci guadagna il cliente (di partenza i primi
+  due). Si possono aggiungere fasi e vantaggi propri. Le scelte pronte cambiano col tipo di
+  lavoro (`logica/preventivo.dart`).
+- **Testo da modelli, gratis e offline**: «Per Luca: Sito vetrina. Consegna in 1
+  settimana.», poi le fasi e i vantaggi in elenco. Nessuna AI.
+- **Prezzo**: prezzo pieno, sconto in % e totale (1.000 → −30% → 700 €). Se non c'è sconto
+  compare solo il totale. I prezzi si "fotografano" al momento del salvataggio.
+- **Quattro stili** (titoli del brief): **App** (Laguna: PROGETTO / COME LAVORO / COSA CI
+  GUADAGNI), **Professionale** (foglio bianco, serif, navy: Progetto / Modalità di lavoro /
+  Vantaggi per te), **Informatico** (scuro, monospazio, verde: // progetto / // metodo /
+  // benefit, `total = 700 €`), **Gaming** (viola con bordi neon: MISSIONE / STRATEGIA /
+  BOTTINO, PREZZO FINALE). Serif e monospazio sono i caratteri di sistema di Android.
+- **Salva PNG** (galleria, album "QuantoValgo") e **Condividi** (foglio di condivisione di
+  Android). L'immagine esce sempre a **1080 px** di larghezza (foglio da 360 punti a 3×).
+  Salvando o condividendo il preventivo entra nell'elenco; salvando ancora lo stesso si
+  aggiorna, senza doppioni. Dati in `utenti/{uid}/preventivi`; eliminando il lavoro
+  spariscono anche i suoi preventivi.
+- **"Migliora il testo con l'AI"**: il pulsante c'è ma è **spento** (passo 11): non parte mai
+  da solo e per ora non ha un costo approvato.
+- Pacchetti nuovi: `share_plus`, `path_provider`, `gal` (nessun servizio a pagamento).
+  Permessi Android: scrittura nella galleria solo per Android 10 e precedenti.
+- Codice: `modelli/preventivo.dart`, `widget/foglio_preventivo.dart`,
+  `schermate/preventivi.dart`, `preventivo_domande.dart`, `preventivo_anteprima.dart`,
+  `servizi/esportazione*.dart`.

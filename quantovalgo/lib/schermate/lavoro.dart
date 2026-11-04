@@ -17,6 +17,7 @@ import '../widget/stile_lucido.dart';
 import 'carta_pagamento.dart';
 import 'cronometro_azioni.dart';
 import 'pagamenti.dart';
+import 'preventivo_domande.dart';
 import 'progetto.dart';
 
 /// Apre un lavoro: la pagina semplice, oppure (per "A giornata") il calendario
@@ -202,6 +203,17 @@ class LavoroPagina extends StatelessWidget {
                     ),
                     const Divider(height: 1, indent: 16, endIndent: 16),
                   ],
+                  _Riga(
+                    chiave: const Key('fai-preventivo'),
+                    titolo: 'Fai il preventivo',
+                    sotto: 'Un\'immagine da mandare al cliente',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => PreventivoDomande(lavoroId: lavoro.id),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
                   _Riga(
                     chiave: const Key('tutti-i-dettagli'),
                     titolo: 'Tutti i dettagli',

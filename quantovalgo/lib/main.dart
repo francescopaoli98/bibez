@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'servizi/accesso_firebase.dart';
 import 'servizi/archivio_firestore.dart';
+import 'servizi/esportazione_reale.dart';
 import 'servizi/promemoria_locali.dart';
 import 'servizi/ricerca_tavily.dart';
 
@@ -48,6 +49,7 @@ Future<void> main() async {
       erroreAvvio: erroreAvvio,
       promemoria: notificheAttive ? promemoria : null,
       ricerca: RicercaTavily(),
+      esportazione: EsportazioneReale(),
     ),
   );
 }

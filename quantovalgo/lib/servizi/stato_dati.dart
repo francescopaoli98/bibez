@@ -22,6 +22,7 @@ import '../modelli/giornata.dart';
 import '../modelli/impostazioni.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
+import '../modelli/preventivo.dart';
 import '../modelli/sessione_ore.dart';
 import '../modelli/sottoprogetto.dart';
 import '../modelli/tipi.dart';
@@ -48,7 +49,7 @@ class StatoDati extends ChangeNotifier {
   late final StreamSubscription<Utente?> _ascoltoUtente;
   final List<StreamSubscription<Object?>> _ascolti = [];
   final Set<String> _arrivati = {};
-  static const _totaleFlussi = 9;
+  static const _totaleFlussi = 10;
 
   /// "Adesso" dell'app (sostituibile nei test).
   final DateTime Function() adesso;
@@ -61,6 +62,7 @@ class StatoDati extends ChangeNotifier {
   List<Categoria> _categorie = const [];
   List<Giornata> _giornate = const [];
   List<SessioneOre> _sessioni = const [];
+  List<Preventivo> _preventivi = const [];
   Impostazioni _impostazioni = const Impostazioni();
 
   /// Valori di calcolo (sconti, fattori di competenza), da Impostazioni.
@@ -79,6 +81,9 @@ class StatoDati extends ChangeNotifier {
   List<Costo> get costi => _costi;
   List<Categoria> get categorie => _categorie;
   List<Giornata> get giornate => _giornate;
+
+  /// I preventivi salvati, dal più recente.
+  List<Preventivo> get preventivi => _preventivi;
   List<SessioneOre> get sessioni => _sessioni;
   Impostazioni get impostazioni => _impostazioni;
 
@@ -94,6 +99,7 @@ class StatoDati extends ChangeNotifier {
     _categorie = const [];
     _giornate = const [];
     _sessioni = const [];
+    _preventivi = const [];
     _impostazioni = const Impostazioni();
     _arrivati.clear();
     problema = false;
@@ -127,6 +133,9 @@ class StatoDati extends ChangeNotifier {
       });
       _ascolta<SessioneOre>('sessioni', _archivio.sessioni(), (v) {
         _sessioni = [...v]..sort((a, b) => b.inizio.compareTo(a.inizio));
+      });
+      _ascolta<Preventivo>('preventivi', _archivio.preventivi(), (v) {
+        _preventivi = [...v]..sort((a, b) => b.creatoIl.compareTo(a.creatoIl));
       });
       _ascolta<Impostazioni>(
         'impostazioni',
@@ -646,6 +655,10 @@ class StatoDati extends ChangeNotifier {
     idSottoprogetti: [for (final s in sottoprogettiDi(id)) s.id],
     idGiornate: [for (final g in giornateDi(id)) g.id],
     idSessioni: [for (final s in sessioniDelLavoro(id)) s.id],
+    idPreventivi: [
+      for (final p in _preventivi)
+        if (p.lavoroId == id) p.id,
+    ],
   );
 
   String salvaSottoprogetto(Sottoprogetto s) => _archivio.salvaSottoprogetto(s);
@@ -661,6 +674,9 @@ class StatoDati extends ChangeNotifier {
 
   String salvaCosto(Costo c) => _archivio.salvaCosto(c);
   void eliminaCosto(String id) => _archivio.eliminaCosto(id);
+
+  String salvaPreventivo(Preventivo p) => _archivio.salvaPreventivo(p);
+  void eliminaPreventivo(String id) => _archivio.eliminaPreventivo(id);
 
   String salvaCategoria(Categoria c) => _archivio.salvaCategoria(c);
   void eliminaCategoria(String id) => _archivio.eliminaCategoria(id);

@@ -6,6 +6,7 @@ import 'schermate/errore_avvio.dart';
 import 'servizi/accesso.dart';
 import 'servizi/archivio.dart';
 import 'servizi/aggiornamento_prezzi.dart';
+import 'servizi/esportazione.dart';
 import 'servizi/pianificatore_promemoria.dart';
 import 'servizi/promemoria_servizio.dart';
 import 'servizi/ricerca_prezzi.dart';
@@ -23,6 +24,7 @@ class QuantoValgoApp extends StatefulWidget {
     this.adesso,
     this.promemoria,
     this.ricerca,
+    this.esportazione,
   });
 
   final ServizioAccesso accesso;
@@ -39,6 +41,9 @@ class QuantoValgoApp extends StatefulWidget {
 
   /// Ricerca dei prezzi sul web (Tavily). Vuota: niente ricerca.
   final RicercaPrezzi? ricerca;
+
+  /// Salvataggio e condivisione dell'immagine del preventivo.
+  final ServizioEsportazione? esportazione;
 
   @override
   State<QuantoValgoApp> createState() => _QuantoValgoAppState();
@@ -106,6 +111,7 @@ class _QuantoValgoAppState extends State<QuantoValgoApp> {
       accesso: widget.accesso,
       archivio: widget.archivio,
       ricerca: widget.ricerca,
+      esportazione: widget.esportazione,
       child: _dati == null ? app : DatiScope(dati: _dati, child: app),
     );
   }

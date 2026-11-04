@@ -69,7 +69,9 @@ class AltroPagina extends StatelessWidget {
         icona: Icons.description_outlined,
         stile: StileLucido.blu,
         titolo: 'Preventivi',
-        sotto: 'crea un\'immagine',
+        sotto: dati.preventivi.isEmpty
+            ? 'crea un\'immagine'
+            : '${dati.preventivi.length} fatti',
         onTap: () => _apri(context, const PreventiviPagina()),
       ),
       _Tassello(
