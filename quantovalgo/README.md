@@ -38,7 +38,7 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 10. Preventivi in PNG con 4 stili
 - [x] 11. "Migliora il testo con l'AI" nei preventivi (Claude, solo su tuo comando)
 - [x] Guadagni veloci: soldi entrati senza creare un lavoro
-- [ ] 12. Rifinitura finale (nome e icona dell'app, APK)
+- [x] 12. Rifinitura finale: nome "QuantoValgo" e icona QV
 
 ## Richieste aggiunte dopo il brief
 
@@ -404,3 +404,15 @@ più chiaro la frase del progetto, le fasi e i vantaggi.
 - Codice: `logica/migliora_testo.dart` (richiesta e lettura della risposta, senza rete),
   `servizi/migliora_testo*.dart` (chiamata HTTP), `schermate/foglio_proposta_ai.dart`,
   `schermate/foglio_chiave.dart` (ora per Tavily e Claude).
+
+## Nome e icona (passo 12)
+
+- **Nome**: *QuantoValgo* (è il nome sotto l'icona sul telefono).
+- **Icona**: le iniziali **QV** in bianco sullo sfondo Laguna (blu → turchese, con il "sole"
+  in alto a destra come nell'app). Dentro la **Q** salgono **tre barre** (economia); il
+  braccio destro della **V** diventa un fusto con un **germoglio** (crescita personale).
+- **Android**: icona adattiva (Android 8+) con sfondo e primo piano separati, icona
+  monocromatica per le icone a tema (Android 13+) e icone classiche per Android 7.
+  File in `android/app/src/main/res/mipmap-*`.
+- **Sorgenti**: `design/icona/*.svg`. Per cambiare colori o forme si modifica
+  `design/icona/genera.py` e si esportano di nuovo i PNG (renderizzati a 1×, 1,5×, 2×, 3×, 4×).
