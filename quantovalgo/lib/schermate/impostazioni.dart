@@ -83,6 +83,8 @@ class ImpostazioniPagina extends StatelessWidget {
         const SizedBox(height: 16),
         const _SezioneRicerca(),
         const SizedBox(height: 16),
+        const _SezioneAi(),
+        const SizedBox(height: 16),
         const _SezioneSconti(),
         const SizedBox(height: 16),
         const _SezioneLivelli(),
@@ -539,6 +541,37 @@ class _SezioneRicerca extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// "Migliora il testo con l'AI" nei preventivi: solo la chiave di Claude.
+class _SezioneAi extends StatelessWidget {
+  const _SezioneAi();
+
+  @override
+  Widget build(BuildContext context) {
+    final dati = DatiScope.di(context);
+    final conChiave = dati.impostazioni.chiaveClaude.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _TitoloSezione(
+          'AI per i preventivi',
+          'Riscrive il testo del preventivo con Claude. Parte solo quando '
+              'premi il pulsante; ogni volta costa meno di un centesimo.',
+        ),
+        _Gruppo(
+          righe: [
+            _RigaValore(
+              chiave: const Key('riga-chiave-claude'),
+              nome: 'Chiave di Claude',
+              valore: conChiave ? 'Inserita' : 'Non inserita',
+              onTap: () => modificaChiaveClaude(context),
             ),
           ],
         ),

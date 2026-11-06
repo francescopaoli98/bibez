@@ -711,7 +711,8 @@ void main() {
       await avviaApp(tester, archivio: archivio, adesso: oggi);
       await apriDalMenu(tester, 'Impostazioni');
 
-      expect(find.text('Non inserita'), findsOneWidget);
+      // Due chiavi nelle impostazioni: Tavily (prezzi) e Claude (AI)
+      expect(find.text('Non inserita'), findsNWidgets(2));
       expect(find.text('Prima inserisci la chiave.'), findsOneWidget);
 
       await tocca(tester, find.byKey(const Key('riga-chiave')));

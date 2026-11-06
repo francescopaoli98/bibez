@@ -2,12 +2,16 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quantovalgo/logica/migliora_testo.dart';
 import 'package:quantovalgo/modelli/cliente.dart';
+import 'package:quantovalgo/modelli/impostazioni.dart';
 import 'package:quantovalgo/modelli/lavoro.dart';
 import 'package:quantovalgo/modelli/preventivo.dart';
 import 'package:quantovalgo/modelli/sottoprogetto.dart';
 import 'package:quantovalgo/modelli/tipi.dart';
 import 'package:quantovalgo/schermate/preventivo_anteprima.dart';
+import 'package:quantovalgo/servizi/migliora_testo.dart';
+import 'package:quantovalgo/widget/pulsante_lucido.dart';
 
 import 'finti.dart';
 
@@ -321,15 +325,220 @@ void main() {
       );
       expect(archivio.tabellaPreventivi.elenco, isEmpty);
     });
+  });
 
-    testWidgets('Il miglioramento con l\'AI c\'è ma è spento', (tester) async {
-      schermoAlto(tester);
-      await avviaApp(tester, archivio: conLavoro(), adesso: oggi);
+  group('Migliora il testo con l\'AI', () {
+    const proposta = TestiMigliorati(
+      progetto: 'Realizzo un sito vetrina curato per la tua attività.',
+      fasi: [
+        'Ascolto cosa ti serve davvero',
+        'Sviluppo il sito',
+        'Lo provo e lo correggo',
+        'Lo metto online e te lo consegno',
+      ],
+      benefit: [
+        'Un sito semplice da usare',
+        'Bello anche da telefono',
+        'Ti seguo anche dopo',
+        'Prezzo chiaro, senza sorprese',
+      ],
+    );
+
+    FintoArchivio conChiave() => conLavoro()
+      ..impostazioniSalvate = const Impostazioni(
+        chiaveClaude: 'sk-ant-prova1234',
+      );
+
+    Future<void> vaiAllAnteprima(WidgetTester tester) async {
       await apriDomande(tester);
       await tocca(tester, find.text('Vedi il preventivo'));
+    }
+
+    testWidgets('Non parte da solo: serve premere il pulsante', (tester) async {
+      schermoAlto(tester);
+      final ai = FintaMigliora(const MiglioramentoRiuscito(proposta));
+      await avviaApp(
+        tester,
+        archivio: conChiave(),
+        adesso: oggi,
+        miglioraTesto: ai,
+      );
+      await vaiAllAnteprima(tester);
 
       expect(find.text('Migliora il testo con l\'AI'), findsOneWidget);
       expect(find.textContaining('Non parte mai da solo'), findsOneWidget);
+      expect(ai.richieste, isEmpty);
+    });
+
+    testWidgets('Senza il servizio il pulsante è spento', (tester) async {
+      schermoAlto(tester);
+      await avviaApp(tester, archivio: conChiave(), adesso: oggi);
+      await vaiAllAnteprima(tester);
+
+      final pulsante = tester.widget<PulsanteLucido>(
+        find.byKey(const Key('migliora-ai')),
+      );
+      expect(pulsante.onPressed, isNull);
+    });
+
+    testWidgets(
+      'Senza chiave apre il foglio per inserirla e non chiama l\'AI',
+      (tester) async {
+        schermoAlto(tester);
+        final ai = FintaMigliora(const MiglioramentoRiuscito(proposta));
+        final archivio = conLavoro();
+        await avviaApp(
+          tester,
+          archivio: archivio,
+          adesso: oggi,
+          miglioraTesto: ai,
+        );
+        await vaiAllAnteprima(tester);
+
+        await tocca(tester, find.byKey(const Key('migliora-ai')));
+        expect(find.text('Chiave di Claude'), findsOneWidget);
+        expect(ai.richieste, isEmpty);
+
+        // Una chiave che non è di Anthropic si ferma subito
+        await tester.enterText(
+          find.byKey(const Key('campo-chiave')),
+          'tvly-1234567890',
+        );
+        await tocca(tester, find.text('Salva chiave'));
+        expect(find.textContaining('sk-ant-'), findsWidgets);
+        expect(archivio.impostazioniSalvate.chiaveClaude, isEmpty);
+
+        await tester.enterText(
+          find.byKey(const Key('campo-chiave')),
+          'sk-ant-abcdef123456',
+        );
+        await tocca(tester, find.text('Salva chiave'));
+        expect(
+          archivio.impostazioniSalvate.chiaveClaude,
+          'sk-ant-abcdef123456',
+        );
+        // Salvata la chiave, l'AI non parte comunque da sola
+        expect(ai.richieste, isEmpty);
+      },
+    );
+
+    testWidgets('"Usa questa" cambia il foglio e il preventivo salvato', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      catturaFinta();
+      final ai = FintaMigliora(const MiglioramentoRiuscito(proposta));
+      final archivio = conChiave();
+      await avviaApp(
+        tester,
+        archivio: archivio,
+        adesso: oggi,
+        esportazione: FintaEsportazione(),
+        miglioraTesto: ai,
+      );
+      await vaiAllAnteprima(tester);
+
+      await tocca(tester, find.byKey(const Key('migliora-ai')));
+      // La richiesta porta la chiave e i testi di ora
+      expect(ai.richieste.single.chiave, 'sk-ant-prova1234');
+      expect(ai.richieste.single.testi.tipo, TipoLavoro.codice);
+      expect(ai.richieste.single.testi.consegna, '1 settimana');
+      // Prima della scelta il foglio non cambia
+      expect(find.byKey(const Key('proposta-dopo')), findsOneWidget);
+      expect(find.byKey(const Key('proposta-prima')), findsOneWidget);
+
+      await tocca(tester, find.byKey(const Key('usa-proposta')));
+      expect(find.text('Sviluppo il sito'), findsOneWidget);
+      expect(find.byKey(const Key('torna-al-mio-testo')), findsOneWidget);
+
+      await tocca(tester, find.text('Salva PNG'));
+      final p = archivio.tabellaPreventivi.elenco.single;
+      expect(p.progetto, proposta.progetto);
+      expect(p.fasi, proposta.fasi);
+      expect(p.benefit, proposta.benefit);
+      // Cliente, consegna e prezzi non si toccano
+      expect(p.cliente, 'Luca');
+      expect(p.consegna, '1 settimana');
+      expect(p.prezzoFinale, 700);
+    });
+
+    testWidgets('"Tieni la mia" lascia tutto com\'era', (tester) async {
+      schermoAlto(tester);
+      final ai = FintaMigliora(const MiglioramentoRiuscito(proposta));
+      await avviaApp(
+        tester,
+        archivio: conChiave(),
+        adesso: oggi,
+        miglioraTesto: ai,
+      );
+      await vaiAllAnteprima(tester);
+
+      await tocca(tester, find.byKey(const Key('migliora-ai')));
+      await tocca(tester, find.byKey(const Key('tieni-la-mia')));
+      expect(find.text('Sviluppo il sito'), findsNothing);
+      expect(find.byKey(const Key('torna-al-mio-testo')), findsNothing);
+      expect(find.text('Capiamo insieme cosa ti serve'), findsOneWidget);
+    });
+
+    testWidgets('Dopo "Usa questa" si può tornare al proprio testo', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      final ai = FintaMigliora(const MiglioramentoRiuscito(proposta));
+      await avviaApp(
+        tester,
+        archivio: conChiave(),
+        adesso: oggi,
+        miglioraTesto: ai,
+      );
+      await vaiAllAnteprima(tester);
+
+      await tocca(tester, find.byKey(const Key('migliora-ai')));
+      await tocca(tester, find.byKey(const Key('usa-proposta')));
+      await tocca(tester, find.byKey(const Key('torna-al-mio-testo')));
+      expect(find.text('Sviluppo il sito'), findsNothing);
+      expect(find.text('Capiamo insieme cosa ti serve'), findsOneWidget);
+    });
+
+    testWidgets('Se l\'AI sbaglia lo dice e il testo resta', (tester) async {
+      schermoAlto(tester);
+      final ai = FintaMigliora(
+        const MiglioramentoFallito('Non riesco a raggiungere Claude.'),
+      );
+      await avviaApp(
+        tester,
+        archivio: conChiave(),
+        adesso: oggi,
+        miglioraTesto: ai,
+      );
+      await vaiAllAnteprima(tester);
+
+      await tocca(tester, find.byKey(const Key('migliora-ai')));
+      expect(find.text('Non riesco a raggiungere Claude.'), findsOneWidget);
+      expect(find.byKey(const Key('proposta-dopo')), findsNothing);
+      expect(find.text('Capiamo insieme cosa ti serve'), findsOneWidget);
+    });
+
+    testWidgets('Chiave non valida: riapre il foglio della chiave', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      final ai = FintaMigliora(
+        const MiglioramentoFallito(
+          'La chiave non è valida.',
+          serveChiave: true,
+        ),
+      );
+      await avviaApp(
+        tester,
+        archivio: conChiave(),
+        adesso: oggi,
+        miglioraTesto: ai,
+      );
+      await vaiAllAnteprima(tester);
+
+      await tocca(tester, find.byKey(const Key('migliora-ai')));
+      expect(find.text('Chiave di Claude'), findsOneWidget);
     });
   });
 

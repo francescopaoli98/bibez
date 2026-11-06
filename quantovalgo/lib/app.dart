@@ -7,6 +7,7 @@ import 'servizi/accesso.dart';
 import 'servizi/archivio.dart';
 import 'servizi/aggiornamento_prezzi.dart';
 import 'servizi/esportazione.dart';
+import 'servizi/migliora_testo.dart';
 import 'servizi/pianificatore_promemoria.dart';
 import 'servizi/promemoria_servizio.dart';
 import 'servizi/ricerca_prezzi.dart';
@@ -25,6 +26,7 @@ class QuantoValgoApp extends StatefulWidget {
     this.promemoria,
     this.ricerca,
     this.esportazione,
+    this.miglioraTesto,
   });
 
   final ServizioAccesso accesso;
@@ -44,6 +46,9 @@ class QuantoValgoApp extends StatefulWidget {
 
   /// Salvataggio e condivisione dell'immagine del preventivo.
   final ServizioEsportazione? esportazione;
+
+  /// Riscrittura dei testi del preventivo con l'AI (Claude). Vuota: niente AI.
+  final MiglioraTesto? miglioraTesto;
 
   @override
   State<QuantoValgoApp> createState() => _QuantoValgoAppState();
@@ -112,6 +117,7 @@ class _QuantoValgoAppState extends State<QuantoValgoApp> {
       archivio: widget.archivio,
       ricerca: widget.ricerca,
       esportazione: widget.esportazione,
+      miglioraTesto: widget.miglioraTesto,
       child: _dati == null ? app : DatiScope(dati: _dati, child: app),
     );
   }

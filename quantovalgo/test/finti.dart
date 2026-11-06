@@ -21,7 +21,9 @@ import 'package:quantovalgo/servizi/accesso.dart';
 import 'package:quantovalgo/logica/promemoria.dart';
 import 'package:quantovalgo/servizi/archivio.dart';
 import 'package:quantovalgo/modelli/tipi.dart';
+import 'package:quantovalgo/logica/migliora_testo.dart';
 import 'package:quantovalgo/servizi/esportazione.dart';
+import 'package:quantovalgo/servizi/migliora_testo.dart';
 import 'package:quantovalgo/servizi/promemoria_servizio.dart';
 import 'package:quantovalgo/servizi/ricerca_prezzi.dart';
 import 'package:quantovalgo/servizi/utente.dart';
@@ -309,6 +311,23 @@ class FintaRicerca implements RicercaPrezzi {
   }
 }
 
+/// AI finta: risponde quello che le dici e ricorda le richieste.
+class FintaMigliora implements MiglioraTesto {
+  FintaMigliora(this.esito);
+
+  EsitoMiglioramento esito;
+  final richieste = <({TestiDaMigliorare testi, String chiave})>[];
+
+  @override
+  Future<EsitoMiglioramento> migliora(
+    TestiDaMigliorare testi, {
+    required String chiave,
+  }) async {
+    richieste.add((testi: testi, chiave: chiave));
+    return esito;
+  }
+}
+
 /// Esportazione finta: ricorda cosa è stato salvato e condiviso.
 class FintaEsportazione implements ServizioEsportazione {
   final salvati = <({String nome, int byte})>[];
@@ -338,6 +357,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   ServizioPromemoria? promemoria,
   RicercaPrezzi? ricerca,
   ServizioEsportazione? esportazione,
+  MiglioraTesto? miglioraTesto,
 }) async {
   final accesso = FintoAccesso(iniziale: utente);
   final archivioUsato = archivio ?? FintoArchivio();
@@ -350,6 +370,7 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
       promemoria: promemoria,
       ricerca: ricerca,
       esportazione: esportazione,
+      miglioraTesto: miglioraTesto,
     ),
   );
   await tester.pumpAndSettle();

@@ -12,6 +12,7 @@ class Impostazioni {
     this.scontoRelazione = scontiPredefiniti,
     this.correzioneLivello = correzioniPredefinite,
     this.chiaveTavily = '',
+    this.chiaveClaude = '',
     this.aggiornaPrezzi = false,
     this.ricercheMese = '',
     this.ricercheUsate = 0,
@@ -46,6 +47,10 @@ class Impostazioni {
   /// La crea l'utente su tavily.com; sta nel suo cloud privato.
   final String chiaveTavily;
 
+  /// Chiave dell'API di Claude (Anthropic) per "Migliora il testo con l'AI"
+  /// (vuota = AI spenta). La crea l'utente; sta nel suo cloud privato.
+  final String chiaveClaude;
+
   /// Aggiorna da solo, una volta a settimana, le forbici trovate dal web
   /// (quelle scritte a mano non si toccano). Parte quando si apre l'app.
   final bool aggiornaPrezzi;
@@ -76,6 +81,7 @@ class Impostazioni {
     Map<Relazione, int>? scontoRelazione,
     Map<int, int>? correzioneLivello,
     String? chiaveTavily,
+    String? chiaveClaude,
     bool? aggiornaPrezzi,
     String? ricercheMese,
     int? ricercheUsate,
@@ -88,6 +94,7 @@ class Impostazioni {
     scontoRelazione: scontoRelazione ?? this.scontoRelazione,
     correzioneLivello: correzioneLivello ?? this.correzioneLivello,
     chiaveTavily: chiaveTavily ?? this.chiaveTavily,
+    chiaveClaude: chiaveClaude ?? this.chiaveClaude,
     aggiornaPrezzi: aggiornaPrezzi ?? this.aggiornaPrezzi,
     ricercheMese: ricercheMese ?? this.ricercheMese,
     ricercheUsate: ricercheUsate ?? this.ricercheUsate,
@@ -104,6 +111,7 @@ class Impostazioni {
       for (final e in correzioneLivello.entries) '${e.key}': e.value,
     },
     'chiaveTavily': chiaveTavily,
+    'chiaveClaude': chiaveClaude,
     'aggiornaPrezzi': aggiornaPrezzi,
     'ricercheMese': ricercheMese,
     'ricercheUsate': ricercheUsate,
@@ -141,6 +149,9 @@ class Impostazioni {
       },
       chiaveTavily: dati['chiaveTavily'] is String
           ? (dati['chiaveTavily'] as String).trim()
+          : '',
+      chiaveClaude: dati['chiaveClaude'] is String
+          ? (dati['chiaveClaude'] as String).trim()
           : '',
       aggiornaPrezzi: dati['aggiornaPrezzi'] as bool? ?? false,
       ricercheMese: dati['ricercheMese'] is String

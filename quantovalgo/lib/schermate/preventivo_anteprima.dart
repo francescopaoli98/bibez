@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../logica/formato.dart';
+import '../logica/migliora_testo.dart';
 import '../logica/preventivo.dart';
 import '../modelli/preventivo.dart';
+import '../modelli/tipi.dart';
+import '../servizi/migliora_testo.dart';
 import '../servizi/servizi_app.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
@@ -15,6 +18,8 @@ import '../widget/pagina_secondaria.dart';
 import '../widget/pulsante_lucido.dart';
 import '../widget/pulsante_scelta.dart';
 import '../widget/stile_lucido.dart';
+import 'foglio_chiave.dart';
+import 'foglio_proposta_ai.dart';
 import 'preventivo_domande.dart';
 
 /// Come si trasforma il foglio in un'immagine PNG (3×, cioè 1080 pixel di
@@ -50,8 +55,79 @@ class _PreventivoAnteprimaState extends State<PreventivoAnteprima> {
   late String? _idSalvato = widget.bozza.id.isEmpty ? null : widget.bozza.id;
   bool _inCorso = false;
 
-  Preventivo get _attuale =>
-      widget.bozza.copyWith(id: _idSalvato ?? '', stile: _stile);
+  /// I tre testi mostrati: all'inizio quelli scelti nelle domande, poi (solo se
+  /// lo vuoi) quelli proposti dall'AI.
+  late String _progetto = widget.bozza.progetto;
+  late List<String> _fasi = widget.bozza.fasi;
+  late List<String> _benefit = widget.bozza.benefit;
+  bool _conAi = false;
+  bool _aiInCorso = false;
+
+  Preventivo get _attuale => widget.bozza.copyWith(
+    id: _idSalvato ?? '',
+    stile: _stile,
+    progetto: _progetto,
+    fasi: _fasi,
+    benefit: _benefit,
+  );
+
+  /// Chiede all'AI di riscrivere i testi. Parte solo dal pulsante: senza
+  /// chiave apre prima il foglio per inserirla, e poi si preme di nuovo.
+  Future<void> _miglioraConAi() async {
+    final servizio = ServiziApp.di(context).miglioraTesto;
+    final dati = DatiScope.leggi(context);
+    if (servizio == null || _aiInCorso) return;
+
+    final chiave = dati.impostazioni.chiaveClaude;
+    if (chiave.isEmpty) {
+      await modificaChiaveClaude(context);
+      return;
+    }
+
+    final prima = TestiDaMigliorare(
+      tipo: dati.lavoro(widget.bozza.lavoroId)?.tipo ?? TipoLavoro.altro,
+      progetto: _progetto,
+      fasi: _fasi,
+      benefit: _benefit,
+      consegna: widget.bozza.consegna,
+    );
+
+    setState(() => _aiInCorso = true);
+    EsitoMiglioramento esito;
+    try {
+      esito = await servizio.migliora(prima, chiave: chiave);
+    } catch (e) {
+      esito = const MiglioramentoFallito(
+        'Qualcosa non ha funzionato: riprova.',
+      );
+    }
+    if (!mounted) return;
+    setState(() => _aiInCorso = false);
+
+    switch (esito) {
+      case MiglioramentoFallito(:final messaggio, :final serveChiave):
+        _messaggio(messaggio);
+        if (serveChiave) await modificaChiaveClaude(context);
+      case MiglioramentoRiuscito(:final testi):
+        final usa = await scegliProposta(context, prima: prima, dopo: testi);
+        if (usa && mounted) {
+          setState(() {
+            _progetto = testi.progetto;
+            _fasi = testi.fasi;
+            _benefit = testi.benefit;
+            _conAi = true;
+          });
+        }
+    }
+  }
+
+  /// Torna ai testi scelti nelle domande, buttando la proposta dell'AI.
+  void _tornaAlMioTesto() => setState(() {
+    _progetto = widget.bozza.progetto;
+    _fasi = widget.bozza.fasi;
+    _benefit = widget.bozza.benefit;
+    _conAi = false;
+  });
 
   /// Un nome di file semplice: `preventivo-sito-vetrina-2026-11-04`.
   String _nomeFile(String titolo, DateTime data) {
@@ -116,16 +192,17 @@ class _PreventivoAnteprimaState extends State<PreventivoAnteprima> {
     final titolo = dati.lavoro(b.lavoroId)?.nome ?? b.progetto;
     final tema = Theme.of(context).textTheme;
     final puoEsportare = ServiziApp.di(context).esportazione != null;
+    final puoMigliorare = ServiziApp.di(context).miglioraTesto != null;
 
     final foglio = DatiFoglio(
       titolo: titolo,
       cliente: b.cliente,
       testi: componiTesti(
-        progetto: b.progetto,
+        progetto: _progetto,
         cliente: b.cliente,
-        fasi: b.fasi,
+        fasi: _fasi,
         consegna: b.consegna,
-        benefit: b.benefit,
+        benefit: _benefit,
       ),
       conto: contoPrezzo(
         prezzoPieno: b.prezzoPieno,
@@ -182,18 +259,32 @@ class _PreventivoAnteprimaState extends State<PreventivoAnteprima> {
               : null,
         ),
         const SizedBox(height: 10),
-        // Il miglioramento con l'AI parte solo su tuo comando e per ora è spento
-        const PulsanteLucido(
-          etichetta: 'Migliora il testo con l\'AI',
+        // Il miglioramento con l'AI parte solo su tuo comando
+        PulsanteLucido(
+          key: const Key('migliora-ai'),
+          etichetta: _aiInCorso ? 'Un attimo…' : 'Migliora il testo con l\'AI',
           icona: Icons.auto_awesome_rounded,
           stile: StileLucido.oro,
-          onPressed: null,
+          onPressed: puoMigliorare && !_aiInCorso ? _miglioraConAi : null,
         ),
         const SizedBox(height: 6),
         Text(
-          'Arriverà più avanti. Non parte mai da solo: solo se lo premi.',
+          !puoMigliorare
+              ? 'Non disponibile in questa versione.'
+              : _conAi
+              ? 'Testo scritto con l\'AI. Puoi sempre tornare al tuo.'
+              : 'Non parte mai da solo: solo se lo premi. Manda il testo a '
+                    'Claude e costa meno di un centesimo.',
           style: tema.bodyMedium?.copyWith(color: ColoriLaguna.testoSecondario),
         ),
+        if (_conAi)
+          Align(
+            child: TextButton(
+              key: const Key('torna-al-mio-testo'),
+              onPressed: _tornaAlMioTesto,
+              child: const Text('Torna al mio testo'),
+            ),
+          ),
         const SizedBox(height: 10),
         Align(
           child: TextButton(

@@ -36,7 +36,9 @@ flutter build apk    # APK per installarlo sul telefono
 - [x] 8. Obiettivo, pareggio, tariffa minima e Impostazioni
 - [x] 9. Ricerca prezzi con Tavily e autoapprendimento
 - [x] 10. Preventivi in PNG con 4 stili
-- [ ] 11–12. Vedi il brief
+- [x] 11. "Migliora il testo con l'AI" nei preventivi (Claude, solo su tuo comando)
+- [x] Guadagni veloci: soldi entrati senza creare un lavoro
+- [ ] 12. Rifinitura finale (nome e icona dell'app, APK)
 
 ## Richieste aggiunte dopo il brief
 
@@ -341,7 +343,8 @@ Il pulsante verde apre un percorso guidato, una domanda a schermo pieno:
   due). Si possono aggiungere fasi e vantaggi propri. Le scelte pronte cambiano col tipo di
   lavoro (`logica/preventivo.dart`).
 - **Testo da modelli, gratis e offline**: «Per Luca: Sito vetrina. Consegna in 1
-  settimana.», poi le fasi e i vantaggi in elenco. Nessuna AI.
+  settimana.», poi le fasi e i vantaggi in elenco. Di partenza nessuna AI (la
+  si può chiedere col pulsante, passo 11).
 - **Prezzo**: prezzo pieno, sconto in % e totale (1.000 → −30% → 700 €). Se non c'è sconto
   compare solo il totale. I prezzi si "fotografano" al momento del salvataggio.
 - **Quattro stili** (titoli del brief): **App** (Laguna: PROGETTO / COME LAVORO / COSA CI
@@ -354,10 +357,50 @@ Il pulsante verde apre un percorso guidato, una domanda a schermo pieno:
   Salvando o condividendo il preventivo entra nell'elenco; salvando ancora lo stesso si
   aggiorna, senza doppioni. Dati in `utenti/{uid}/preventivi`; eliminando il lavoro
   spariscono anche i suoi preventivi.
-- **"Migliora il testo con l'AI"**: il pulsante c'è ma è **spento** (passo 11): non parte mai
-  da solo e per ora non ha un costo approvato.
+- **"Migliora il testo con l'AI"**: vedi la sezione del passo 11 qui sotto.
 - Pacchetti nuovi: `share_plus`, `path_provider`, `gal` (nessun servizio a pagamento).
   Permessi Android: scrittura nella galleria solo per Android 10 e precedenti.
 - Codice: `modelli/preventivo.dart`, `widget/foglio_preventivo.dart`,
   `schermate/preventivi.dart`, `preventivo_domande.dart`, `preventivo_anteprima.dart`,
   `servizi/esportazione*.dart`.
+
+## Guadagni veloci
+
+Per i soldi che entrano **senza un lavoro** (una vendita, una mancia, un rimborso…): niente
+cliente, niente parti, niente prezzo suggerito. Si scrive solo **quanto**, **da dove**
+(facoltativo) e **quando** (oggi, ieri o un altro giorno).
+
+- **Dove**: la sfera dorata accanto a "Nuovo lavoro" nella Home. L'elenco, con correzione
+  e cancellazione, è in *Altro → Guadagni* (un mese alla volta, con il totale).
+- **Nei conti**: contano nell'**incassato** del mese in cui sono entrati, quindi nell'anello
+  della Home, nel saldo, nelle tasse e nell'obiettivo netto. Sono puro guadagno: non hanno
+  costi collegati. Non hanno ore, quindi non entrano nel "guadagno all'ora".
+- **Dati**: `utenti/{uid}/introiti` (importo, data, nota). Le regole di Firestore già coprono
+  tutte le raccolte sotto `utenti/{uid}`, non serve cambiarle.
+- Codice: `modelli/introito.dart`, `logica/introiti.dart`, `schermate/foglio_introito.dart`,
+  `schermate/guadagni.dart`.
+
+## Migliora il testo con l'AI (passo 11)
+
+Nell'anteprima del preventivo il pulsante **"Migliora il testo con l'AI"** riscrive in modo
+più chiaro la frase del progetto, le fasi e i vantaggi.
+
+- **Solo su tuo comando**: non parte mai da solo. Il testo viene mandato a Claude (Anthropic)
+  soltanto quando premi il pulsante.
+- **Tu scegli**: compare la proposta accanto al tuo testo; **"Usa questa"** la mette nel
+  preventivo, **"Tieni la mia"** (o chiudere il foglio) lascia tutto com'era. Dopo averla
+  usata puoi tornare al tuo testo con **"Torna al mio testo"**. Cliente, consegna e prezzi
+  non vengono mai riscritti.
+- **Costo**: serve una chiave dell'API di Anthropic, che crei tu su console.anthropic.com
+  (è a consumo, con un po' di credito, **non** è l'abbonamento di Claude.ai). Si usa il
+  modello piccolo `claude-haiku-5-5` (0,10 $ / 0,50 $ per milione di token): un
+  miglioramento costa **una frazione di centesimo**. Senza chiave il pulsante apre il foglio
+  per inserirla; l'AI non parte finché non lo premi di nuovo.
+- **Chiave**: in *Impostazioni → AI per i preventivi* (o dal pulsante). Sta nel tuo cloud
+  privato, come quella di Tavily; **mai nel repository**.
+- **Errori**: rete assente, chiave non valida, troppe richieste, credito finito o risposta
+  inutilizzabile → un messaggio chiaro e il testo resta com'è. Una risposta con voci
+  mancanti, righe troppo lunghe o JSON rotto viene scartata.
+- Codice: `logica/migliora_testo.dart` (richiesta e lettura della risposta, senza rete),
+  `servizi/migliora_testo*.dart` (chiamata HTTP), `schermate/foglio_proposta_ai.dart`,
+  `schermate/foglio_chiave.dart` (ora per Tavily e Claude).

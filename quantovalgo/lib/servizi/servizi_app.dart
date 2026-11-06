@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'accesso.dart';
 import 'archivio.dart';
 import 'esportazione.dart';
+import 'migliora_testo.dart';
 import 'ricerca_prezzi.dart';
 
 /// Rende disponibili accesso e archivio a tutte le schermate, senza
@@ -14,6 +15,7 @@ class ServiziApp extends InheritedWidget {
     required this.archivio,
     this.ricerca,
     this.esportazione,
+    this.miglioraTesto,
     required super.child,
   });
 
@@ -26,6 +28,9 @@ class ServiziApp extends InheritedWidget {
   /// Salvataggio e condivisione dell'immagine del preventivo.
   final ServizioEsportazione? esportazione;
 
+  /// Miglioramento del testo del preventivo con l'AI (vuoto: pulsante spento).
+  final MiglioraTesto? miglioraTesto;
+
   static ServiziApp di(BuildContext context) {
     final servizi = context.dependOnInheritedWidgetOfExactType<ServiziApp>();
     assert(servizi != null, 'ServiziApp non trovato sopra questo widget');
@@ -37,5 +42,6 @@ class ServiziApp extends InheritedWidget {
       accesso != vecchio.accesso ||
       archivio != vecchio.archivio ||
       ricerca != vecchio.ricerca ||
-      esportazione != vecchio.esportazione;
+      esportazione != vecchio.esportazione ||
+      miglioraTesto != vecchio.miglioraTesto;
 }
