@@ -8,6 +8,7 @@ import '../logica/apprendimento.dart' as apprendimento show forbiceCorretta;
 import '../logica/costi.dart';
 import '../logica/costi.dart' as logica_costi;
 import '../logica/giornate.dart';
+import '../logica/introiti.dart';
 import '../logica/mesi.dart';
 import '../logica/obiettivo.dart';
 import '../logica/ore.dart';
@@ -20,6 +21,7 @@ import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
 import '../modelli/giornata.dart';
 import '../modelli/impostazioni.dart';
+import '../modelli/introito.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/preventivo.dart';
@@ -49,7 +51,7 @@ class StatoDati extends ChangeNotifier {
   late final StreamSubscription<Utente?> _ascoltoUtente;
   final List<StreamSubscription<Object?>> _ascolti = [];
   final Set<String> _arrivati = {};
-  static const _totaleFlussi = 10;
+  static const _totaleFlussi = 11;
 
   /// "Adesso" dell'app (sostituibile nei test).
   final DateTime Function() adesso;
@@ -63,6 +65,7 @@ class StatoDati extends ChangeNotifier {
   List<Giornata> _giornate = const [];
   List<SessioneOre> _sessioni = const [];
   List<Preventivo> _preventivi = const [];
+  List<Introito> _introiti = const [];
   Impostazioni _impostazioni = const Impostazioni();
 
   /// Valori di calcolo (sconti, fattori di competenza), da Impostazioni.
@@ -85,6 +88,9 @@ class StatoDati extends ChangeNotifier {
   /// I preventivi salvati, dal più recente.
   List<Preventivo> get preventivi => _preventivi;
   List<SessioneOre> get sessioni => _sessioni;
+
+  /// I guadagni veloci, dal giorno più recente.
+  List<Introito> get introiti => _introiti;
   Impostazioni get impostazioni => _impostazioni;
 
   // --- Ascolto ---
@@ -100,6 +106,7 @@ class StatoDati extends ChangeNotifier {
     _giornate = const [];
     _sessioni = const [];
     _preventivi = const [];
+    _introiti = const [];
     _impostazioni = const Impostazioni();
     _arrivati.clear();
     problema = false;
@@ -136,6 +143,15 @@ class StatoDati extends ChangeNotifier {
       });
       _ascolta<Preventivo>('preventivi', _archivio.preventivi(), (v) {
         _preventivi = [...v]..sort((a, b) => b.creatoIl.compareTo(a.creatoIl));
+      });
+      _ascolta<Introito>('introiti', _archivio.introiti(), (v) {
+        _introiti = [...v]
+          ..sort((a, b) {
+            final perGiorno = b.data.compareTo(a.data);
+            return perGiorno != 0
+                ? perGiorno
+                : b.creatoIl.compareTo(a.creatoIl);
+          });
       });
       _ascolta<Impostazioni>(
         'impostazioni',
@@ -226,6 +242,14 @@ class StatoDati extends ChangeNotifier {
     );
   }
 
+  // --- Guadagni veloci ---
+
+  /// I guadagni veloci entrati nel mese di [mese].
+  List<Introito> introitiDelMese(DateTime mese) => [
+    for (final i in _introiti)
+      if (primoDelMese(i.data) == primoDelMese(mese)) i,
+  ];
+
   // --- Saldo del mese (Home) ---
 
   /// Incassi, costi, guadagno all'ora e sconti regalati di [mese].
@@ -260,8 +284,12 @@ class StatoDati extends ChangeNotifier {
         }
       }
     }
+    // Guadagni veloci: puro guadagno, contano nel giorno in cui sono entrati
+    final dagliIntroiti = totaleIntroiti(introitiDelMese(m));
+    incassato += dagliIntroiti;
     return SaldoMese(
       incassato: incassato,
+      introiti: dagliIntroiti,
       costiCondivisi: logica_costi.totaleCostiDelMese(_costi, m),
       costiDiretti: costiDiretti,
       utileProgetti: utile,
@@ -674,6 +702,9 @@ class StatoDati extends ChangeNotifier {
 
   String salvaCosto(Costo c) => _archivio.salvaCosto(c);
   void eliminaCosto(String id) => _archivio.eliminaCosto(id);
+
+  String salvaIntroito(Introito i) => _archivio.salvaIntroito(i);
+  void eliminaIntroito(String id) => _archivio.eliminaIntroito(id);
 
   String salvaPreventivo(Preventivo p) => _archivio.salvaPreventivo(p);
   void eliminaPreventivo(String id) => _archivio.eliminaPreventivo(id);

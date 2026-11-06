@@ -1,7 +1,8 @@
 /// I numeri di un mese per la Home.
 ///
 /// - **Incassato**: progetti segnati incassati in quel mese + giornate del
-///   negozio fatte in quel mese.
+///   negozio fatte in quel mese + guadagni veloci (puro guadagno, senza
+///   lavoro né costi) di quel mese.
 /// - **Costi**: costi condivisi del mese (abbonamenti, una tantum, fissi) più i
 ///   costi diretti dei progetti incassati nel mese.
 /// - **Saldo** = incassato − costi (in positivo o in negativo).
@@ -16,8 +17,10 @@ class SaldoMese {
     required this.utileProgetti,
     required this.oreProgetti,
     required this.regalato,
+    this.introiti = 0,
   });
 
+  /// Totale incassato nel mese (comprende i [introiti]).
   final double incassato;
   final double costiCondivisi;
   final double costiDiretti;
@@ -26,6 +29,9 @@ class SaldoMese {
   final double utileProgetti;
   final double oreProgetti;
   final double regalato;
+
+  /// La parte di [incassato] che viene dai guadagni veloci.
+  final double introiti;
 
   double get costi => costiCondivisi + costiDiretti;
 

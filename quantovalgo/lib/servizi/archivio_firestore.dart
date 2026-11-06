@@ -8,6 +8,7 @@ import '../modelli/cliente.dart';
 import '../modelli/costo.dart';
 import '../modelli/giornata.dart';
 import '../modelli/impostazioni.dart';
+import '../modelli/introito.dart';
 import '../modelli/lavoro.dart';
 import '../modelli/prezzo_mercato.dart';
 import '../modelli/preventivo.dart';
@@ -126,6 +127,9 @@ class ArchivioFirestore implements Archivio {
 
   @override
   Stream<List<Costo>> costi() => _ascolta('costi', Costo.fromMap);
+
+  @override
+  Stream<List<Introito>> introiti() => _ascolta('introiti', Introito.fromMap);
 
   @override
   Stream<List<Preventivo>> preventivi() =>
@@ -248,6 +252,13 @@ class ArchivioFirestore implements Archivio {
 
   @override
   void eliminaCosto(String id) => _elimina('costi', id);
+
+  @override
+  String salvaIntroito(Introito introito) =>
+      _salva('introiti', introito.id, introito.toMap());
+
+  @override
+  void eliminaIntroito(String id) => _elimina('introiti', id);
 
   @override
   String salvaPreventivo(Preventivo preventivo) =>

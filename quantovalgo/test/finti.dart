@@ -11,6 +11,7 @@ import 'package:quantovalgo/modelli/cliente.dart';
 import 'package:quantovalgo/modelli/costo.dart';
 import 'package:quantovalgo/modelli/giornata.dart';
 import 'package:quantovalgo/modelli/impostazioni.dart';
+import 'package:quantovalgo/modelli/introito.dart';
 import 'package:quantovalgo/modelli/lavoro.dart';
 import 'package:quantovalgo/modelli/prezzo_mercato.dart';
 import 'package:quantovalgo/modelli/preventivo.dart';
@@ -107,6 +108,7 @@ class FintoArchivio implements Archivio {
   final tabellaGiornate = _Tabella<Giornata>();
   final tabellaSessioni = _Tabella<SessioneOre>();
   final tabellaPreventivi = _Tabella<Preventivo>();
+  final tabellaIntroiti = _Tabella<Introito>();
   var impostazioniSalvate = const Impostazioni();
   final _flussoImpostazioni = StreamController<Impostazioni>.broadcast();
   int _contatore = 0;
@@ -140,6 +142,8 @@ class FintoArchivio implements Archivio {
   Stream<List<SessioneOre>> sessioni() => tabellaSessioni.ascolta();
   @override
   Stream<List<Preventivo>> preventivi() => tabellaPreventivi.ascolta();
+  @override
+  Stream<List<Introito>> introiti() => tabellaIntroiti.ascolta();
   @override
   Stream<Impostazioni> impostazioni() async* {
     yield impostazioniSalvate;
@@ -221,6 +225,16 @@ class FintoArchivio implements Archivio {
     impostazioniSalvate = i;
     _flussoImpostazioni.add(i);
   }
+
+  @override
+  String salvaIntroito(Introito i) {
+    final id = _nuovoId(i.id);
+    tabellaIntroiti.metti(id, Introito.fromMap(id, i.toMap()));
+    return id;
+  }
+
+  @override
+  void eliminaIntroito(String id) => tabellaIntroiti.togli(id);
 
   @override
   String salvaPreventivo(Preventivo p) {
@@ -342,10 +356,13 @@ Future<({FintoAccesso accesso, FintoArchivio archivio})> avviaApp(
   return (accesso: accesso, archivio: archivioUsato);
 }
 
-/// Apre una voce del menu "Altro": Lavori, Spese, Clienti, Obiettivo,
-/// Preventivi o Impostazioni (la Home non ha più la barra in basso).
+/// Apre una voce del menu "Altro": Lavori, Guadagni, Spese, Clienti,
+/// Obiettivo, Preventivi o Impostazioni (la Home non ha più la barra in basso).
 Future<void> apriDalMenu(WidgetTester tester, String voce) async {
   await tester.tap(find.bySemanticsLabel('Altro'));
+  await tester.pumpAndSettle();
+  // Su schermi bassi l'ultima riga di tasselli sta sotto: scorro fin lì
+  await tester.ensureVisible(find.text(voce));
   await tester.pumpAndSettle();
   await tester.tap(find.text(voce));
   await tester.pumpAndSettle();

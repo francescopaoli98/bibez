@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../logica/formato.dart';
+import '../logica/introiti.dart';
 import '../logica/mesi.dart';
 import '../servizi/stato_dati.dart';
 import '../tema/colori.dart';
@@ -10,6 +11,7 @@ import '../widget/sfera_lucida.dart';
 import '../widget/stile_lucido.dart';
 import 'clienti.dart';
 import 'costi.dart';
+import 'guadagni.dart';
 import 'impostazioni.dart';
 import 'obiettivo.dart';
 import 'preventivi.dart';
@@ -39,6 +41,13 @@ class AltroPagina extends StatelessWidget {
         titolo: 'Lavori',
         sotto: nLavori == 0 ? 'ancora nessuno' : '$nLavori in tutto',
         onTap: () => _apri(context, const ProgettiPagina()),
+      ),
+      _Tassello(
+        icona: Icons.savings_rounded,
+        stile: StileLucido.oro,
+        titolo: 'Guadagni',
+        sotto: '${euro(totaleIntroiti(dati.introitiDelMese(mese)))} veloci',
+        onTap: () => _apri(context, const GuadagniPagina()),
       ),
       _Tassello(
         icona: Icons.euro_rounded,
@@ -91,7 +100,12 @@ class AltroPagina extends StatelessWidget {
             children: [
               Expanded(child: tasselli[i]),
               const SizedBox(width: 12),
-              Expanded(child: tasselli[i + 1]),
+              // Con un numero dispari l'ultima riga lascia il posto vuoto
+              Expanded(
+                child: i + 1 < tasselli.length
+                    ? tasselli[i + 1]
+                    : const SizedBox.shrink(),
+              ),
             ],
           ),
           const SizedBox(height: 12),
