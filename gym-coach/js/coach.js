@@ -3,6 +3,7 @@ import { S, save } from './store.js';
 import { syncSession } from './training.js';
 import { targets } from './nutrition.js';
 import { topics } from './chats.js';
+import { coachLine } from './salute.js';
 
 export function coachSystem(lib) {
   const p = S.profile;
@@ -20,6 +21,8 @@ Altezza ${p.altezza || 'n.d.'} cm, età ${p.eta || 'n.d.'}. Obiettivo calorico i
 
 SCHEDA ATTUALE (giorno = numero a partire da 0):
 ${plan}
+
+${coachLine(p.salute)}
 
 ULTIMI ALLENAMENTI:
 ${rec}

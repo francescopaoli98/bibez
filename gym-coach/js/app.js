@@ -11,6 +11,7 @@ import { applyTheme, setTheme, getTheme, PRESETS, BACKGROUNDS } from './theme.js
 import { initSound, play, buzz } from './sound.js';
 import { countUps, confetti } from './fx.js';
 import { initInstall } from './install.js';
+import * as Sal from './salute.js';
 import { viewProgressi } from './progress.js';
 import { remindersCard } from './reminders.js';
 import * as Chats from './chats.js';
@@ -108,7 +109,7 @@ async function accessFlow() {
 function rememberDevice0(r) { if (r?.password) keepSignedIn().catch(() => {}); }
 
 const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach, progressi: () => viewProgressi({ render, LIB, go }),
-                 profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding };
+                 profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding, guida: viewGuida };
 const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'progressi', scheda: 'scheda', esercizi: 'scheda', coach: 'coach' };
 
 function route() {
@@ -182,46 +183,94 @@ function exRow(id, subtitle, onclick) {
     h('div', { class: 'grow' }, h('h3', {}, ex.nome), h('div', { class: 'muted small' }, subtitle || ex.muscoli)));
 }
 
-/* ---------------------------- primo avvio: una sola schermata ---------------------------- */
+/* ---------------------------- primo avvio: "Prima di iniziare" ---------------------------- */
+const inp = (props) => h('input', { class: 'bigin', type: 'number', inputmode: 'decimal', ...props });
+const condBtn = (txt, on, onclick) => h('button', { class: 'cond' + (on ? ' on' : ''), role: 'checkbox', 'aria-checked': String(on), onclick }, h('i', {}, on ? '✓' : ''), txt);
+const privacyBox = (txt) => h('div', { class: 'privacy' }, icon('heart'), h('span', {}, txt));
+
 function viewOnboarding() {
-  const d = { obiettivo: 'misto', livello: 'intermedio', giorni: 3, casa: 'libero', peso: '', note: '', apiKey: S.settings.apiKey || '' };
+  const d = { peso: '', altezza: '', eta: '', sesso: '', cond: new Set(), altro: '', farmaci: null, farmaciNote: '', ack: false,
+              obiettivo: 'misto', livello: 'intermedio', giorni: 3, casa: 'libero', apiKey: S.settings.apiKey || '' };
+  let step = 0, err = '';
+  const salute = () => ({ condizioni: [...d.cond], altro: d.altro.trim(), farmaci: d.farmaci === true, farmaciNote: d.farmaciNote.trim() });
+  const advice = () => Sal.hasAny(salute());                      // se c'è qualcosa da segnalare, c'è la schermata "consiglio"
+  const order = () => advice() ? ['dati', 'salute', 'consiglio', 'obiettivi'] : ['dati', 'salute', 'obiettivi'];
   const pick = (title, key, opts) => {
     const box = h('div', { class: 'chips' });
-    const draw = () => box.replaceChildren(...opts.map(([v, t]) =>
-      h('button', { class: 'chip lg' + (d[key] === v ? ' on' : ''), onclick: () => { d[key] = v; draw(); } }, t)));
-    draw();
-    return h('div', { class: 'stack' }, h('h3', {}, title), box);
+    const drawc = () => box.replaceChildren(...opts.map(([v, t]) => h('button', { class: 'chip lg' + (d[key] === v ? ' on' : ''), onclick: () => { d[key] = v; drawc(); } }, t)));
+    drawc(); return h('div', { class: 'stack' }, h('h3', {}, title), box);
   };
-  const btn = h('button', { class: 'btn block', onclick: create });
-  const label = () => { btn.textContent = (d.apiKey || useProxy()) ? 'Crea la mia scheda' : 'Crea la scheda (senza IA)'; };
-  label();
 
-  async function create() {
+  function valid(name) {
+    if (name === 'dati') {
+      const p = parseFloat(d.peso), al = parseFloat(d.altezza), e = parseInt(d.eta);
+      if (!(p >= 30 && p <= 300)) return 'Scrivi il tuo peso in chili (per esempio 70).';
+      if (!(al >= 120 && al <= 230)) return 'Scrivi la tua altezza in centimetri (per esempio 170).';
+      if (!(e >= 14 && e <= 100)) return 'Scrivi quanti anni hai.';
+      if (!d.sesso) return 'Scegli uomo o donna (serve per calcolare le calorie).';
+    }
+    if (name === 'salute' && d.farmaci === null) return 'Rispondi: prendi dei farmaci? (Sì o No)';
+    if (name === 'consiglio' && !d.ack) return 'Tocca la casella per confermare di aver letto.';
+    return '';
+  }
+
+  function draw() {
+    const names = order(), name = names[step], last = step === names.length - 1;
+    const body = [];
+    if (name === 'dati') body.push(
+      h('div', {}, h('h1', {}, 'I tuoi dati'), h('p', { class: 'lead' }, 'Servono per calcolare le calorie e per consigliarti bene. Puoi cambiarli quando vuoi.')),
+      h('label', { class: 'field2' }, 'Quanto pesi?', h('small', {}, 'Scrivi il peso in chili'), h('div', { class: 'inpbox' }, inp({ placeholder: '70', value: d.peso, oninput: e => d.peso = e.target.value }), h('span', {}, 'kg'))),
+      h('label', { class: 'field2' }, 'Quanto sei alto/a?', h('div', { class: 'inpbox' }, inp({ placeholder: '170', value: d.altezza, oninput: e => d.altezza = e.target.value }), h('span', {}, 'cm'))),
+      h('div', { class: 'row', style: 'gap:12px;align-items:flex-end' },
+        h('label', { class: 'field2 grow' }, 'Anni', h('div', { class: 'inpbox' }, inp({ placeholder: '30', value: d.eta, oninput: e => d.eta = e.target.value }))),
+        h('div', { class: 'field2 grow' }, 'Sesso', (() => { const bx = h('div', { class: 'chips' }); const dr = () => bx.replaceChildren(...[['uomo', 'Uomo'], ['donna', 'Donna']].map(([v, t]) => h('button', { class: 'chip lg' + (d.sesso === v ? ' on' : ''), onclick: () => { d.sesso = v; dr(); } }, t))); dr(); return bx; })())));
+    if (name === 'salute') body.push(
+      h('div', {}, h('h1', {}, 'La tua salute'), h('p', { class: 'lead' }, 'Tocca quello che hai. Se non hai niente, vai avanti.')),
+      h('div', { class: 'stack', style: 'gap:10px' }, Sal.CONDIZIONI.map(([k, t]) => condBtn(t, d.cond.has(k), () => { d.cond.has(k) ? d.cond.delete(k) : d.cond.add(k); err = ''; draw(); }))),
+      d.cond.has('altro') && h('input', { type: 'text', class: 'bigtext', placeholder: 'Cosa? (anche solo una parola)', value: d.altro, oninput: e => d.altro = e.target.value }),
+      h('div', { class: 'field2' }, 'Prendi dei farmaci?', h('div', { class: 'row', style: 'gap:10px' }, [[true, 'Sì'], [false, 'No']].map(([v, t]) => h('button', { class: 'chip lg' + (d.farmaci === v ? ' on' : ''), onclick: () => { d.farmaci = v; err = ''; draw(); } }, t)))),
+      d.farmaci === true && h('input', { type: 'text', class: 'bigtext', placeholder: 'Quali? (anche solo il nome)', value: d.farmaciNote, oninput: e => d.farmaciNote = e.target.value }),
+      privacyBox('Queste informazioni restano solo sul tuo telefono, cifrate. Le legge il coach per essere prudente con te. Non sostituiscono il parere del medico.'));
+    if (name === 'consiglio') {
+      const s = salute(), items = [...s.condizioni.filter(k => k !== 'altro').map(k => Sal.label(k).toLowerCase()), ...(s.altro ? [s.altro] : []), ...(s.farmaci ? ['farmaci'] : [])];
+      body.push(
+        h('div', {}, h('h1', {}, 'Un consiglio importante')),
+        h('div', { class: 'warn' }, icon('warn'), h('span', {}, 'Hai indicato: ', h('b', {}, items.join(', ')), '.', h('br'), h('br'), 'Prima di iniziare ti consiglio di ', h('b', {}, 'parlarne con il tuo medico'), ' e chiedergli se puoi fare attività fisica in palestra.')),
+        privacyBox('Il coach terrà conto di quello che hai scritto: sceglierà esercizi più dolci e ti dirà di fermarti se qualcosa non va.'),
+        condBtn('Ho capito: parlerò con il mio medico.', d.ack, () => { d.ack = !d.ack; err = ''; draw(); }));
+    }
+    if (name === 'obiettivi') body.push(
+      h('div', {}, h('h1', {}, 'Il tuo obiettivo'), h('p', { class: 'lead' }, 'Ho già scelto le opzioni più comuni. Cambia solo se serve.')),
+      pick('Obiettivo', 'obiettivo', OBIETTIVI), pick('Esperienza', 'livello', LIVELLI), pick('Giorni a settimana', 'giorni', [[2, '2'], [3, '3'], [4, '4'], [5, '5']]), pick('A casa che attrezzatura hai?', 'casa', CASA_OPT),
+      useProxy()
+        ? h('div', { class: 'card stack' }, h('h3', {}, 'Coach IA ✅'), h('p', { class: 'muted small' }, 'Il coach è già collegato: non devi inserire nessuna chiave. I tuoi messaggi al coach passano dal Gemini di chi gestisce l\'app.'))
+        : h('div', { class: 'card stack' }, h('h3', {}, 'Coach IA (gratis)'),
+            h('p', { class: 'muted small' }, 'Incolla la chiave di Gemini: serve per la scheda su misura e per la chat col coach. Resta solo sul tuo telefono.'),
+            h('input', { type: 'password', placeholder: 'Chiave Gemini', value: d.apiKey, autocomplete: 'off', oninput: e => d.apiKey = e.target.value.trim() }),
+            h('a', { class: 'small', href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener' }, 'Come ottenere la chiave →')));
+
+    render(h('div', { class: 'wizard' },
+      h('div', { class: 'stepbar' }, names.map((_, i) => h('i', { class: i <= step ? 'on' : '' }))),
+      ...body, err && h('p', { class: 'err', role: 'alert' }, err),
+      h('div', { class: 'row', style: 'gap:10px;margin-top:6px' },
+        step > 0 && h('button', { class: 'btn ghost', style: 'min-height:64px', 'aria-label': 'Indietro', onclick: () => { err = ''; step--; draw(); window.scrollTo(0, 0); } }, '‹'),
+        h('button', { class: 'btn big grow', style: 'min-height:64px;font-size:20px', onclick: next }, last ? (d.apiKey || useProxy() ? 'Crea la mia scheda' : 'Crea la scheda (senza IA)') : 'Avanti'))));
+  }
+
+  async function next() {
+    const names = order(), name = names[step];
+    err = valid(name);
+    if (err) { draw(); return; }
+    if (step < names.length - 1) { step++; err = ''; draw(); window.scrollTo(0, 0); return; }
+    const sal = { ...salute(), medico: d.ack, aggiornata: new Date().toISOString() };
     S.settings.apiKey = d.apiKey;
-    S.profile = { nome: S.account?.name || '', obiettivo: d.obiettivo, livello: d.livello, giorni: d.giorni, casa: d.casa, peso: parseFloat(d.peso) || 0, note: d.note };
+    S.profile = { nome: S.account?.name || '', obiettivo: d.obiettivo, livello: d.livello, giorni: d.giorni, casa: d.casa,
+                  peso: parseFloat(d.peso), altezza: parseFloat(d.altezza), eta: parseInt(d.eta), sesso: d.sesso, salute: sal, note: Sal.hasAny(sal) ? Sal.summary(sal) : '' };
+    S.pesi = [{ date: new Date().toISOString(), kg: S.profile.peso }];
     save();
     await buildPlan();
   }
-
-  render(h('div', { class: 'stack', style: 'gap:22px' },
-    h('div', { class: 'brand' }, h('img', { src: 'icons/icon-192.png', alt: '' }), 'Gym Coach'),
-    h('div', {}, h('h1', {}, 'Facciamo la tua scheda'), h('p', { class: 'muted' }, 'Ho già scelto per te le opzioni più comuni. Cambia solo se serve.')),
-    pick('Obiettivo', 'obiettivo', OBIETTIVI),
-    pick('Esperienza', 'livello', LIVELLI),
-    pick('Giorni a settimana', 'giorni', [[2, '2'], [3, '3'], [4, '4'], [5, '5']]),
-    pick('A casa che attrezzatura hai?', 'casa', CASA_OPT),
-    h('label', { class: 'field' }, 'Il tuo peso in kg (per stimare le calorie, facoltativo)',
-      h('input', { type: 'number', inputmode: 'decimal', placeholder: '75', oninput: e => d.peso = e.target.value })),
-    h('label', { class: 'field' }, 'Dolori o limiti? (facoltativo)',
-      h('input', { type: 'text', placeholder: 'Es. mal di schiena', oninput: e => d.note = e.target.value })),
-    useProxy()
-      ? h('div', { class: 'card stack' }, h('h3', {}, 'Coach IA ✅'), h('p', { class: 'muted small' }, 'Il coach è già collegato: non devi inserire nessuna chiave. I tuoi messaggi al coach passano dal Gemini di chi gestisce l\'app.'))
-      : h('div', { class: 'card stack' },
-      h('h3', {}, 'Coach IA (gratis)'),
-      h('p', { class: 'muted small' }, 'Incolla la chiave di Gemini: serve per la scheda su misura e per la chat col coach. Resta solo sul tuo telefono.'),
-      h('input', { type: 'password', placeholder: 'Chiave Gemini', value: d.apiKey, autocomplete: 'off', oninput: e => { d.apiKey = e.target.value.trim(); label(); } }),
-      h('a', { class: 'small', href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener' }, 'Come ottenere la chiave →')),
-    btn));
+  draw();
 }
 
 async function buildPlan() {
@@ -233,11 +282,37 @@ async function buildPlan() {
     try { plan = await aiPlan(S.profile, LIB); }
     catch (e) { S.lastError = errorText(e); note = 'IA non disponibile: ho usato una scheda pronta. Vedi Impostazioni → Avanzate → Copia ultimo errore.'; }
   }
-  S.plan = plan || templatePlan(S.profile);
+  S.plan = Sal.adjustPlan(plan || templatePlan(S.profile), S.profile.salute);        // con schiena o articolazioni delicate: esercizi più dolci
   S.nextDay = 0; S.session = null; S.planBackup = null;
   save();
-  if (location.hash === '#/oggi') route(); else go('#/oggi');
+  const dest = S.seen?.guida ? '#/oggi' : '#/guida';
+  if (location.hash === dest) route(); else go(dest);
   setTimeout(() => toast(note || 'Scheda pronta! 🎉'), 300);
+}
+
+/* ---------------------------- guida di benvenuto ---------------------------- */
+function viewGuida() {
+  const nome = utente();
+  const SL = [
+    ['👋', `Ciao${nome ? ' ' + nome : ''}!`, 'Ti spiego come funziona in 4 passi. Ci vuole meno di un minuto.'],
+    ['▶', 'Ogni giorno: apri "Oggi"', 'Tocca il grande pulsante verde INIZIA. L\'app ti dice cosa fare, un esercizio alla volta.'],
+    ['✓', 'Dopo ogni serie, tocca ✓', 'Il tempo di riposo parte da solo. Quando finisce, senti un suono. Poi passi al prossimo esercizio.'],
+    ['💬', 'Hai un dubbio? Scrivi al coach', 'Scrivi come parleresti a una persona: "mi fa male la spalla", "ho poco tempo". Il coach ti risponde.'],
+  ];
+  let n = 0;
+  const finish = () => { S.seen = { ...(S.seen || {}), guida: true }; save(); go('#/oggi'); };
+  function draw() {
+    const [e, t, p] = SL[n], last = n === SL.length - 1;
+    view.className = 'no-tabs'; renderTabs(null);
+    render(h('div', { class: 'guida' },
+      h('div', { class: 'stack', style: 'gap:30px;margin-top:40px' }, h('div', { class: 'big-ic' }, e),
+        h('div', { class: 'stack center' }, h('h1', {}, t), h('p', { class: 'lead' }, p))),
+      h('div', { class: 'stack', style: 'gap:18px' },
+        h('div', { class: 'dots' }, SL.map((_, i) => h('i', { class: i === n ? 'on' : '' }))),
+        h('button', { class: 'btn big block', style: 'min-height:64px;font-size:20px', onclick: () => last ? finish() : (n++, draw()) }, last ? 'Ho capito, cominciamo' : 'Avanti'),
+        !last && h('button', { class: 'linkbtn', style: 'font-size:16px', onclick: finish }, 'Salta'))));
+  }
+  draw();
 }
 
 /* ---------------------------- Oggi ---------------------------- */
@@ -256,6 +331,32 @@ const saluto = () => { const hr = new Date().getHours(); return hr < 12 ? 'Buong
 const utente = () => S.profile?.nome || S.account?.name || '';
 const oggiTxt = () => new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 
+// Promemoria in cima a "Oggi": peso (ogni settimana) e salute (ogni 3 mesi)
+function reminderCards() {
+  const out = [], now = Date.now(), r = S.remind || {};
+  const lastW = S.pesi?.at(-1)?.date, days = lastW ? (now - new Date(lastW)) / 864e5 : 999;
+  if (r.pesoDays > 0 && days >= r.pesoDays && !(r.pesoSnooze > now)) {
+    const field = inp({ placeholder: String(S.profile.peso || '70'), 'aria-label': 'Peso in chili' });
+    const save1 = () => {
+      const kg = parseFloat(String(field.value).replace(',', '.'));
+      if (!(kg >= 30 && kg <= 300)) return toast('Scrivi il peso in chili (per esempio 70)');
+      S.pesi = [...(S.pesi || []), { date: new Date().toISOString(), kg }]; S.profile.peso = kg; save(); play('check'); toast('Peso aggiornato ✅'); viewOggi();
+    };
+    out.push(
+      h('div', { class: 'remind' }, h('div', { class: 'ic' }, '⚖️'), h('div', { class: 'grow' }, h('h3', {}, 'Aggiorna il tuo peso'), h('p', { class: 'muted small' }, lastW ? `L'ultima volta è stato ${Math.round(days)} giorni fa. Serve per calorie e grafici.` : 'Serve per calorie e grafici.'))),
+      h('div', { class: 'card stack' }, h('div', { class: 'row', style: 'gap:10px' }, h('div', { class: 'inpbox grow' }, field, h('span', {}, 'kg')), h('button', { class: 'btn big', style: 'min-height:56px', onclick: save1 }, 'Salva')),
+        h('button', { class: 'linkbtn', onclick: () => { S.remind = { ...r, pesoSnooze: now + 7 * 864e5 }; save(); viewOggi(); } }, 'Ricordamelo tra una settimana')));
+  }
+  const sd = S.profile?.salute?.aggiornata;
+  if (r.salute !== false && sd && (now - new Date(sd)) / 864e5 >= 90 && !(r.saluteSnooze > now)) {
+    out.push(h('div', { class: 'remind' }, h('div', { class: 'ic' }, '💚'), h('div', { class: 'grow' }, h('h3', {}, 'Rivedi la tua salute'), h('p', { class: 'muted small' }, 'Sono passati 3 mesi. È cambiato qualcosa? (nuove cure, infortuni, gravidanza…)'),
+      h('div', { class: 'row', style: 'gap:8px;margin-top:10px' },
+        h('button', { class: 'btn small', onclick: () => { S.profile.salute.aggiornata = new Date().toISOString(); save(); viewOggi(); } }, 'Tutto uguale'),
+        h('button', { class: 'btn ghost small', onclick: () => go('#/profilo') }, 'Aggiorna')))));
+  }
+  return out;
+}
+
 function viewOggi() {
   const day = S.plan.giorni[S.nextDay % S.plan.giorni.length];
   const wk = weekCount(), target = S.profile.giorni;
@@ -271,6 +372,7 @@ function viewOggi() {
     h('div', { class: 'row between' },
       h('div', {}, h('div', { class: 'eyebrow' }, `${saluto()} · ${oggiTxt()}`), h('h1', {}, utente() || 'Ciao')),
       h('div', { class: 'row', style: 'gap:8px' }, helpBtn('oggi'), gear())),
+    ...(!S.session ? reminderCards() : []),
     !S.session && luogoSwitch(viewOggi),
     !S.session && homeHint(),
     h('div', { class: 'hero' },
@@ -746,28 +848,79 @@ function appearanceCard() {
 }
 
 function bodyCard() {
-  const out = h('div', { class: 'stack' });
-  const num = (label, key, ph) => h('label', { class: 'field' }, label,
-    h('input', { type: 'number', inputmode: 'decimal', placeholder: ph, value: S.profile[key] || '', oninput: e => { S.profile[key] = parseFloat(e.target.value) || 0; save(); show(); } }));
-  const sesso = h('div', { class: 'chips' });
-  const drawSesso = () => sesso.replaceChildren(...[['uomo', 'Uomo'], ['donna', 'Donna']].map(([v, t]) =>
-    h('button', { class: 'chip lg' + (S.profile.sesso === v ? ' on' : ''), onclick: () => { S.profile.sesso = v; save(); drawSesso(); show(); } }, t)));
-  function show() {
-    const t = targets(S.profile);
-    out.replaceChildren(t
-      ? h('div', { class: 'stack' },
+  const t = targets(S.profile);
+  return h('div', { class: 'card stack' }, h('h2', {}, 'Calorie e proteine'),
+    t ? h('div', { class: 'stack' },
           h('div', { class: 'stats' },
             h('div', { class: 'stat' }, h('b', {}, t.kcal), h('span', {}, 'kcal al giorno')),
             h('div', { class: 'stat' }, h('b', {}, t.prot + ' g'), h('span', {}, 'proteine')),
             h('div', { class: 'stat' }, h('b', {}, t.fat + ' g'), h('span', {}, 'grassi'))),
           h('p', { class: 'muted small' }, `Mantenimento circa ${t.mantenimento} kcal. Il resto è carboidrati (~${t.carb} g). Stima indicativa: pesati ogni settimana e correggi di ±100-150 kcal se serve. Non sostituisce il parere di un medico o di un nutrizionista.`))
-      : h('p', { class: 'muted small' }, 'Inserisci peso, altezza, età e sesso per calcolare calorie e proteine.'));
+      : h('p', { class: 'muted' }, 'Inserisci peso, altezza, età e sesso in "La tua salute" per calcolare calorie e proteine.'));
+}
+
+/* ---------------------------- la tua salute ---------------------------- */
+function healthCard() {
+  const P = S.profile, sal = P.salute || {};
+  const touch = () => { P.salute = { ...(P.salute || {}), aggiornata: new Date().toISOString() }; P.note = Sal.hasAny(P.salute) ? Sal.summary(P.salute) : ''; save(); };
+  const row = (emoji, t, sub, btn, onclick) => h('div', { class: 'setrow2' }, h('div', { class: 'ic2' }, emoji), h('div', { class: 'grow' }, h('b', {}, t), h('div', { class: 'muted small' }, sub)), h('button', { class: 'chip', onclick }, btn));
+
+  function datiSheet() {
+    const f = { peso: P.peso || '', altezza: P.altezza || '', eta: P.eta || '', sesso: P.sesso || '' };
+    const err = h('p', { class: 'err' });
+    const sx = h('div', { class: 'chips' }); const drs = () => sx.replaceChildren(...[['uomo', 'Uomo'], ['donna', 'Donna']].map(([v, t]) => h('button', { class: 'chip lg' + (f.sesso === v ? ' on' : ''), onclick: () => { f.sesso = v; drs(); } }, t))); drs();
+    const field = (lab, key, unit) => h('label', { class: 'field2' }, lab, h('div', { class: 'inpbox' }, inp({ value: f[key], oninput: e => f[key] = e.target.value }), unit && h('span', {}, unit)));
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Peso e misure'), field('Peso', 'peso', 'kg'), field('Altezza', 'altezza', 'cm'), field('Anni', 'eta'), h('div', { class: 'field2' }, 'Sesso', sx), err,
+      h('button', { class: 'btn big block', onclick: () => {
+        const p = parseFloat(String(f.peso).replace(',', '.')), al = parseFloat(f.altezza), e = parseInt(f.eta);
+        if (!(p >= 30 && p <= 300) || !(al >= 120 && al <= 230) || !(e >= 14 && e <= 100) || !f.sesso) return err.textContent = 'Controlla i numeri e scegli uomo o donna.';
+        if (p !== P.peso) S.pesi = [...(S.pesi || []), { date: new Date().toISOString(), kg: p }];
+        Object.assign(P, { peso: p, altezza: al, eta: e, sesso: f.sesso }); save(); closeSheet(); toast('Salvato ✅'); viewProfilo();
+      } }, 'Salva')));
   }
-  drawSesso(); show();
-  return h('div', { class: 'card stack' }, h('h2', {}, 'Il tuo corpo e l\'alimentazione'),
-    h('div', { class: 'row' }, h('div', { class: 'grow' }, num('Peso (kg)', 'peso', '87')), h('div', { class: 'grow' }, num('Altezza (cm)', 'altezza', '181'))),
-    h('div', { class: 'row' }, h('div', { class: 'grow' }, num('Età', 'eta', '30')), h('div', { class: 'grow' }, h('div', { class: 'field' }, 'Sesso (per la formula)', sesso))),
-    out);
+  function condSheet() {
+    const c = new Set(sal.condizioni || []); let altro = sal.altro || '';
+    const box = h('div', { class: 'stack' });
+    const drawc = () => box.replaceChildren(
+      h('div', { class: 'stack', style: 'gap:10px' }, Sal.CONDIZIONI.map(([k, t]) => condBtn(t, c.has(k), () => { c.has(k) ? c.delete(k) : c.add(k); drawc(); }))),
+      c.has('altro') && h('input', { type: 'text', class: 'bigtext', placeholder: 'Cosa? (anche solo una parola)', value: altro, oninput: e => altro = e.target.value }),
+      c.size > 0 && h('div', { class: 'warn' }, icon('warn'), h('span', {}, 'Con questi problemi ti consiglio di ', h('b', {}, 'parlarne con il tuo medico'), ' prima di allenarti. Il coach sceglierà esercizi più dolci.')));
+    drawc();
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Problemi di salute'), h('p', { class: 'muted' }, 'Tocca quelli che hai.'), box,
+      h('button', { class: 'btn big block', onclick: () => { P.salute = { ...sal, condizioni: [...c], altro: altro.trim() }; touch(); closeSheet(); toast('Salvato ✅'); viewProfilo(); } }, 'Salva')));
+  }
+  function farmaciSheet() {
+    let on = sal.farmaci === true, note = sal.farmaciNote || '';
+    const box = h('div', { class: 'stack' });
+    const drawf = () => box.replaceChildren(h('div', { class: 'row', style: 'gap:10px' }, [[true, 'Sì'], [false, 'No']].map(([v, t]) => h('button', { class: 'chip lg' + (on === v ? ' on' : ''), onclick: () => { on = v; drawf(); } }, t))),
+      on && h('input', { type: 'text', class: 'bigtext', placeholder: 'Quali? (anche solo il nome)', value: note, oninput: e => note = e.target.value }));
+    drawf();
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Farmaci'), h('p', { class: 'muted' }, 'Prendi dei farmaci? Il coach non dà consigli sui farmaci: li usa solo per essere prudente.'), box,
+      h('button', { class: 'btn big block', onclick: () => { P.salute = { ...sal, farmaci: on, farmaciNote: on ? note.trim() : '' }; touch(); closeSheet(); toast('Salvato ✅'); viewProfilo(); } }, 'Salva')));
+  }
+  const conds = Sal.hasAny({ condizioni: sal.condizioni, altro: sal.altro }) ? Sal.summary({ condizioni: sal.condizioni, altro: sal.altro }) : 'Nessuno indicato';
+  return h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px' }, 'La tua salute'),
+    row('⚖️', 'Peso e misure', P.peso ? `${P.peso} kg · ${P.altezza || '?'} cm · ${P.eta || '?'} anni` : 'Da inserire', 'Aggiorna', datiSheet),
+    row('💚', 'Problemi di salute', conds, 'Modifica', condSheet),
+    row('💊', 'Farmaci', sal.farmaci ? `Sì${sal.farmaciNote ? ': ' + sal.farmaciNote : ''}` : 'No', 'Modifica', farmaciSheet),
+    privacyBox('Ti ricordo di rivedere questi dati ogni 3 mesi e di aggiornare il peso ogni settimana. Se cambia qualcosa (nuova cura, infortunio), aggiornali: il coach si adatta.'));
+}
+
+function healthRemindersCard() {
+  const r = S.remind || (S.remind = { pesoDays: 7, salute: true });
+  const box = h('div', { class: 'stack' });
+  const draw = () => box.replaceChildren(
+    h('div', { class: 'stack' }, h('h3', {}, 'Peso: ricordamelo'),
+      h('div', { class: 'chips' }, [[0, 'Mai'], [7, 'Ogni settimana'], [14, 'Ogni 2 settimane']].map(([v, t]) => h('button', { class: 'chip lg' + (r.pesoDays === v ? ' on' : ''), onclick: () => { r.pesoDays = v; delete r.pesoSnooze; save(); draw(); } }, t))),
+      h('p', { class: 'muted small' }, 'Quando apri l\'app compare un avviso, con il campo già pronto.')),
+    h('div', { class: 'setrow' }, h('div', {}, h('b', {}, 'Rivedi la salute ogni 3 mesi')), h('button', { class: 'switch' + (r.salute !== false ? ' on' : ''), role: 'switch', 'aria-checked': String(r.salute !== false), 'aria-label': 'Rivedi la salute ogni 3 mesi', 'data-nosound': '', onclick: () => { r.salute = r.salute === false; save(); draw(); } })));
+  draw();
+  return h('div', { class: 'card stack' }, h('h2', {}, 'Promemoria della salute'), box);
+}
+
+function helpCard() {
+  return h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px' }, 'Aiuto'),
+    h('button', { class: 'setrow2 fullrow', onclick: () => go('#/guida') }, h('div', { class: 'ic2' }, '❓'), h('div', { class: 'grow' }, h('b', {}, 'Rivedi la guida'), h('div', { class: 'muted small' }, 'Le 4 schermate di benvenuto')), h('span', { class: 'arrow' }, '›')));
 }
 
 /* ---------------------------- impostazioni ---------------------------- */
@@ -785,8 +938,11 @@ function viewProfilo() {
     h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Impostazioni')),
     securityCard(),
     appearanceCard(),
+    healthCard(),
+    healthRemindersCard(),
     bodyCard(),
     remindersCard(),
+    helpCard(),
     h('div', { class: 'card stack' }, h('h2', {}, 'Casa'),
       h('div', { class: 'stack' }, h('h3', {}, 'Attrezzatura a casa'),
         h('div', { class: 'chips' }, CASA_OPT.map(([v, t]) => h('button', { class: 'chip lg' + ((S.profile.casa || 'libero') === v ? ' on' : ''), onclick: (e) => {

@@ -1,5 +1,6 @@
 // Generazione scheda: IA (Gemini) con fallback su schede pronte.
 import { gemini } from './ai.js';
+import { summary, hasAny } from './salute.js';
 
 const REPS = {
   massa:    { reps: '8-12',  rest: 90, sets: 3 },
@@ -60,6 +61,7 @@ Rispondi SOLO con JSON valido, senza altro testo.`;
 - Giorni a settimana: ${profile.giorni}
 - Attrezzatura: palestra completa
 - Note / limitazioni: ${profile.note || 'nessuna'}
+- Salute dichiarata: ${hasAny(profile.salute) ? summary(profile.salute) + ' (scegli esercizi prudenti, niente carichi massimali)' : 'nessun problema'}
 
 Regole:
 - Esattamente ${profile.giorni} giorni di allenamento, ognuno con 5-7 esercizi.

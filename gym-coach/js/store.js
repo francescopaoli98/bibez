@@ -26,6 +26,8 @@ const DEFAULT = {
   chat: [],                 // (vecchio formato, migrato in chats)
   chats: [],                // [{id, title, created, updated, messages:[{role, text, proposal?}]}]
   activeChat: null,         // id della chat aperta (null = nuova chat vuota)
+  remind: { pesoDays: 7, salute: true },   // promemoria: peso ogni N giorni (0 = mai), rivedere la salute ogni 3 mesi
+  seen: {},                 // cose già viste (guida, primo avvio…)
   luogo: 'palestra',        // 'palestra' | 'casa' (dove ti alleni oggi)
   nextDay: 0,               // indice del prossimo giorno in scheda
   planBackup: null,         // scheda prima dell'ultima modifica del coach (per annullare)
