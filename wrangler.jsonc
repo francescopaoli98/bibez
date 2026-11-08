@@ -1,0 +1,14 @@
+{
+  // Gym Coach su Cloudflare Workers: file statici di gym-coach/ + API in worker/index.js
+  "name": "gym-f98-x7k",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./gym-coach",
+    "binding": "ASSETS",
+    "not_found_handling": "none",
+    "run_worker_first": ["/api/*"]
+  }
+  // Archivio degli account (KV): si aggiunge dopo averlo creato, vedi CLOUDFLARE.md
+  // "kv_namespaces": [{ "binding": "APP", "id": "<ID del namespace>" }]
+}

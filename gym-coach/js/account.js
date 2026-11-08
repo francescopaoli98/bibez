@@ -3,7 +3,7 @@
 import { S, save } from './store.js';
 
 // Attivo sul sito di Cloudflare (*.pages.dev). In locale si prova con localStorage 'gymcoach:accounts' = '1'.
-export const accountsMode = () => location.hostname.endsWith('.pages.dev') || localStorage.getItem('gymcoach:accounts') === '1';
+export const accountsMode = () => /\.(pages|workers)\.dev$/.test(location.hostname) || localStorage.getItem('gymcoach:accounts') === '1';
 
 const USERS = 'gymcoach:users', LAST = 'gymcoach:lastuser';
 export const knownUsers = () => { try { return JSON.parse(localStorage.getItem(USERS)) || []; } catch { return []; } };
