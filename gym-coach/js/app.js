@@ -1,6 +1,6 @@
 import { S, save, resetAll, exportJSON } from './store.js';
 import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
-import { gemini } from './ai.js';
+import { gemini, listModels } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
 import { targets } from './nutrition.js';
@@ -40,7 +40,9 @@ function route() {
   if ((!S.profile || !S.plan) && name !== 'benvenuto') return go('#/benvenuto');
   if (!ROUTES[name]) name = 'oggi';
   const tab = TAB_OF[name];
-  view.className = tab ? '' : 'no-tabs';
+  if (name !== 'allenamento') stopRest();          // il timer vale solo durante l'allenamento
+  view.className = (tab ? '' : 'no-tabs') + ' enter';
+  clearTimeout(route.t); route.t = setTimeout(() => view.classList.remove('enter'), 800);
   renderTabs(tab);
   window.scrollTo(0, 0);
   ROUTES[name]();
@@ -109,7 +111,8 @@ function viewOnboarding() {
   }
 
   render(h('div', { class: 'stack', style: 'gap:22px' },
-    h('div', {}, h('h1', {}, 'Facciamo la tua scheda 💪'), h('p', { class: 'muted' }, 'Ho già scelto per te le opzioni più comuni. Cambia solo se serve.')),
+    h('div', { class: 'brand' }, h('img', { src: 'icons/icon-192.png', alt: '' }), 'Gym Coach'),
+    h('div', {}, h('h1', {}, 'Facciamo la tua scheda'), h('p', { class: 'muted' }, 'Ho già scelto per te le opzioni più comuni. Cambia solo se serve.')),
     pick('Obiettivo', 'obiettivo', OBIETTIVI),
     pick('Esperienza', 'livello', LIVELLI),
     pick('Giorni a settimana', 'giorni', [[2, '2'], [3, '3'], [4, '4'], [5, '5']]),
@@ -129,7 +132,7 @@ function viewOnboarding() {
 async function buildPlan() {
   view.className = 'no-tabs'; renderTabs(null);
   render(h('div', { class: 'center stack', style: 'padding-top:30vh' },
-    h('div', { class: 'spin' }), h('h2', {}, 'Il coach prepara la tua scheda…')));
+    h('div', { class: 'spin' }), h('h2', {}, 'Il coach prepara la tua scheda…'), h('p', { class: 'muted small' }, 'Al massimo 45 secondi, poi uso una scheda pronta.')));
   let plan, note = '';
   if (S.settings.apiKey) {
     try { plan = await aiPlan(S.profile, LIB); }
@@ -143,26 +146,39 @@ async function buildPlan() {
 }
 
 /* ---------------------------- Oggi ---------------------------- */
-const weekCount = () => S.history.filter(w => new Date(w.date).getTime() > Date.now() - 7 * 864e5).length;
+const monday = () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; };
+const thisWeek = () => S.history.filter(w => new Date(w.date).getTime() >= monday().getTime());
+const weekCount = () => thisWeek().length;
+function weekDots() {
+  const mon = monday(), today = new Date().toDateString();
+  return h('div', { class: 'days' }, ['L', 'M', 'M', 'G', 'V', 'S', 'D'].map((l, i) => {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    const done = S.history.some(w => new Date(w.date).toDateString() === d.toDateString());
+    return h('div', { class: 'day-dot' + (done ? ' done' : '') + (d.toDateString() === today ? ' today' : '') }, h('i'), l);
+  }));
+}
+const saluto = () => { const hr = new Date().getHours(); return hr < 12 ? 'Buongiorno' : hr < 18 ? 'Buon pomeriggio' : 'Buonasera'; };
+const oggiTxt = () => { const t = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }); return t[0].toUpperCase() + t.slice(1); };
 
 function viewOggi() {
   const day = S.plan.giorni[S.nextDay % S.plan.giorni.length];
   const wk = weekCount(), target = S.profile.giorni;
   const exs = adaptDay(day, S.luogo);
-  const kcalWeek = Math.round(S.history.filter(w => new Date(w.date).getTime() > Date.now() - 7 * 864e5).reduce((a, w) => a + (w.kcal || 0), 0) / 10) * 10;
+  const kcalWeek = Math.round(thisWeek().reduce((a, w) => a + (w.kcal || 0), 0) / 10) * 10;
   render(
-    h('div', { class: 'row between' }, h('h1', {}, 'Ciao 👋'), gear()),
+    h('div', { class: 'row between' }, h('div', {}, h('div', { class: 'eyebrow' }, oggiTxt()), h('h1', {}, saluto())), gear()),
     !S.session && luogoSwitch(viewOggi),
     !S.session && homeHint(),
     h('div', { class: 'hero' },
       h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? '🏠 Casa' : '🏋️ Palestra'}` : 'Oggi tocca a'),
-      h('h1', {}, day.nome),
-      h('p', { class: 'muted' }, `${exs.length} esercizi · circa ${estMin(exs)} min · ${kcalTxt(exs)}`),
+      h('h1', { class: 'hero-title' }, day.nome),
+      h('div', { class: 'meta' }, h('span', {}, '⏱ ' + estMin(exs) + ' min'), h('span', {}, '🔥 ' + kcalTxt(exs)), h('span', {}, '🏋️ ' + exs.length + ' esercizi')),
+      h('div', { class: 'chips' }, [...new Set(exs.map(e => EX(e.id)?.gruppo))].filter(Boolean).map(g => h('span', { class: 'chip' }, g))),
       h('button', { class: 'btn big block', onclick: () => { if (!S.session) startSession(S.nextDay % S.plan.giorni.length); go('#/allenamento'); } },
         S.session ? 'Riprendi' : 'Inizia')),
     h('div', { class: 'card stack' },
       h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}${kcalWeek ? ' · ~' + kcalWeek + ' kcal' : ''}`)),
-      h('div', { class: 'week' }, Array.from({ length: target }, (_, i) => h('i', { class: i < wk ? 'on' : '' })))),
+      weekDots()),
     nutritionCard(),
     h('a', { class: 'card row between linkcard', href: '#/progressi' },
       h('div', {}, h('h3', {}, 'I tuoi progressi'), h('p', { class: 'muted small' }, S.history.length ? 'Peso, forza, record e storico' : 'Peso, forza e record: appaiono qui')), h('span', { class: 'arrow' }, '›')),
@@ -238,12 +254,8 @@ function viewAllenamento() {
   const ex = s.exercises[s.cur], info = EX(ex.id), sg = suggestion(ex.id, ex.target), time = isTime(ex.target.ripetizioni);
   const last = s.cur === n - 1;
 
-  const total = s.exercises.reduce((a, e) => a + e.sets.length, 0);
-  const bar = h('i');
-  const upd = () => {
-    const done = s.exercises.reduce((a, e) => a + e.sets.filter(x => x.done).length, 0);
-    bar.style.width = (done / total * 100) + '%';
-  };
+  const segEls = s.exercises.map((_, i) => h('i', { class: 'seg' + (i === s.cur ? ' cur' : '') }, h('u')));
+  const upd = () => s.exercises.forEach((e, i) => { segEls[i].firstChild.style.width = (e.sets.filter(x => x.done).length / e.sets.length * 100) + '%'; });
 
   const rows = ex.sets.map((st, si) => {
     const kg = h('input', { type: 'number', inputmode: 'decimal', step: '0.5', min: '0', placeholder: 'kg', value: st.kg, disabled: time, oninput: e => { st.kg = e.target.value; save(); } });
@@ -266,9 +278,9 @@ function viewAllenamento() {
     h('div', { class: 'sticky-head' },
       h('div', {}, h('div', { class: 'muted small' }, s.dayName + (s.luogo === 'casa' ? ' · 🏠 Casa' : '')), h('h3', {}, `Esercizio ${s.cur + 1} di ${n}`)),
       h('button', { class: 'btn ghost small', onclick: exitMenu }, 'Fine')),
-    h('div', { class: 'progress' }, bar),
+    h('div', { class: 'segs' }, segEls),
     h('button', { class: 'anim-btn', onclick: () => showExercise(ex.id), 'aria-label': 'Come si fa' }, exAnim(info), h('span', { class: 'pill' }, 'Come si fa ›')),
-    h('div', {}, h('h1', {}, info.nome), h('p', { class: 'muted' }, `${ex.target.serie} × ${ex.target.ripetizioni}${ex.target.recupero ? ' · recupero ' + ex.target.recupero + 's' : ''}`)),
+    h('div', {}, h('h1', { class: 'wk-title' }, info.nome), h('p', { class: 'muted' }, `${ex.target.serie} × ${ex.target.ripetizioni}${ex.target.recupero ? ' · recupero ' + ex.target.recupero + 's' : ''}`)),
     sg && h('div', { class: 'hint' }, 'Ultima volta: ', sg.txt, sg.up ? h('span', {}, ' · ', h('b', {}, `prova ${sg.up} kg 🔥`)) : ''),
     h('div', { class: 'sets' },
       h('div', { class: 'hd' }, ''), h('div', { class: 'hd' }, time ? '' : 'Kg'), h('div', { class: 'hd' }, time ? '' : 'Ripet.'), h('div', { class: 'hd' }, ''), rows),
@@ -337,12 +349,16 @@ function startRest(sec) {
   stopRest();
   let end = Date.now() + sec * 1000;
   const t = h('div', { class: 't' });
+  const C = 2 * Math.PI * 22;
+  const ring = h('div', { class: 'ring', html: `<svg viewBox="0 0 52 52"><circle class="bg" cx="26" cy="26" r="22"/><circle class="fg" cx="26" cy="26" r="22" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg>` });
+  const fg = ring.querySelector('.fg');
   const draw = () => {
     const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+    fg.style.strokeDashoffset = C * (1 - Math.min(1, left / Math.max(sec, (end - Date.now()) / 1000)));
     t.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
     if (left === 0) { clearInterval(restTimer); restTimer = null; beep(); navigator.vibrate?.([200, 100, 200]); t.textContent = 'Via! 💥'; setTimeout(stopRest, 2500); }
   };
-  document.getElementById('rest-root').replaceChildren(h('div', { class: 'rest' },
+  document.getElementById('rest-root').replaceChildren(h('div', { class: 'rest' }, ring,
     h('div', { class: 'grow' }, h('div', { class: 'muted small' }, 'Recupero'), t),
     h('button', { class: 'btn ghost small', onclick: () => { end += 15000; draw(); } }, '+15s'),
     h('button', { class: 'btn small', onclick: stopRest }, 'Salta')));
@@ -356,6 +372,7 @@ function viewCoach() {
   const list = h('div', { class: 'chat' });
   const input = h('input', { type: 'text', placeholder: 'Scrivi al coach…', enterkeyhint: 'send' });
   let busy = false;
+  const newBtn = h('button', { class: 'btn ghost small', onclick: () => { S.chat = []; save(); draw(); } }, 'Nuova chat');
   const bottom = () => window.scrollTo(0, document.body.scrollHeight);
 
   function proposalCard(m) {
@@ -379,6 +396,7 @@ function viewCoach() {
   }
 
   function draw() {
+    newBtn.hidden = !S.chat.length;
     const msgs = S.chat.length ? S.chat : [{ role: 'model', text: 'Ciao! Sono il tuo coach. Dimmi se qualcosa ti dà fastidio, se hai poco tempo o se vuoi cambiare un esercizio: ti dico io cosa modificare, e prima di toccare la scheda ti chiedo il permesso. 💪' }];
     list.replaceChildren(...msgs.flatMap(m => {
       const b = h('div', { class: 'msg ' + (m.role === 'user' ? 'me' : 'ai') });
@@ -409,9 +427,10 @@ function viewCoach() {
 
   const sugg = ['Mi fa male una cosa', 'Cambia un esercizio', 'Ho poco tempo oggi', 'Mi sembra troppo facile'];
   render(
-    h('div', { class: 'row between' }, h('h1', {}, 'Coach'),
+    h('div', { class: 'row between' },
+      h('div', { class: 'coach-head' }, h('div', { class: 'avatar' }, icon('dumbbell')), h('div', {}, h('h1', {}, 'Coach'), h('div', { class: 'eyebrow', style: 'text-transform:none' }, 'Ti rispondo anche per cambiare la scheda'))),
       h('div', { class: 'row', style: 'gap:8px' },
-        S.chat.length > 0 && h('button', { class: 'btn ghost small', onclick: () => { S.chat = []; save(); viewCoach(); } }, 'Nuova chat'), gear())),
+        newBtn, gear())),
     !S.settings.apiKey && h('div', { class: 'card stack' }, h('p', {}, 'Per parlare col coach serve la chiave Gemini (gratuita).'),
       h('a', { class: 'btn small', href: '#/profilo' }, 'Aggiungila qui')),
     list,
@@ -472,7 +491,8 @@ function viewProfilo() {
       h('div', { class: 'row' },
         h('button', { class: 'btn ghost grow', onclick: async (e) => {
           saveKeys(); e.target.disabled = true; e.target.textContent = 'Provo…';
-          try { await gemini({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }] }); toast('Collegamento riuscito ✅'); }
+          const t0 = Date.now();
+          try { await gemini({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }] }); toast(`Collegamento riuscito ✅ (${((Date.now() - t0) / 1000).toFixed(1)} s)`); }
           catch (err) { toast(err.message); }
           e.target.disabled = false; e.target.textContent = 'Prova collegamento'; } }, 'Prova collegamento'),
         h('button', { class: 'btn grow', onclick: () => { saveKeys(); toast('Salvato'); } }, 'Salva')),
@@ -486,6 +506,16 @@ function viewProfilo() {
     h('details', { class: 'card' }, h('summary', { class: 'muted' }, 'Avanzate'),
       h('div', { class: 'stack', style: 'margin-top:12px' },
         h('label', { class: 'field' }, 'Modello Gemini', modelIn),
+        h('button', { class: 'btn ghost block', onclick: async (e) => {
+          saveKeys(); e.target.disabled = true; e.target.textContent = 'Cerco i modelli…';
+          try {
+            const list = await listModels();
+            openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Scegli il modello'),
+              h('p', { class: 'muted small' }, 'I "flash" sono i più veloci. Se uno è lento, provane un altro.'),
+              list.map(n => h('button', { class: 'ex-item', onclick: () => { modelIn.value = n; saveKeys(); closeSheet(); toast('Modello: ' + n); } },
+                h('div', { class: 'grow' }, h('h3', {}, n), n === S.settings.model && h('div', { class: 'muted small' }, 'in uso'))))));
+          } catch (err) { toast(err.message); }
+          e.target.disabled = false; e.target.textContent = 'Scegli il modello'; } }, 'Scegli il modello'),
         h('button', { class: 'btn ghost block', onclick: () => { saveKeys(); h('a', { href: URL.createObjectURL(new Blob([exportJSON()], { type: 'application/json' })), download: 'gym-coach-backup.json' }).click(); } }, 'Esporta backup'),
         h('button', { class: 'btn danger block', onclick: () => { if (confirm('Cancellare TUTTI i dati (scheda, storico, chiave)?')) { resetAll(); location.hash = ''; location.reload(); } } }, 'Cancella tutto'))),
     h('p', { class: 'muted small center' }, 'Immagini esercizi: free-exercise-db (pubblico dominio).'));

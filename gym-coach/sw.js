@@ -1,7 +1,8 @@
 // Service worker: l'app funziona anche offline (palestra senza campo!).
-const VERSION = 'v5';
-const CORE = ['./', 'index.html', 'css/style.css', 'js/app.js', 'js/store.js', 'js/ui.js', 'js/ai.js', 'js/plans.js', 'js/training.js', 'js/coach.js', 'js/nutrition.js', 'js/progress.js', 'js/reminders.js',
-  'data/exercises.json', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png'];
+const VERSION = 'v7';
+const CORE = ['./', 'index.html', 'css/fonts.css', 'css/style.css', 'css/theme.css', 'js/app.js', 'js/store.js', 'js/ui.js', 'js/ai.js', 'js/plans.js', 'js/training.js', 'js/coach.js', 'js/nutrition.js', 'js/progress.js', 'js/reminders.js',
+  'data/exercises.json', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png',
+  'fonts/HTxwL3I-JCGChYJ8VI-L6OO_au7B46r2z3bWuYMBYro.woff2', 'fonts/HTxwL3I-JCGChYJ8VI-L6OO_au7B47b1z3bWuYMBYro.woff2', 'fonts/HTxwL3I-JCGChYJ8VI-L6OO_au7B4873z3bWuYMBYro.woff2', 'fonts/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
