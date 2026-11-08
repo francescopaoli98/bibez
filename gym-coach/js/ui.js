@@ -32,10 +32,10 @@ export function icon(name) {
 }
 
 let toastT;
-export function toast(msg) {
+export function toast(msg, ms) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600);
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || Math.min(9000, 2600 + msg.length * 45));
 }
 
 // Pannello che sale dal basso

@@ -16,6 +16,27 @@ const tabsEl = document.getElementById('tabs');
 const render = (...kids) => view.replaceChildren(...kids.flat(Infinity).filter(k => k != null && k !== false));
 const go = (hash) => { location.hash = hash; };
 
+const APP_VERSION = 'v10';
+
+// Errori di Gemini: mostrati per intero e copiabili, per poterli incollare in chat
+const errorText = (err) => `Errore Gemini: ${err.message}\nModello: ${S.settings.model}\nApp: ${APP_VERSION}\nOra: ${new Date().toISOString()}`;
+async function copyText(txt) {
+  try { await navigator.clipboard.writeText(txt); return true; }
+  catch {
+    const ta = h('textarea', { style: 'position:fixed;opacity:0;top:0' }); ta.value = txt; document.body.append(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch {}
+    ta.remove(); return ok;
+  }
+}
+function showError(err) {
+  S.lastError = errorText(err); save();
+  const box = h('textarea', { readonly: true, rows: 6, onclick: e => e.target.select() }); box.value = S.lastError;
+  openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Errore di Gemini'),
+    h('p', { class: 'muted small' }, 'Tocca "Copia errore" e incollalo nella chat con me: così capisco subito cosa non va.'), box,
+    h('button', { class: 'btn block', onclick: async () => toast((await copyText(S.lastError)) ? 'Copiato! Incollalo nella chat con me' : 'Tieni premuto sul testo e scegli Copia', 4000) }, 'Copia errore'),
+    h('button', { class: 'btn ghost block', onclick: closeSheet }, 'Chiudi')));
+}
+
 const GRUPPI = ['tutti', 'gambe', 'petto', 'schiena', 'spalle', 'braccia', 'core', 'cardio'];
 const OBIETTIVI = [['misto', 'Un po\' di tutto'], ['massa', 'Massa'], ['dimagrire', 'Dimagrire'], ['tonificare', 'Tonificare']];
 const CASA_OPT = [['libero', 'Niente (corpo libero)'], ['manubri', 'Manubri']];
@@ -136,7 +157,7 @@ async function buildPlan() {
   let plan, note = '';
   if (S.settings.apiKey) {
     try { plan = await aiPlan(S.profile, LIB); }
-    catch (e) { note = 'IA non disponibile: ho usato una scheda pronta. (' + e.message + ')'; }
+    catch (e) { S.lastError = errorText(e); note = 'IA non disponibile: ho usato una scheda pronta. Vedi Impostazioni → Avanzate → Copia ultimo errore.'; }
   }
   S.plan = plan || templatePlan(S.profile);
   S.nextDay = 0; S.session = null; S.planBackup = null;
@@ -423,7 +444,7 @@ function viewCoach() {
       const { text: reply, changes } = parseReply(raw);
       const ok = normChanges(changes, LIB);
       S.chat.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : {}) });
-    } catch (e) { S.chat.pop(); toast(e.message); input.value = text; }
+    } catch (e) { S.chat.pop(); input.value = text; showError(e); }
     clearInterval(tick); S.chat = S.chat.slice(-30); save(); busy = false; draw();
   }
   input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
@@ -496,7 +517,7 @@ function viewProfilo() {
           saveKeys(); e.target.disabled = true; e.target.textContent = 'Provo…';
           const t0 = Date.now();
           try { await gemini({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }] }); toast(`Collegamento riuscito ✅ (${((Date.now() - t0) / 1000).toFixed(1)} s)`); }
-          catch (err) { toast(err.message); }
+          catch (err) { showError(err); }
           e.target.disabled = false; e.target.textContent = 'Prova collegamento'; } }, 'Prova collegamento'),
         h('button', { class: 'btn grow', onclick: () => { saveKeys(); toast('Salvato'); } }, 'Salva')),
       h('p', { class: 'muted small' }, 'La chiave resta su questo telefono e viene inviata solo a Google.')),
@@ -508,6 +529,7 @@ function viewProfilo() {
         saveKeys(); S.profile = { ...S.profile, ...p, note: note.value }; save(); await buildPlan(); } }, 'Rigenera la scheda')),
     h('details', { class: 'card' }, h('summary', { class: 'muted' }, 'Avanzate'),
       h('div', { class: 'stack', style: 'margin-top:12px' },
+        S.lastError && h('button', { class: 'btn ghost block', onclick: async () => toast((await copyText(S.lastError)) ? 'Errore copiato: incollalo nella chat con me' : 'Copia non riuscita', 4000) }, 'Copia ultimo errore'),
         h('label', { class: 'field' }, 'Modello Gemini', modelIn),
         h('button', { class: 'btn block', onclick: async () => {
           saveKeys();

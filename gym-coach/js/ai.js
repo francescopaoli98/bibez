@@ -41,7 +41,8 @@ export async function gemini({ system, contents, json = false, temperature = 0.7
   for (; i < THINK_MODES.length; i++) {
     body.generationConfig = { ...gen, ...(THINK_MODES[i] ? { thinkingConfig: THINK_MODES[i] } : {}) };
     r = await request(path, { method: 'POST', body, ms });
-    if (!(r.status === 400 && /think/i.test(r.data?.error?.message || '') && i < THINK_MODES.length - 1)) break;
+    // un 400 che non riguarda la chiave: probabilmente il modello non accetta questa impostazione, prova la successiva
+    if (!(r.status === 400 && !/api key/i.test(r.data?.error?.message || '') && i < THINK_MODES.length - 1)) break;
   }
   if (r.ok && S.settings.think[name] !== i) { S.settings.think[name] = i; save(); }
   // modello sovraccarico (503): un secondo tentativo
@@ -50,7 +51,8 @@ export async function gemini({ system, contents, json = false, temperature = 0.7
   if (!r.ok) {
     const msg = r.data?.error?.message || '';
     if (r.status === 400 && /api key/i.test(msg)) throw new AIError('Chiave non valida. Controllala in Impostazioni.');
-    if (r.status === 400 || r.status === 403) throw new AIError('Gemini ha rifiutato la richiesta. ' + msg);
+    if (r.status === 403) throw new AIError('Gemini ha rifiutato la chiave o l\'accesso (403). ' + msg);
+    if (r.status === 400) throw new AIError('Gemini ha rifiutato la richiesta (400). ' + msg);
     if (r.status === 404) throw new AIError('Modello non trovato. Sceglilo di nuovo in Impostazioni → Avanzate.');
     if (r.status === 429) throw new AIError('Limite gratuito raggiunto. Riprova tra un minuto.');
     if (r.status === 503) throw new AIError('Gemini è sovraccarico in questo momento. Riprova tra poco.');
