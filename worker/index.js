@@ -3,6 +3,7 @@
 import * as login from '../functions/api/login.js';
 import * as password from '../functions/api/password.js';
 import * as refresh from '../functions/api/refresh.js';
+import * as stato from '../functions/api/stato.js';
 import { handleGemini } from '../functions/_lib/gemini.js';
 import { err } from '../functions/_lib/auth.js';
 
@@ -12,6 +13,7 @@ export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
     if (pathname === '/api/login') return POST_ONLY(request) || login.onRequestPost({ request, env });
+    if (pathname === '/api/stato' && request.method === 'GET') return stato.onRequestGet({ env });
     if (pathname === '/api/refresh') return POST_ONLY(request) || refresh.onRequestPost({ request, env });
     if (pathname === '/api/password') return POST_ONLY(request) || password.onRequestPost({ request, env });
     if (pathname.startsWith('/api/gemini/')) return handleGemini({ request, env, path: pathname.slice('/api/gemini/'.length) });

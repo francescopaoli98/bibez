@@ -2,7 +2,8 @@
 import { json, err, hashPassword, equal, unb64u, newToken, TOKEN_DAYS } from '../_lib/auth.js';
 
 export async function onRequestPost({ request, env }) {
-  if (!env.APP || !env.SESSION_SECRET) return err(500, 'Server non configurato: mancano il KV "APP" o il segreto SESSION_SECRET.');
+  if (!env.APP) return err(500, 'Server non configurato: manca il collegamento all\'archivio KV (nome "APP").');
+  if (!env.SESSION_SECRET) return err(500, 'Server non configurato: manca il segreto SESSION_SECRET.');
   let body; try { body = await request.json(); } catch { return err(400, 'Richiesta non valida.'); }
   const user = String(body.user || '').trim().toLowerCase().slice(0, 40);
   const password = String(body.password || '').slice(0, 200);
