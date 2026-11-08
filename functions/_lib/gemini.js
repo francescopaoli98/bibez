@@ -4,7 +4,7 @@ import { err, checkToken } from './auth.js';
 
 const GOOGLE = 'https://generativelanguage.googleapis.com/v1beta/';
 const MODEL_OK = /^models\/gemini-[a-z0-9.\-]+:generateContent$/;
-const MAX_BODY = 200_000;
+const MAX_BODY = 2_500_000;   // abbastanza per ~2 minuti di audio (dettatura vocale)
 
 export async function handleGemini({ request, env, path }) {
   if (!env.GEMINI_API_KEY) return err(500, 'Proxy non configurato: manca GEMINI_API_KEY.');

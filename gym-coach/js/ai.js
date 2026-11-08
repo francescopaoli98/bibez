@@ -10,6 +10,10 @@ const PROXY = '/api/gemini';
 // Su Cloudflare (*.pages.dev) il coach usa il proxy: la chiave sta sul server, non sul telefono.
 // Chi vuole può comunque scegliere la propria chiave (S.settings.ownKey).
 export const proxyAvailable = () => accountsMode();
+// Chi usa il coach condiviso (es. Irene) non deve mai scegliere modelli o chiavi: vede solo messaggi semplici.
+// Le opzioni da esperto restano per chi usa la propria chiave o le attiva (5 tocchi sul titolo di Impostazioni).
+export const expert = () => !proxyAvailable() || !!S.settings.ownKey || !!S.settings.expert;
+const SLOW = () => expert() ? ' Riprova, oppure scegli un modello più veloce in Impostazioni → Avanzate.' : ' Riprova tra un momento.';
 export const useProxy = () => proxyAvailable() && !S.settings.ownKey;
 export const aiReady = () => useProxy() || !!S.settings.apiKey;
 const TIMEOUT_MS = 45000;
@@ -38,7 +42,7 @@ async function request(path, { method = 'GET', body, ms = TIMEOUT_MS } = {}) {
     lastTiming = { total: (performance.now() - tStart) / 1000, server: Number.isFinite(srv) ? srv / 1000 : null };
     return { status: res.status, ok: res.ok, data };
   } catch (e) {
-    if (e.name === 'AbortError') throw new AIError('Gemini ci sta mettendo troppo. Riprova, oppure scegli un modello più veloce in Impostazioni → Avanzate.');
+    if (e.name === 'AbortError') throw new AIError('Gemini ci sta mettendo troppo.' + SLOW());
     throw new AIError('Nessuna connessione. Controlla la rete e riprova.');
   } finally { clearTimeout(timer); }
 }
@@ -69,10 +73,10 @@ export async function gemini({ system, contents, json = false, temperature = 0.7
     if (r.status === 401) throw new AIError('Accesso scaduto: chiudi e riapri l\'app e inserisci la password. ' + msg);
     if (r.status === 403) throw new AIError('Gemini ha rifiutato la chiave o l\'accesso (403). ' + msg);
     if (r.status === 400) throw new AIError('Gemini ha rifiutato la richiesta (400). ' + msg);
-    if (r.status === 404) throw new AIError('Modello non trovato. Sceglilo di nuovo in Impostazioni → Avanzate.');
+    if (r.status === 404) throw new AIError(expert() ? 'Modello non trovato. Sceglilo di nuovo in Impostazioni → Avanzate.' : 'Il coach non è raggiungibile in questo momento. Riprova tra poco.');
     if (r.status === 429) throw new AIError('Limite gratuito raggiunto. Riprova tra un minuto.');
     if (r.status === 503) throw new AIError('Gemini è sovraccarico in questo momento. Riprova tra poco.');
-    if (r.status === 504) throw new AIError(msg || 'Gemini non ha risposto in tempo. Riprova, oppure scegli un modello più veloce in Impostazioni → Avanzate.');
+    if (r.status === 504) throw new AIError(expert() ? (msg || 'Gemini non ha risposto in tempo.' + SLOW()) : 'Il coach non ha risposto in tempo. Riprova tra un momento.');
     throw new AIError(`Errore Gemini (${r.status}). ${msg}`);
   }
   const text = r.data?.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('') || '';

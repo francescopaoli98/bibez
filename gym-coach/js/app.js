@@ -3,7 +3,7 @@ import { bioAvailable, bioRegister } from './bio.js';
 import { lockScreen, loginScreen, initAutoLock, softLock, setUnlockHook } from './lock.js';
 import { accountsMode, knownUsers, rememberUser, lastUser, forgetLast, getSession, setSession, refreshSession, changeAccountPassword } from './account.js';
 import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
-import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable, lastTiming } from './ai.js';
+import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable, lastTiming, expert } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
 import { targets } from './nutrition.js';
@@ -15,6 +15,7 @@ import * as Sal from './salute.js';
 import { viewProgressi } from './progress.js';
 import { remindersCard } from './reminders.js';
 import * as Chats from './chats.js';
+import { voiceMode, startVoice } from './voice.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges } from './coach.js';
 
 let LIB = [];
@@ -41,6 +42,10 @@ async function copyText(txt) {
 function showError(err) {
   S.lastError = errorText(err); save();
   const box = h('textarea', { readonly: true, rows: 6, onclick: e => e.target.select() }); box.value = S.lastError;
+  if (!expert()) return openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Il coach non risponde'),
+    h('p', {}, 'Succede ogni tanto. Aspetta un momento e riprova: di solito passa da solo.'),
+    h('button', { class: 'btn big block', onclick: closeSheet }, 'Ho capito'),
+    h('button', { class: 'btn ghost small', onclick: async () => toast((await copyText(S.lastError)) ? 'Copiato: mandalo a Francesco' : 'Copia non riuscita', 4000) }, 'Copia i dettagli per Francesco')));
   openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Errore di Gemini'),
     h('p', { class: 'muted small' }, 'Tocca "Copia errore" e incollalo nella chat con me: così capisco subito cosa non va.'), box,
     h('button', { class: 'btn block', onclick: async () => toast((await copyText(S.lastError)) ? 'Copiato! Incollalo nella chat con me' : 'Tieni premuto sul testo e scegli Copia', 4000) }, 'Copia errore'),
@@ -328,11 +333,11 @@ async function buildPlan() {
         const m = await pickFastModel();
         if (m) {
           const old = S.settings.model; S.settings.model = m;
-          try { plan = await aiPlan(S.profile, LIB); note = `Il modello era lento: ne ho scelto uno più veloce (${m}).`; }
+          try { plan = await aiPlan(S.profile, LIB); note = expert() ? `Il modello era lento: ne ho scelto uno più veloce (${m}).` : 'Scheda pronta! 🎉'; }
           catch (e2) { S.settings.model = old; last = e2; }
         }
       }
-      if (!plan) { S.lastError = errorText(last); note = 'IA non disponibile: ho usato una scheda pronta. Vedi Impostazioni → Avanzate → Copia ultimo errore.'; }
+      if (!plan) { S.lastError = errorText(last); note = expert() ? 'IA non disponibile: ho usato una scheda pronta. Vedi Impostazioni → Avanzate → Copia ultimo errore.' : 'Il coach è occupato: ti ho preparato una scheda pronta. Più tardi puoi rifarla da Impostazioni → Rifai la scheda.'; }
     }
   }
   S.plan = Sal.adjustPlan(plan || templatePlan(S.profile), S.profile.salute);        // con schiena o articolazioni delicate: esercizi più dolci
@@ -638,7 +643,12 @@ function relDate(t) {
 
 function viewCoach() {
   const list = h('div', { class: 'chat' });
-  const input = h('input', { type: 'text', placeholder: 'Scrivi al coach…', enterkeyhint: 'send', 'data-nosound': '' });
+  const input = h('textarea', { rows: 1, placeholder: 'Scrivi al coach…', enterkeyhint: 'send', 'data-nosound': '' });
+  const grow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; };   // la casella cresce col testo
+  const sendBtn = h('button', { class: 'btn', 'data-nosound': '', onclick: () => send() }, 'Invia');
+  const note = h('div', { class: 'dict-note' });
+  const clearNote = () => { note.textContent = ''; sendBtn.classList.remove('glow'); };
+  input.addEventListener('input', () => { grow(); if (!input.value.trim()) clearNote(); });
   let busy = false, animateFrom = Infinity;               // dal messaggio animateFrom in poi: comparsa animata
   const titleEl = h('h1', {}), subEl = h('div', { class: 'eyebrow', style: 'text-transform:none' });
   const bottom = () => window.scrollTo({ top: document.body.scrollHeight, behavior: getTheme().anim ? 'smooth' : 'auto' });
@@ -702,14 +712,14 @@ function viewCoach() {
     text = (text || input.value).trim();
     if (!text || busy) return;
     if (!aiReady()) return toast('Aggiungi la chiave Gemini in Impostazioni');
-    busy = true; input.value = '';
+    busy = true; input.value = ''; grow(); clearNote();
     const chat = Chats.push({ role: 'user', text });
     animateFrom = chat.messages.length - 1; draw(); play('send'); buzz(10);
     const cnt = h('span', { class: 'muted small cnt' });
     const typing = h('div', { class: 'msg ai enter' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span'), cnt));
     list.append(typing); bottom();
     const t0 = Date.now();
-    const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); cnt.textContent = s < 4 ? '' : ` ${s} s` + (s >= 15 ? ' · Gemini è lento: prova un modello più veloce in Impostazioni' : ''); }, 500);
+    const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); cnt.textContent = s < 4 ? '' : ` ${s} s` + (s >= 15 ? (expert() ? ' · Gemini è lento: prova un modello più veloce in Impostazioni' : ' · ci sta mettendo un po\', un attimo…') : ''); }, 500);
     try {
       const hist = chat.messages.slice(-30).map(m => ({ role: m.role, parts: [{ text: m.text }] }));
       while (hist.length && hist[0].role !== 'user') hist.shift();
@@ -721,7 +731,7 @@ function viewCoach() {
         cnt.textContent = ' · cerco un modello più veloce…';
         const m = await pickFastModel();                    // il modello è lento: ne scelgo uno più veloce e riprovo una volta
         if (!m) throw e;
-        S.settings.model = m; save(); toast(`Il modello era lento: ne ho scelto uno più veloce (${m}).`, 5000);
+        S.settings.model = m; save(); if (expert()) toast(`Il modello era lento: ne ho scelto uno più veloce (${m}).`, 5000);
         raw = await ask();
       }
       const { text: reply, changes } = parseReply(raw);
@@ -732,7 +742,55 @@ function viewCoach() {
     } catch (e) { Chats.popLast(); input.value = text; play('error'); showError(e); }
     clearInterval(tick); busy = false; draw();
   }
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+
+  /* --- dettatura: tocchi il microfono, parli, tocchi Fine; il testo resta nella casella per controllarlo --- */
+  let voice = null;
+  async function dictate() {
+    if (voice || busy) return;
+    if (voiceMode() === 'rec' && !aiReady()) return toast('Aggiungi la chiave Gemini in Impostazioni');
+    const title = h('span', {}, 'Ti ascolto…'), time = h('b', { class: 'vp-time' }, '0:00');
+    const fin = h('span', { class: 'fin' }), tmp = h('span', { class: 'tmp' });
+    const live = h('div', { class: 'vp-text' }, fin, tmp);
+    const hint = h('p', { class: 'vp-hint' }, 'Parla pure: tocca Fine solo quando hai finito.');
+    const bars = h('div', { class: 'vp-bars' }, Array.from({ length: 25 }, (_, i) => h('i', { style: `--i:${i}` })));
+    const btnFine = h('button', { class: 'btn big vp-fine', 'data-nosound': '' }, '■ Fine'), btnNo = h('button', { class: 'btn ghost', 'data-nosound': '' }, 'Annulla');
+    const panel = h('div', { class: 'voice-panel enter' },
+      h('div', { class: 'row between' }, h('div', { class: 'vp-title' }, h('span', { class: 'rec-dot' }), title), time), live, bars,
+      h('div', { class: 'row' }, btnNo, btnFine), hint);
+    const setRec = () => { live.hidden = true; title.textContent = 'Sto registrando…'; hint.textContent = 'Parla pure: quando tocchi Fine trascrivo io, in pochi secondi.'; };
+    const close = () => { clearInterval(tick); panel.remove(); voice = null; };
+    let t0 = Date.now();
+    const tick = setInterval(() => {
+      if (!panel.isConnected || !list.isConnected) return end(false);               // sono uscito dalla chat
+      const s = Math.floor((Date.now() - t0) / 1000); time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+      if (voice?.mode === 'rec' && s >= 115) end(true);                              // limite della registrazione
+    }, 250);
+    async function end(keep) {
+      const v = voice; if (!v) return;
+      if (!keep) { v.cancel(); return close(); }
+      btnFine.disabled = btnNo.disabled = true; bars.classList.add('busy'); title.textContent = 'Trascrivo…'; hint.textContent = 'Pochi secondi…';
+      try {
+        const text = await v.stop();
+        close();
+        if (!text) return toast('Non ho sentito niente. Riprova.');
+        input.value = (input.value.trim() + ' ' + text).trim(); grow();
+        note.textContent = '✍️ Controlla il testo, poi tocca Invia'; sendBtn.classList.add('glow'); play('check'); buzz(12);
+        input.scrollTop = input.scrollHeight;
+      } catch (e) { close(); showError(e); }
+    }
+    try {
+      voice = await startVoice({
+        onText: (f, i) => { fin.textContent = f; tmp.textContent = (f && i ? ' ' : '') + i; live.scrollTop = live.scrollHeight; },
+        onMode: setRec,
+        onFail: (msg) => { close(); toast(msg, 6000); },
+      });
+    } catch (e) { return toast(e.message, 6000); }
+    if (voice.mode === 'rec') setRec();
+    buzz(14); document.body.append(panel);
+    btnFine.onclick = () => end(true); btnNo.onclick = () => end(false);
+  }
+
 
   const sugg = ['Mi fa male una cosa', 'Cambia un esercizio', 'Ho poco tempo oggi', 'Mi sembra troppo facile'];
   render(
@@ -747,7 +805,8 @@ function viewCoach() {
     !Chats.messages().length && h('div', { class: 'chips' }, sugg.map(q => h('button', { class: 'chip', onclick: () => send(q) }, q)),
       h('button', { class: 'chip', onclick: () => { const [t, l] = HELP.coach; openSheet(h('div', { class: 'stack' }, h('h2', {}, t), h('ul', { class: 'helplist' }, l.map(x => h('li', {}, x))), h('button', { class: 'btn big block', onclick: closeSheet }, 'Ho capito'))); } }, '❓ Come funziona')),
     h('div', { style: 'height:64px' }),
-    h('div', { class: 'composer' }, h('div', { class: 'in' }, input, h('button', { class: 'btn', 'data-nosound': '', onclick: () => send() }, 'Invia'))));
+    h('div', { class: 'composer' }, note, h('div', { class: 'in' }, input,
+      voiceMode() && h('button', { class: 'micbtn', 'aria-label': 'Parla al coach', 'data-nosound': '', onclick: dictate }, icon('mic')), sendBtn)));
   draw();
 }
 
@@ -988,6 +1047,7 @@ function helpCard() {
 }
 
 /* ---------------------------- impostazioni ---------------------------- */
+let taps = 0, lastTap = 0;
 function viewProfilo() {
   const p = { obiettivo: S.profile.obiettivo, livello: S.profile.livello, giorni: S.profile.giorni };
   const sel = (label, key, opts) => h('div', { class: 'stack' }, h('h3', {}, label),
@@ -999,7 +1059,9 @@ function viewProfilo() {
   const saveKeys = () => { if (!proxyAvailable() || S.settings.ownKey) S.settings.apiKey = keyIn.value.trim(); S.settings.model = modelIn.value.trim() || 'gemini-flash-latest'; save(); };
 
   render(
-    h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Impostazioni')),
+    h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', { onclick: () => {      // 5 tocchi: opzioni da esperto (scelta di modello e chiave)
+      taps = (Date.now() - lastTap > 1500 ? 0 : taps) + 1; lastTap = Date.now();
+      if (taps >= 5) { taps = 0; S.settings.expert = !S.settings.expert; save(); toast(S.settings.expert ? 'Opzioni da esperto attivate' : 'Opzioni da esperto nascoste'); viewProfilo(); } } }, 'Impostazioni')),
     securityCard(),
     appearanceCard(),
     healthCard(),
@@ -1012,7 +1074,7 @@ function viewProfilo() {
         h('div', { class: 'chips' }, CASA_OPT.map(([v, t]) => h('button', { class: 'chip lg' + ((S.profile.casa || 'libero') === v ? ' on' : ''), onclick: (e) => {
           S.profile.casa = v; save(); e.target.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); e.target.classList.add('on'); toast('Salvato'); } }, t)))),
     ),
-    h('div', { class: 'card stack' }, h('h2', {}, 'Coach IA (Gemini)'),
+    expert() && h('div', { class: 'card stack' }, h('h2', {}, 'Coach IA (Gemini)'),
       proxyAvailable() && h('div', { class: 'stack' },
         h('div', { class: 'chips' }, [[false, 'Coach condiviso'], [true, 'La mia chiave']].map(([v, t]) =>
           h('button', { class: 'chip lg' + (!!S.settings.ownKey === v ? ' on' : ''), onclick: () => { S.settings.ownKey = v; save(); viewProfilo(); } }, t))),
@@ -1037,7 +1099,7 @@ function viewProfilo() {
     h('details', { class: 'card' }, h('summary', { class: 'muted' }, 'Avanzate'),
       h('div', { class: 'stack', style: 'margin-top:12px' },
         S.lastError && h('button', { class: 'btn ghost block', onclick: async () => toast((await copyText(S.lastError)) ? 'Errore copiato: incollalo nella chat con me' : 'Copia non riuscita', 4000) }, 'Copia ultimo errore'),
-        h('label', { class: 'field' }, 'Modello Gemini', modelIn),
+        ...(!expert() ? [] : [h('label', { class: 'field' }, 'Modello Gemini', modelIn),
         h('button', { class: 'btn block', onclick: async () => {
           saveKeys();
           let names; try { names = await listModels(); } catch (err) { return toast(err.message); }
@@ -1068,7 +1130,7 @@ function viewProfilo() {
               list.map(n => h('button', { class: 'ex-item', onclick: () => { modelIn.value = n; saveKeys(); closeSheet(); toast('Modello: ' + n); } },
                 h('div', { class: 'grow' }, h('h3', {}, n), n === S.settings.model && h('div', { class: 'muted small' }, 'in uso'))))));
           } catch (err) { toast(err.message); }
-          e.target.disabled = false; e.target.textContent = 'Scegli il modello'; } }, 'Scegli il modello'),
+          e.target.disabled = false; e.target.textContent = 'Scegli il modello'; } }, 'Scegli il modello')]),
         h('button', { class: 'btn ghost block', onclick: () => { saveKeys(); downloadFile('gym-coach-backup.json', exportJSON()); toast('Backup salvato (senza la chiave Gemini). Conservalo con cura: non è cifrato.', 5000); } }, 'Esporta backup'),
         h('label', { class: 'btn ghost block' }, 'Importa backup',
           h('input', { type: 'file', accept: 'application/json,.json', hidden: true, onchange: async (e) => {
