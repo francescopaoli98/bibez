@@ -13,7 +13,21 @@ export function voiceMode() {
   if (navigator.mediaDevices?.getUserMedia && window.MediaRecorder) return 'rec';
   return null;
 }
+const ANDROID = /Android/i.test(navigator.userAgent);   // su Android la modalità "continua" ripete le frasi: lì ascolto una frase alla volta e riparto
 const clean = t => t.replace(/\s+/g, ' ').trim();
+
+// Il telefono a volte manda la stessa frase più volte, ogni volta un po' più lunga o corretta: tengo solo l'ultima versione
+const words = t => clean(t).toLowerCase().replace(/[.,;:!?]/g, '').split(' ');
+export function collapse(parts) {
+  const out = [];
+  parts.forEach((p, i) => {
+    const next = parts[i + 1]; if (next == null) return out.push(p);
+    const a = words(p), b = words(next), n = Math.min(3, a.length, b.length);
+    const same = n > 0 && a.slice(0, n).join(' ') === b.slice(0, n).join(' ');          // stesso inizio: è una versione più corta della stessa frase
+    if (!same) out.push(p);
+  });
+  return out;
+}
 
 /* ---------- registrazione + trascrizione Gemini ---------- */
 async function startRec() {
@@ -48,12 +62,12 @@ function startLive(cb) {
   let base = '', cur = '', interim = '', stopped = false, rec, waiter = null;
   const emit = () => cb.onText(clean(base + ' ' + cur), clean(interim));
   const make = () => {
-    rec = new SR(); rec.lang = 'it-IT'; rec.continuous = true; rec.interimResults = true;
+    rec = new SR(); rec.lang = 'it-IT'; rec.continuous = !ANDROID; rec.interimResults = true;
     rec.onresult = (e) => {
       // ricostruisco tutto da zero a ogni evento (su Android i risultati si ripetono se li sommo)
-      let fin = '', tmp = '';
-      for (let i = 0; i < e.results.length; i++) (e.results[i].isFinal ? (fin += ' ' + e.results[i][0].transcript) : (tmp += ' ' + e.results[i][0].transcript));
-      cur = clean(fin); interim = clean(tmp); emit();
+      const fin = [], tmp = [];
+      for (let i = 0; i < e.results.length; i++) (e.results[i].isFinal ? fin : tmp).push(e.results[i][0].transcript);
+      cur = clean(collapse(fin).join(' ')); interim = clean(collapse(tmp).join(' ')); emit();
     };
     rec.onerror = (e) => {
       if (e.error === 'no-speech' || e.error === 'aborted') return;      // normale: silenzio, riparte da sola
@@ -63,7 +77,7 @@ function startLive(cb) {
     rec.onend = () => {
       base = clean(base + ' ' + cur + ' ' + interim); cur = ''; interim = '';
       if (stopped) { waiter?.(base); return; }
-      try { make(); } catch { stopped = true; cb.onFail('restart', base); }   // il telefono si è fermato da solo: riparto
+      setTimeout(() => { if (stopped) return; try { make(); } catch { stopped = true; cb.onFail('restart', base); } }, 60);   // il telefono si è fermato da solo: riparto
     };
     rec.start();
   };
