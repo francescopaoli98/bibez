@@ -36,6 +36,10 @@ function applyToken(d) {
 }
 // Rinnova il gettone con la password già inserita (silenzioso: se sei offline resta quello di prima)
 export async function refreshSession() {
+  if (session?.token) {                                     // prima il rinnovo senza password (altri 90 giorni)
+    try { const d = await api('/api/refresh', {}, session.token); applyToken(d); return; }
+    catch (e) { if (e.offline || !session.pw) throw e; }
+  }
   if (!session?.pw) throw new Error('Accedi di nuovo.');
   applyToken(await apiLogin(session.user, session.pw));
 }

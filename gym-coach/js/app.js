@@ -1,4 +1,5 @@
-import { S, save, resetAll, exportJSON, importJSON, initStore, lockEnabled, enableLock, disableLock, changePassword, unlock, setUser, hasUserData } from './store.js';
+import { S, save, resetAll, exportJSON, importJSON, initStore, lockEnabled, enableLock, disableLock, changePassword, unlock, setUser, hasUserData, deviceInfo, rememberDevice, forgetDevice, unlockWithDevice } from './store.js';
+import { bioAvailable, bioRegister } from './bio.js';
 import { lockScreen, loginScreen, initAutoLock, softLock, setUnlockHook } from './lock.js';
 import { accountsMode, knownUsers, rememberUser, lastUser, forgetLast, getSession, setSession, refreshSession, changeAccountPassword } from './account.js';
 import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
@@ -9,6 +10,7 @@ import { targets } from './nutrition.js';
 import { applyTheme, setTheme, getTheme, PRESETS, BACKGROUNDS } from './theme.js';
 import { initSound, play, buzz } from './sound.js';
 import { countUps, confetti } from './fx.js';
+import { initInstall } from './install.js';
 import { viewProgressi } from './progress.js';
 import { remindersCard } from './reminders.js';
 import * as Chats from './chats.js';
@@ -59,9 +61,17 @@ async function boot() {
   initAutoLock();
   window.addEventListener('hashchange', route);
   route();
+  initInstall();
 }
 
-// Accesso con account: prima volta = nome utente e password (controllati dal server); poi basta la password sul telefono
+// Resta connesso: dopo il primo accesso la chiave resta sul telefono (90 giorni, riparte a ogni apertura)
+async function keepSignedIn() {
+  if (S.security.stay === false) return;
+  const dev = await deviceInfo();
+  if (!dev) await rememberDevice(S.security.stayDays || 90);
+}
+
+// Accesso con account: prima volta = nome utente e password (controllati dal server); poi basta l'impronta, o niente
 async function accessFlow() {
   setUnlockHook(pw => { const s = getSession(); if (s) s.pw = pw; });
   let pick = lastUser();
@@ -69,10 +79,14 @@ async function accessFlow() {
     const known = knownUsers(), k = known.find(x => x.u === pick);
     if (k && hasUserData(k.u)) {
       setUser(k.u);
-      const r = await lockScreen({ cold: true, title: `Ciao ${k.name}`, canSwitch: true });
+      const dev = await deviceInfo();
+      let r = null;
+      if (dev && !dev.cred && await unlockWithDevice()) r = { password: null };               // resta connesso: si apre da solo
+      if (!r) r = await lockScreen({ cold: true, title: `Ciao ${k.name}`, canSwitch: true, bio: dev?.cred || null });
       if (r === 'switch') { pick = ''; forgetLast(); continue; }
+      rememberDevice0(r);
       rememberUser(k.u, k.name);                         // alla prossima apertura si parte da questo account
-      setSession({ user: k.u, name: S.account?.name || k.name, token: S.account?.token, exp: S.account?.exp, pw: r.password });
+      setSession({ user: k.u, name: S.account?.name || k.name, token: S.account?.token, exp: S.account?.exp, pw: r.password || undefined });
       refreshSession().catch(() => {});                  // rinnova l'accesso in silenzio (se sei offline resta quello di prima)
       return;
     }
@@ -85,10 +99,13 @@ async function accessFlow() {
     S.account = { user: res.user, name: res.name, token: res.token, exp: res.exp };
     S.profile && !S.profile.nome && (S.profile.nome = res.name);
     save(); rememberUser(res.user, res.name);
+    await keepSignedIn();
     setSession({ ...S.account, pw: res.password });
     return;
   }
 }
+// dopo uno sblocco con password: ricrea la chiave del dispositivo se manca (es. scaduta)
+function rememberDevice0(r) { if (r?.password) keepSignedIn().catch(() => {}); }
 
 const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach, progressi: () => viewProgressi({ render, LIB, go }),
                  profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding };
@@ -595,19 +612,37 @@ function accountCard() {
     } }, 'Cambia password');
     openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Cambia password'), o, n1, n2, err, btn));
   }
-  function draw() {
+  const chips = (opts, cur, set) => h('div', { class: 'chips' }, opts.map(([v, t]) => h('button', { class: 'chip' + (cur === v ? ' on' : ''), onclick: () => set(v) }, t)));
+
+  async function draw() {
+    const dev = await deviceInfo(), canBio = await bioAvailable();
+    const stay = S.security.stay !== false && !!dev, bioOn = !!dev?.cred;
     box.replaceChildren(
       h('p', {}, '👤 ', h('b', {}, S.account?.name || ses?.name || ''), '  ', h('span', { class: 'muted small' }, '@' + (S.account?.user || ses?.user || ''))),
-      h('p', { class: 'muted small' }, 'I tuoi dati restano cifrati su questo telefono. Il coach funziona solo con il tuo account.'),
-      h('div', { class: 'stack' }, h('h3', {}, 'Chiedi la password'),
-        h('div', { class: 'chips' }, [[0, 'Ogni volta'], [1, 'Dopo 1 min'], [5, 'Dopo 5 min'], [15, 'Dopo 15 min'], [-1, 'Solo all\'apertura']].map(([v, t]) =>
-          h('button', { class: 'chip' + (S.security.autoLockMin === v ? ' on' : ''), onclick: () => { S.security.autoLockMin = v; save(); draw(); } }, t)))),
+      h('p', { class: 'muted small' }, 'I tuoi dati sono cifrati con la tua password: nemmeno chi gestisce l\'app può leggerli.'),
+      h('div', { class: 'stack' }, h('h3', {}, 'Resta connesso'),
+        chips([[30, '30 giorni'], [90, '90 giorni'], [3650, 'Finché non esco'], [0, 'No']], stay ? S.security.stayDays : 0, async (v) => {
+          if (v === 0) { S.security.stay = false; save(); await forgetDevice(); }
+          else { S.security.stay = true; S.security.stayDays = v; save(); await forgetDevice(); await rememberDevice(v); }
+          draw(); }),
+        h('p', { class: 'muted small' }, stay ? 'Per questo tempo non ti chiedo la password. Il tempo riparte ogni volta che usi l\'app.' : 'La password verrà chiesta a ogni apertura.')),
+      canBio && h('div', { class: 'setrow' }, h('div', {}, h('b', {}, 'Sblocco con impronta'), h('div', { class: 'muted small' }, 'Impronta o volto, come il telefono. Vale solo su questo telefono.')),
+        h('button', { class: 'switch' + (bioOn ? ' on' : ''), role: 'switch', 'aria-checked': String(bioOn), 'aria-label': 'Sblocco con impronta', 'data-nosound': '', onclick: async () => {
+          try {
+            if (bioOn) await rememberDevice(S.security.stayDays || 90, null);
+            else { if (!dev) { S.security.stay = true; await rememberDevice(S.security.stayDays || 90); } await rememberDevice(S.security.stayDays || 90, await bioRegister(S.account?.name)); toast('Impronta attivata ✅'); }
+          } catch { toast('Non è stato possibile attivare l\'impronta'); }
+          draw(); } })),
+      bioOn && h('div', { class: 'stack' }, h('h3', {}, 'Blocca l\'app dopo'),
+        chips([[0, 'Subito'], [1, '1 min'], [5, '5 min'], [15, '15 min'], [-1, 'Mai']], S.security.autoLockMin, (v) => { S.security.autoLockMin = v; save(); draw(); }),
+        h('p', { class: 'muted small' }, 'Dopo questo tempo in background l\'app si riblocca e si riapre con l\'impronta (non serve la password).')),
+      h('div', { class: 'tip' }, 'La password la chiedo solo: al primo accesso, su un telefono nuovo, dopo ' + (S.security.stayDays >= 3650 ? 'tanto tempo' : (S.security.stayDays || 90) + ' giorni') + ' senza usare l\'app, o se l\'impronta non funziona.'),
       h('button', { class: 'btn ghost block', onclick: () => softLock() }, 'Blocca ora'),
       h('button', { class: 'btn ghost block', onclick: changeSheet }, 'Cambia password'),
-      h('button', { class: 'btn ghost block', onclick: () => { if (confirm('Uscire da questo account? I dati restano cifrati sul telefono.')) { forgetLast(); location.hash = ''; location.reload(); } } }, 'Cambia account / Esci'));
+      h('button', { class: 'btn ghost block', onclick: () => { if (confirm('Uscire da questo account? Dovrai rimettere la password per rientrare. I dati restano cifrati sul telefono.')) { forgetDevice().then(() => { forgetLast(); location.hash = ''; location.reload(); }); } } }, 'Esci da questo account'));
   }
   draw();
-  return h('div', { class: 'card stack' }, h('h2', {}, 'Account e sicurezza'), box);
+  return h('div', { class: 'card stack' }, h('h2', {}, 'Account e accesso'), box);
 }
 
 /* ---------------------------- sicurezza: blocco con password ---------------------------- */

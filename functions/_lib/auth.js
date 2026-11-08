@@ -3,7 +3,7 @@
 const te = new TextEncoder();
 
 export const ITER = 100_000;                 // il massimo che Cloudflare Workers consente per PBKDF2
-export const TOKEN_DAYS = 30;
+export const TOKEN_DAYS = 90;
 
 export const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
   status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },

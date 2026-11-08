@@ -21,7 +21,7 @@ const DEFAULT = {
   reminder: null,           // {days:[1,3,5], time:'18:00'}
   settings: { apiKey: '', model: 'gemini-flash-latest' },
   account: null,            // {user, name, token, exp}: l'account con cui hai fatto accesso
-  security: { autoLockMin: 5 },   // minuti in background prima di richiedere la password (-1 = mai)
+  security: { autoLockMin: 5, stay: true, stayDays: 90 },   // blocco dopo N minuti (-1 = mai); resta connesso (giorni)
   session: null,            // allenamento in corso
   chat: [],                 // (vecchio formato, migrato in chats)
   chats: [],                // [{id, title, created, updated, messages:[{role, text, proposal?}]}]
@@ -76,6 +76,37 @@ async function decryptBlob(blob, password) {
 
 export const lockEnabled = () => !!localStorage.getItem(E());
 
+/* ---------- chiave del dispositivo: per restare connessi senza riscrivere la password ----------
+   La chiave AES (non estraibile: nemmeno l'app può leggerne i byte) resta nel browser per N giorni.
+   Il tempo riparte a ogni apertura. Con l'impronta attiva, prima di usarla si chiede l'impronta. */
+const IDBNAME = 'gymcoach-dev', IDBSTORE = 'keys';
+const idb = () => new Promise((res, rej) => { const r = indexedDB.open(IDBNAME, 1); r.onupgradeneeded = () => r.result.createObjectStore(IDBSTORE); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const idbDo = async (mode, fn) => { const db = await idb(); return new Promise((res, rej) => { const q = fn(db.transaction(IDBSTORE, mode).objectStore(IDBSTORE)); q.onsuccess = () => res(q.result ?? null); q.onerror = () => rej(q.error); }); };
+const devId = () => user || '_';
+const devGet = () => idbDo('readonly', s => s.get(devId())).catch(() => null);
+const devPut = (v) => idbDo('readwrite', s => s.put(v, devId()));
+
+export async function deviceInfo() {
+  const r = await devGet();
+  return r && r.expiresAt > Date.now() ? { days: r.days, cred: r.cred || null, expiresAt: r.expiresAt } : null;
+}
+export async function rememberDevice(days = 90, cred) {
+  if (!aesKey) return false;
+  const prev = await devGet();
+  try { await devPut({ key: aesKey, days, expiresAt: Date.now() + days * 864e5, cred: cred !== undefined ? cred : (prev?.cred || null) }); return true; } catch { return false; }
+}
+export async function forgetDevice() { try { await idbDo('readwrite', s => s.delete(devId())); } catch {} }
+export async function unlockWithDevice() {
+  const rec = await devGet(), blob = readBlob();
+  if (!rec || !blob || rec.expiresAt <= Date.now()) return false;
+  try {
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(blob.iv) }, rec.key, fromB64(blob.ct));
+    aesKey = rec.key; meta = { salt: fromB64(blob.salt), iter: blob.iter }; applyData(JSON.parse(td.decode(pt)));
+    rec.expiresAt = Date.now() + rec.days * 864e5; await devPut(rec).catch(() => {});      // il tempo riparte
+    return true;
+  } catch { return false; }
+}
+
 export async function initStore() {
   if (lockEnabled()) return 'locked';
   try { applyData(JSON.parse(localStorage.getItem(K()) || '{}')); } catch { applyData({}); }
@@ -99,15 +130,17 @@ export async function disableLock(password) {
   if (!(await verifyPassword(password))) return false;
   await chain;
   localStorage.setItem(K(), JSON.stringify(S));
-  localStorage.removeItem(E()); aesKey = null; meta = null;
+  localStorage.removeItem(E()); aesKey = null; meta = null; await forgetDevice();
   return true;
 }
 export async function changePassword(oldPw, newPw) {
   if (!(await verifyPassword(oldPw))) return false;
   await chain;
+  const prevDev = await devGet();
   meta = { salt: crypto.getRandomValues(new Uint8Array(16)), iter: ITER };
   aesKey = await derive(newPw, meta.salt, meta.iter);
   await writeEnc(JSON.stringify(S));
+  if (prevDev) await devPut({ ...prevDev, key: aesKey }).catch(() => {});        // la chiave del dispositivo segue la nuova password
   return true;
 }
 
@@ -120,7 +153,7 @@ export function save() {
   } catch (e) { console.warn('save failed', e); }
 }
 
-export function resetAll() { [K(), E(), FAILS].forEach(k => localStorage.removeItem(k)); aesKey = null; meta = null; }
+export function resetAll() { [K(), E(), FAILS].forEach(k => localStorage.removeItem(k)); aesKey = null; meta = null; forgetDevice(); }
 // Il backup non contiene mai la chiave Gemini
 export function exportJSON() { const c = structuredClone(S); c.settings.apiKey = ''; return JSON.stringify(c, null, 2); }
 export function importJSON(text) {
