@@ -1,9 +1,11 @@
 // Chiamate a Gemini direttamente dal telefono. La chiave resta solo sul dispositivo.
-import { S } from './store.js';
+import { S, save } from './store.js';
 
 export class AIError extends Error {}
 const BASE = 'https://generativelanguage.googleapis.com/v1beta';
 const TIMEOUT_MS = 45000;
+// Come chiedere risposte rapide, dal più nuovo al più vecchio. Il primo che il modello accetta viene ricordato.
+const THINK_MODES = [{ thinkingLevel: 'minimal' }, { thinkingBudget: 0 }, null];
 
 // Una richiesta con tempo massimo: se Gemini non risponde non resti a caricare all'infinito
 async function request(path, { method = 'GET', body, ms = TIMEOUT_MS } = {}) {
@@ -26,21 +28,24 @@ async function request(path, { method = 'GET', body, ms = TIMEOUT_MS } = {}) {
   } finally { clearTimeout(timer); }
 }
 
-export async function gemini({ system, contents, json = false, temperature = 0.7 }) {
-  const model = encodeURIComponent(S.settings.model || 'gemini-flash-latest');
+export async function gemini({ system, contents, json = false, temperature = 0.7, model: modelName, ms }) {
+  const name = modelName || S.settings.model || 'gemini-flash-latest';
   const gen = { temperature, ...(json ? { responseMimeType: 'application/json' } : {}) };
-  const body = { contents, generationConfig: { ...gen, thinkingConfig: { thinkingBudget: 0 } } };   // risposte rapide: niente "ragionamento" lungo
+  const body = { contents, generationConfig: gen };
   if (system) body.systemInstruction = { parts: [{ text: system }] };
-  const path = `/models/${model}:generateContent`;
+  const path = `/models/${encodeURIComponent(name)}:generateContent`;
 
-  let r = await request(path, { method: 'POST', body });
-  // alcuni modelli non accettano il parametro del ragionamento: riprova senza
-  if (r.status === 400 && /think/i.test(r.data?.error?.message || '')) {
-    body.generationConfig = gen;
-    r = await request(path, { method: 'POST', body });
+  // prova i modi per limitare il "ragionamento" (che rallenta molto): passa al successivo se il modello lo rifiuta
+  S.settings.think = S.settings.think || {};
+  let r, i = S.settings.think[name] ?? 0;
+  for (; i < THINK_MODES.length; i++) {
+    body.generationConfig = { ...gen, ...(THINK_MODES[i] ? { thinkingConfig: THINK_MODES[i] } : {}) };
+    r = await request(path, { method: 'POST', body, ms });
+    if (!(r.status === 400 && /think/i.test(r.data?.error?.message || '') && i < THINK_MODES.length - 1)) break;
   }
+  if (r.ok && S.settings.think[name] !== i) { S.settings.think[name] = i; save(); }
   // modello sovraccarico (503): un secondo tentativo
-  if (r.status === 503) { await new Promise(res => setTimeout(res, 1500)); r = await request(path, { method: 'POST', body }); }
+  if (r.status === 503) { await new Promise(res => setTimeout(res, 1500)); r = await request(path, { method: 'POST', body, ms }); }
 
   if (!r.ok) {
     const msg = r.data?.error?.message || '';
@@ -54,6 +59,15 @@ export async function gemini({ system, contents, json = false, temperature = 0.7
   const text = r.data?.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('') || '';
   if (!text) throw new AIError('Risposta vuota dal coach. Riprova.');
   return text;
+}
+
+// Misura quanto ci mette ogni modello a rispondere a una domanda minuscola
+export async function benchModel(name) {
+  const t0 = performance.now();
+  try {
+    await gemini({ model: name, ms: 25000, contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }] });
+    return { name, sec: (performance.now() - t0) / 1000 };
+  } catch (e) { return { name, sec: null, err: e.message }; }
 }
 
 // Elenco dei modelli veloci disponibili per la tua chiave

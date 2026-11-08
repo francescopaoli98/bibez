@@ -1,6 +1,6 @@
 import { S, save, resetAll, exportJSON } from './store.js';
 import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
-import { gemini, listModels } from './ai.js';
+import { gemini, listModels, benchModel } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
 import { targets } from './nutrition.js';
@@ -412,7 +412,10 @@ function viewCoach() {
     if (!S.settings.apiKey) return toast('Aggiungi la chiave Gemini in Impostazioni');
     busy = true; input.value = '';
     S.chat.push({ role: 'user', text }); S.chat = S.chat.slice(-30); save(); draw();
-    list.append(h('div', { class: 'msg ai' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span')))); bottom();
+    const cnt = h('span', { class: 'muted small' });
+    list.append(h('div', { class: 'msg ai' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span'), cnt))); bottom();
+    const t0 = Date.now();
+    const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); cnt.textContent = s < 4 ? '' : ` ${s} s` + (s >= 15 ? ' · Gemini è lento: prova un modello più veloce in Impostazioni' : ''); }, 500);
     try {
       const hist = S.chat.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
       while (hist.length && hist[0].role !== 'user') hist.shift();
@@ -421,7 +424,7 @@ function viewCoach() {
       const ok = normChanges(changes, LIB);
       S.chat.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : {}) });
     } catch (e) { S.chat.pop(); toast(e.message); input.value = text; }
-    S.chat = S.chat.slice(-30); save(); busy = false; draw();
+    clearInterval(tick); S.chat = S.chat.slice(-30); save(); busy = false; draw();
   }
   input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
 
@@ -506,6 +509,27 @@ function viewProfilo() {
     h('details', { class: 'card' }, h('summary', { class: 'muted' }, 'Avanzate'),
       h('div', { class: 'stack', style: 'margin-top:12px' },
         h('label', { class: 'field' }, 'Modello Gemini', modelIn),
+        h('button', { class: 'btn block', onclick: async () => {
+          saveKeys();
+          let names; try { names = await listModels(); } catch (err) { return toast(err.message); }
+          names = [...names.filter(n => /lite/.test(n)), ...names.filter(n => !/lite/.test(n))].slice(0, 8);
+          const box = h('div', { class: 'stack' });
+          openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Velocità dei modelli'),
+            h('p', { class: 'muted small' }, 'Misuro quanto ci mette ognuno a rispondere. Tocca quello che vuoi usare (più basso = più veloce).'), box));
+          const rows = names.map(n => {
+            const t = h('span', { class: 'muted small' }, 'in attesa…');
+            const b = h('button', { class: 'ex-item', disabled: true, onclick: () => { modelIn.value = n; saveKeys(); closeSheet(); toast('Modello: ' + n); } },
+              h('div', { class: 'grow' }, h('h3', {}, n), n === S.settings.model && h('div', { class: 'muted small' }, 'in uso')), t);
+            box.append(b); return { n, t, b };
+          });
+          for (const r of rows) {
+            r.t.textContent = 'provo…';
+            const res = await benchModel(r.n);
+            if (!document.querySelector('.sheet')) return;          // pannello chiuso: smetto di misurare
+            r.t.textContent = res.sec != null ? res.sec.toFixed(1) + ' s' : 'non funziona';
+            if (res.sec != null) { r.b.disabled = false; r.t.style.color = res.sec < 6 ? 'var(--accent)' : ''; }
+          }
+        } }, 'Trova il modello più veloce'),
         h('button', { class: 'btn ghost block', onclick: async (e) => {
           saveKeys(); e.target.disabled = true; e.target.textContent = 'Cerco i modelli…';
           try {
