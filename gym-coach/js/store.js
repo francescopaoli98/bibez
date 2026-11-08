@@ -8,6 +8,7 @@ const DEFAULT = {
   session: null,            // allenamento in corso
   chat: [],                 // [{role:'user'|'model', text}]
   nextDay: 0,               // indice del prossimo giorno in scheda
+  planBackup: null,         // scheda prima dell'ultima modifica del coach (per annullare)
 };
 
 export const S = (() => {
