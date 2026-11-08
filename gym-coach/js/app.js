@@ -40,7 +40,7 @@ async function copyText(txt) {
   }
 }
 function showError(err) {
-  S.lastError = errorText(err); save();
+  S.lastError = errorText(err) + (S.lastBench ? '\nProve modelli:\n' + S.lastBench : ''); save();
   const box = h('textarea', { readonly: true, rows: 6, onclick: e => e.target.select() }); box.value = S.lastError;
   if (!expert()) return openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Il coach non risponde'),
     h('p', {}, 'Succede ogni tanto. Aspetta un momento e riprova: di solito passa da solo.'),
@@ -288,11 +288,16 @@ function viewOnboarding() {
 
 // Cerca un modello veloce (prima i "lite"): lo misura con una domanda minuscola e prende il primo sotto i 15 secondi
 async function pickFastModel() {
+  // provo insieme fino a 5 modelli (prima quelli "lite" e stabili) e prendo il più veloce che risponde
   try {
     const names = await listModels();
-    const cand = [...names.filter(n => /lite/.test(n)), ...names.filter(n => !/lite/.test(n))].filter(n => n !== S.settings.model).slice(0, 2);
-    for (const n of cand) { const r = await benchModel(n); if (r.sec != null && r.sec < 15) return n; }
-  } catch {}
+    const rank = n => (/lite/.test(n) ? 0 : 2) + (/preview|exp|latest/.test(n) ? 1 : 0);
+    const cand = names.filter(n => n !== S.settings.model).sort((x, y) => rank(x) - rank(y)).slice(0, 5);
+    const res = await Promise.all(cand.map(benchModel));
+    S.lastBench = new Date().toISOString() + '\n' + res.map(r => `${r.name}: ${r.sec != null ? r.sec.toFixed(1) + ' s' : (r.err || 'errore')}`).join('\n'); save();
+    const ok = res.filter(r => r.sec != null && r.sec < 20).sort((x, y) => x.sec - y.sec);
+    if (ok.length) return ok[0].name;
+  } catch (e) { S.lastBench = 'Elenco modelli: ' + e.message; save(); }
   return null;
 }
 
