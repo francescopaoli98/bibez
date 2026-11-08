@@ -2,7 +2,7 @@ import { S, save, resetAll, exportJSON, importJSON, initStore, lockEnabled, enab
 import { bioAvailable, bioRegister } from './bio.js';
 import { lockScreen, loginScreen, initAutoLock, softLock, setUnlockHook } from './lock.js';
 import { accountsMode, knownUsers, rememberUser, lastUser, forgetLast, getSession, setSession, refreshSession, changeAccountPassword } from './account.js';
-import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
+import { h, icon, tile, toast, openSheet, closeSheet, mdLite } from './ui.js';
 import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable, lastTiming, expert } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
@@ -143,15 +143,15 @@ function route() {
 function renderTabs(active) {
   tabsEl.hidden = !active;
   if (!active) return;
-  const items = [['oggi', 'Oggi', 'home'], ['scheda', 'Scheda', 'list'], ['coach', 'Coach', 'chat'], ['progressi', 'Progressi', 'chart']];
+  const items = [['oggi', 'Oggi', 'oggi'], ['scheda', 'Scheda', 'scheda'], ['coach', 'Coach', 'coach'], ['progressi', 'Progressi', 'prog']];
   tabsEl.replaceChildren(h('div', { class: 'inner' }, items.map(([k, label, ic]) =>
-    h('a', { class: 'tab' + (k === active ? ' on' : ''), href: '#/' + k }, icon(ic), label))));
+    h('a', { class: 'tab' + (k === active ? ' on' : ''), href: '#/' + k }, tile(ic, 20), label))));
 }
 
 // Interruttore Palestra / Casa
 function luogoSwitch(redraw) {
-  return h('div', { class: 'seg' }, [['palestra', '🏋️ Palestra'], ['casa', '🏠 Casa']].map(([v, t]) =>
-    h('button', { class: 'seg-b' + ((S.luogo || 'palestra') === v ? ' on' : ''), onclick: () => { S.luogo = v; save(); redraw(); } }, t)));
+  return h('div', { class: 'seg' }, [['palestra', 'Palestra'], ['casa', 'Casa']].map(([v, t]) =>
+    h('button', { class: 'seg-b' + ((S.luogo || 'palestra') === v ? ' on' : ''), onclick: () => { S.luogo = v; save(); redraw(); } }, tile(v, 16), t)));
 }
 const homeHint = () => (S.luogo === 'casa' && (S.profile.casa || 'libero') === 'libero')
   ? h('p', { class: 'muted small' }, 'A casa uso esercizi a corpo libero. Hai dei manubri? ', h('a', { href: '#/profilo' }, 'Dillo qui'))
@@ -172,7 +172,7 @@ function helpBtn(topic) {
   return h('button', { class: 'helpbtn', onclick: () => {
     const [title, lines] = HELP[topic];
     openSheet(h('div', { class: 'stack' }, h('h2', {}, title), h('ul', { class: 'helplist' }, lines.map(l => h('li', {}, l))), h('button', { class: 'btn big block', onclick: closeSheet }, 'Ho capito')));
-  } }, icon('help'), 'Aiuto');
+  } }, tile('aiuto', 14), 'Aiuto');
 }
 
 /* ---------------------------- dettaglio esercizio ---------------------------- */
@@ -184,7 +184,7 @@ function showExercise(id) {
     exAnim(ex),
     h('div', {}, h('h2', {}, ex.nome), h('p', { class: 'muted small' }, `${ex.muscoli} · ${ex.attrezzo}`)),
     h('ol', { class: 'steps' }, ex.passi.map(p => h('li', {}, p))),
-    h('div', { class: 'tip' }, '💡 ', ex.consiglio),
+    h('div', { class: 'tip row', style: 'gap:10px;align-items:flex-start' }, tile('idea', 16), h('span', {}, ex.consiglio)),
     h('a', { class: 'btn ghost block', href: ex.video, target: '_blank', rel: 'noopener' }, '▶ Guarda il video su YouTube'),
     h('button', { class: 'btn block', onclick: closeSheet }, 'Chiudi')));
 }
@@ -407,13 +407,13 @@ function reminderCards() {
       S.pesi = [...(S.pesi || []), { date: new Date().toISOString(), kg }]; S.profile.peso = kg; save(); play('check'); toast('Peso aggiornato ✅'); viewOggi();
     };
     out.push(
-      h('div', { class: 'remind' }, h('div', { class: 'ic' }, '⚖️'), h('div', { class: 'grow' }, h('h3', {}, 'Aggiorna il tuo peso'), h('p', { class: 'muted small' }, lastW ? `L'ultima volta è stato ${Math.round(days)} giorni fa. Serve per calorie e grafici.` : 'Serve per calorie e grafici.'))),
+      h('div', { class: 'remind' }, h('div', { class: 'ic' }, tile('peso', 26)), h('div', { class: 'grow' }, h('h3', {}, 'Aggiorna il tuo peso'), h('p', { class: 'muted small' }, lastW ? `L'ultima volta è stato ${Math.round(days)} giorni fa. Serve per calorie e grafici.` : 'Serve per calorie e grafici.'))),
       h('div', { class: 'card stack' }, h('div', { class: 'row', style: 'gap:10px' }, h('div', { class: 'inpbox grow' }, field, h('span', {}, 'kg')), h('button', { class: 'btn big', style: 'min-height:56px', onclick: save1 }, 'Salva')),
         h('button', { class: 'linkbtn', onclick: () => { S.remind = { ...r, pesoSnooze: now + 7 * 864e5 }; save(); viewOggi(); } }, 'Ricordamelo tra una settimana')));
   }
   const sd = S.profile?.salute?.aggiornata;
   if (r.salute !== false && sd && (now - new Date(sd)) / 864e5 >= 90 && !(r.saluteSnooze > now)) {
-    out.push(h('div', { class: 'remind' }, h('div', { class: 'ic' }, '💚'), h('div', { class: 'grow' }, h('h3', {}, 'Rivedi la tua salute'), h('p', { class: 'muted small' }, 'Sono passati 3 mesi. È cambiato qualcosa? (nuove cure, infortuni, gravidanza…)'),
+    out.push(h('div', { class: 'remind' }, h('div', { class: 'ic' }, tile('salute', 26)), h('div', { class: 'grow' }, h('h3', {}, 'Rivedi la tua salute'), h('p', { class: 'muted small' }, 'Sono passati 3 mesi. È cambiato qualcosa? (nuove cure, infortuni, gravidanza…)'),
       h('div', { class: 'row', style: 'gap:8px;margin-top:10px' },
         h('button', { class: 'btn small', onclick: () => { S.profile.salute.aggiornata = new Date().toISOString(); save(); viewOggi(); } }, 'Tutto uguale'),
         h('button', { class: 'btn ghost small', onclick: () => go('#/profilo') }, 'Aggiorna')))));
@@ -440,9 +440,9 @@ function viewOggi() {
     !S.session && luogoSwitch(viewOggi),
     !S.session && homeHint(),
     h('div', { class: 'hero' },
-      h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? '🏠 Casa' : '🏋️ Palestra'}` : 'Il tuo allenamento di oggi'),
+      h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? 'Casa' : 'Palestra'}` : 'Il tuo allenamento di oggi'),
       h('h1', { class: 'hero-title' }, day.nome),
-      h('div', { class: 'meta' }, h('span', {}, '⏱ ' + estMin(exs) + ' min'), h('span', {}, '🔥 ' + kcalTxt(exs)), h('span', {}, '🏋️ ' + exs.length + ' esercizi')),
+      h('div', { class: 'meta' }, h('span', {}, tile('tempo', 14), estMin(exs) + ' min'), h('span', {}, tile('kcal', 14), kcalTxt(exs)), h('span', {}, tile('palestra', 14), exs.length + ' esercizi')),
       h('div', { class: 'chips' }, [...new Set(exs.map(e => EX(e.id)?.gruppo))].filter(Boolean).map(g => h('span', { class: 'chip' }, g))),
       first && h('div', { class: 'hint-bubble' }, '👇 Tocca qui per cominciare'),
       startBtn),
@@ -546,7 +546,7 @@ function viewAllenamento() {
 
   render(
     h('div', { class: 'sticky-head' },
-      h('div', {}, h('div', { class: 'muted small' }, s.dayName + (s.luogo === 'casa' ? ' · 🏠 Casa' : '')), h('h3', {}, `Esercizio ${s.cur + 1} di ${n}`)),
+      h('div', {}, h('div', { class: 'muted small' }, s.dayName + (s.luogo === 'casa' ? ' · Casa' : '')), h('h3', {}, `Esercizio ${s.cur + 1} di ${n}`)),
       h('div', { class: 'row', style: 'gap:8px' }, helpBtn('allenamento'), h('button', { class: 'btn ghost small', onclick: exitMenu }, 'Fine'))),
     h('div', { class: 'segs' }, segEls),
     h('button', { class: 'anim-btn', onclick: () => showExercise(ex.id), 'aria-label': 'Come si fa' }, exAnim(info), h('span', { class: 'pill' }, 'Come si fa ›')),
@@ -1028,9 +1028,9 @@ function healthCard() {
   }
   const conds = Sal.hasAny({ condizioni: sal.condizioni, altro: sal.altro }) ? Sal.summary({ condizioni: sal.condizioni, altro: sal.altro }) : 'Nessuno indicato';
   return h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px' }, 'La tua salute'),
-    row('⚖️', 'Peso e misure', P.peso ? `${P.peso} kg · ${P.altezza || '?'} cm · ${P.eta || '?'} anni` : 'Da inserire', 'Aggiorna', datiSheet),
-    row('💚', 'Problemi di salute', conds, 'Modifica', condSheet),
-    row('💊', 'Farmaci', sal.farmaci ? `Sì${sal.farmaciNote ? ': ' + sal.farmaciNote : ''}` : 'No', 'Modifica', farmaciSheet),
+    row(tile('peso', 22), 'Peso e misure', P.peso ? `${P.peso} kg · ${P.altezza || '?'} cm · ${P.eta || '?'} anni` : 'Da inserire', 'Aggiorna', datiSheet),
+    row(tile('salute', 22), 'Problemi di salute', conds, 'Modifica', condSheet),
+    row(tile('pillola', 22), 'Farmaci', sal.farmaci ? `Sì${sal.farmaciNote ? ': ' + sal.farmaciNote : ''}` : 'No', 'Modifica', farmaciSheet),
     privacyBox('Ti ricordo di rivedere questi dati ogni 3 mesi e di aggiornare il peso ogni settimana. Se cambia qualcosa (nuova cura, infortunio), aggiornali: il coach si adatta.'));
 }
 
@@ -1048,7 +1048,7 @@ function healthRemindersCard() {
 
 function helpCard() {
   return h('div', { class: 'card' }, h('h2', { style: 'margin-bottom:6px' }, 'Aiuto'),
-    h('button', { class: 'setrow2 fullrow', onclick: () => go('#/guida') }, h('div', { class: 'ic2' }, '❓'), h('div', { class: 'grow' }, h('b', {}, 'Rivedi la guida'), h('div', { class: 'muted small' }, 'Le 4 schermate di benvenuto')), h('span', { class: 'arrow' }, '›')));
+    h('button', { class: 'setrow2 fullrow', onclick: () => go('#/guida') }, h('div', { class: 'ic2' }, tile('aiuto', 22)), h('div', { class: 'grow' }, h('b', {}, 'Rivedi la guida'), h('div', { class: 'muted small' }, 'Le 4 schermate di benvenuto')), h('span', { class: 'arrow' }, '›')));
 }
 
 /* ---------------------------- impostazioni ---------------------------- */

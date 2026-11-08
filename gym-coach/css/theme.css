@@ -379,3 +379,22 @@ body.big { zoom: 1.12; }
 .voice-panel .row { gap: 10px; } .voice-panel .vp-fine { flex: 1; background: var(--danger); color: #fff; }
 .vp-hint { margin: 0; text-align: center; font-size: 13px; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .vp-bars i { animation: none; transform: scaleY(.6); } }
+
+/* ======== v32: icone "tessere colorate" (scintilla del logo) ======== */
+svg .f { fill: currentColor; fill-opacity: .2; }
+.tile { position: relative; display: inline-grid; place-items: center; flex: none; border-radius: 30%; box-shadow: 0 3px 10px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35); vertical-align: middle; }
+.tile svg.glyph { width: var(--g); height: var(--g); color: #fff; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+.tile svg.glyph .f { fill: #fff; fill-opacity: .28; }
+.tile svg.sp { position: absolute; top: -3px; right: -3px; width: 34%; height: 34%; fill: #fff; stroke: none; filter: drop-shadow(0 0 3px rgba(255,255,255,.8)); }
+.tab { gap: 3px; }
+.tab .tile { opacity: .78; transition: opacity .2s, box-shadow .2s, transform .2s; }
+.tab.on .tile { opacity: 1; box-shadow: 0 0 0 2px var(--accent), 0 4px 14px rgba(0,0,0,.4); }
+.tab.on svg { stroke-width: 2.2; }
+.seg-b { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+.seg-b .tile { box-shadow: none; } .seg-b.on .tile { box-shadow: 0 0 0 2px rgba(0,0,0,.35); }
+.meta span .tile { box-shadow: none; } .meta span .tile svg.sp { display: none; }
+.helpbtn .tile { box-shadow: none; } .helpbtn .tile svg.sp { display: none; }
+.remind .ic, .setrow2 .ic2 { background: none; }
+.setrow2 .ic2 .tile svg.sp, .remind .ic .tile svg.sp { top: -4px; right: -4px; }
+.tip .tile { box-shadow: none; } .tip .tile svg.sp { display: none; }
+.meta span.tile { padding: 0; border: 0; gap: 0; font-size: 0; background-clip: border-box; border-radius: 30%; display: inline-grid; }
