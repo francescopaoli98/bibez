@@ -1,5 +1,7 @@
 # Gym Coach su Cloudflare, con due account (tu e Irene)
 
+_Progetto Worker: `gym-f98-x7k` · ramo di produzione: `claude/ai-gym-coach-app-gvnftg`._
+
 Come funziona:
 - L'app sta su `https://gym-f98-x7k.<tuo-sottodominio>.workers.dev`. Per usarla serve un **account** (nome utente + password). Gli account li crei **solo tu**: non esiste la registrazione.
 - Gli account stanno in un piccolo archivio di Cloudflare (**KV**). Le password sono salvate solo come "impronta" (PBKDF2): nemmeno tu le puoi rileggere.
