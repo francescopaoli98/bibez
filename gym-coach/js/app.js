@@ -470,7 +470,7 @@ function viewAllenamento() {
     const paint = () => cells.forEach(c => c.classList.toggle('set-done', st.done));
     chk.addEventListener('click', () => {
       st.done = !st.done; paint(); save(); upd();
-      if (st.done) { play('check'); buzz(14); }
+      if (st.done) { play('check'); buzz(28); }
       if (st.done && ex.target.recupero) startRest(ex.target.recupero);
       if (!st.done) stopRest();
     });

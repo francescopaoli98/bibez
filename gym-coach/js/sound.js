@@ -26,22 +26,19 @@ const SOUNDS = {
 export function play(name) { if (getTheme().sound) { try { SOUNDS[name]?.(); } catch {} } }
 // Vibrazione: Android usa l'API ufficiale. Su iPhone (Safari 17.4 o più recente) Apple non la offre, ma
 // il passaggio di un interruttore nativo (<input switch>) dà un piccolo "tic": lo usiamo come scorciatoia.
-let iosLabel = null;
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function iosTap() {
-  if (!iosLabel) {
-    iosLabel = document.createElement('label');
-    iosLabel.setAttribute('aria-hidden', 'true');
-    iosLabel.style.cssText = 'position:fixed;left:-200px;top:-200px;width:1px;height:1px;opacity:0;pointer-events:none';
-    const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); i.tabIndex = -1;
-    iosLabel.append(i); document.body.append(iosLabel);
-  }
-  iosLabel.click();
+  const label = document.createElement('label');
+  label.setAttribute('aria-hidden', 'true'); label.style.display = 'none';
+  const input = document.createElement('input'); input.type = 'checkbox'; input.setAttribute('switch', '');
+  label.append(input); document.head.append(label);
+  label.click();                                           // deve avvenire dentro il tocco dell'utente
+  label.remove();
 }
 export function buzz(ms = 8) {
   if (!getTheme().haptics) return;
   try {
-    if (typeof navigator.vibrate === 'function') navigator.vibrate(ms);
+    if (typeof navigator.vibrate === 'function') navigator.vibrate(Array.isArray(ms) ? ms : Math.max(ms, 14));
     else if (isIOS()) iosTap();                              // un solo "tic" (su iPhone non si possono fare schemi più lunghi)
   } catch {}
 }
