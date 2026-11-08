@@ -1,12 +1,19 @@
-// Salvataggio dati locale (localStorage). Tutto resta sul telefono.
-const KEY = 'gymcoach:v1';
+// Dati dell'app, salvati solo sul telefono (localStorage).
+// Con il blocco attivo tutto viene CIFRATO (AES-GCM, chiave derivata dalla password con PBKDF2):
+// senza password i dati sul telefono sono illeggibili, anche per chi guarda i file.
+const KEY = 'gymcoach:v1';          // dati in chiaro (blocco non attivo)
+const ENC = 'gymcoach:enc';          // dati cifrati (blocco attivo)
+const FAILS = 'gymcoach:fails';
+const ITER = 600_000;
+
 const DEFAULT = {
-  profile: null,            // {obiettivo, livello, giorni, note}
+  profile: null,            // {nome, obiettivo, livello, giorni, casa, peso, altezza, eta, sesso, note}
   plan: null,               // {nome, giorni:[{nome, esercizi:[{id, serie, ripetizioni, recupero}]}]}
-  history: [],
+  history: [],              // allenamenti completati
   pesi: [],                 // [{date, kg}] peso corporeo
-  reminder: null,           // {days:[1,3,5], time:'18:00'}              // allenamenti completati
+  reminder: null,           // {days:[1,3,5], time:'18:00'}
   settings: { apiKey: '', model: 'gemini-flash-latest' },
+  security: { autoLockMin: 5 },   // minuti in background prima di richiedere la password (-1 = mai)
   session: null,            // allenamento in corso
   chat: [],                 // [{role:'user'|'model', text}]
   luogo: 'palestra',        // 'palestra' | 'casa' (dove ti alleni oggi)
@@ -14,14 +21,96 @@ const DEFAULT = {
   planBackup: null,         // scheda prima dell'ultima modifica del coach (per annullare)
 };
 
-export const S = (() => {
-  try { return { ...DEFAULT, ...JSON.parse(localStorage.getItem(KEY) || '{}'),
-    settings: { ...DEFAULT.settings, ...(JSON.parse(localStorage.getItem(KEY) || '{}').settings || {}) } }; }
-  catch { return structuredClone(DEFAULT); }
-})();
+// Oggetto condiviso da tutti i moduli: viene riempito all'avvio (initStore) o dopo lo sblocco.
+export const S = structuredClone(DEFAULT);
+
+function applyData(d) {
+  Object.assign(S, structuredClone(DEFAULT), d || {});
+  S.settings = { ...DEFAULT.settings, ...((d && d.settings) || {}) };
+  S.security = { ...DEFAULT.security, ...((d && d.security) || {}) };
+}
+
+/* ---------- cifratura ---------- */
+const te = new TextEncoder(), td = new TextDecoder();
+const toB64 = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode(...u8.subarray(i, i + 0x8000)); return btoa(s); };
+const fromB64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+let aesKey = null;                   // chiave in memoria solo mentre il blocco è sbloccato
+let meta = null;                     // {salt, iter}
+let chain = Promise.resolve();       // scritture cifrate in ordine
+
+async function derive(password, salt, iter) {
+  const base = await crypto.subtle.importKey('raw', te.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function writeEnc(json) {
+  if (!aesKey || !meta) return;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, te.encode(json)));
+  localStorage.setItem(ENC, JSON.stringify({ v: 1, salt: toB64(meta.salt), iter: meta.iter, iv: toB64(iv), ct: toB64(ct) }));
+}
+function readBlob() { try { return JSON.parse(localStorage.getItem(ENC)); } catch { return null; } }
+async function decryptBlob(blob, password) {
+  try {
+    const salt = fromB64(blob.salt);
+    const key = await derive(password, salt, blob.iter);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(blob.iv) }, key, fromB64(blob.ct));
+    return { key, salt, iter: blob.iter, data: JSON.parse(td.decode(pt)) };
+  } catch { return null; }        // password sbagliata (il tag di autenticazione non torna)
+}
+
+export const lockEnabled = () => !!localStorage.getItem(ENC);
+
+export async function initStore() {
+  if (lockEnabled()) return 'locked';
+  try { applyData(JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { applyData({}); }
+  return 'ok';
+}
+export async function unlock(password) {
+  const blob = readBlob(); if (!blob) return false;
+  const r = await decryptBlob(blob, password); if (!r) return false;
+  aesKey = r.key; meta = { salt: r.salt, iter: r.iter }; applyData(r.data);
+  return true;
+}
+export async function verifyPassword(password) { const blob = readBlob(); return !!(blob && await decryptBlob(blob, password)); }
+
+export async function enableLock(password) {
+  meta = { salt: crypto.getRandomValues(new Uint8Array(16)), iter: ITER };
+  aesKey = await derive(password, meta.salt, meta.iter);
+  await writeEnc(JSON.stringify(S));
+  localStorage.removeItem(KEY);                   // via i dati in chiaro
+}
+export async function disableLock(password) {
+  if (!(await verifyPassword(password))) return false;
+  await chain;
+  localStorage.setItem(KEY, JSON.stringify(S));
+  localStorage.removeItem(ENC); aesKey = null; meta = null;
+  return true;
+}
+export async function changePassword(oldPw, newPw) {
+  if (!(await verifyPassword(oldPw))) return false;
+  await chain;
+  meta = { salt: crypto.getRandomValues(new Uint8Array(16)), iter: ITER };
+  aesKey = await derive(newPw, meta.salt, meta.iter);
+  await writeEnc(JSON.stringify(S));
+  return true;
+}
 
 export function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { console.warn('save failed', e); }
+  try {
+    if (lockEnabled() || aesKey) {
+      const snap = JSON.stringify(S);
+      chain = chain.then(() => writeEnc(snap)).catch(e => console.warn('save failed', e));
+    } else localStorage.setItem(KEY, JSON.stringify(S));
+  } catch (e) { console.warn('save failed', e); }
 }
-export function resetAll() { localStorage.removeItem(KEY); }
-export function exportJSON() { return JSON.stringify(S, null, 2); }
+
+export function resetAll() { [KEY, ENC, FAILS].forEach(k => localStorage.removeItem(k)); aesKey = null; meta = null; }
+// Il backup non contiene mai la chiave Gemini
+export function exportJSON() { const c = structuredClone(S); c.settings.apiKey = ''; return JSON.stringify(c, null, 2); }
+export function importJSON(text) {
+  const d = JSON.parse(text);
+  if (!d || typeof d !== 'object' || !d.profile || !d.plan) throw new Error('Il file non sembra un backup di Gym Coach.');
+  const keep = { apiKey: S.settings.apiKey, ownKey: S.settings.ownKey, model: S.settings.model };
+  applyData(d); Object.assign(S.settings, keep); save();
+}

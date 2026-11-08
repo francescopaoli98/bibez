@@ -3,22 +3,31 @@ import { S, save } from './store.js';
 
 export class AIError extends Error {}
 const BASE = 'https://generativelanguage.googleapis.com/v1beta';
+const PROXY = '/api/gemini';
+
+// Su Cloudflare (*.pages.dev) il coach usa il proxy: la chiave sta sul server, non sul telefono.
+// Chi vuole può comunque scegliere la propria chiave (S.settings.ownKey).
+export const proxyAvailable = () => location.hostname.endsWith('.pages.dev');
+export const useProxy = () => proxyAvailable() && !S.settings.ownKey;
+export const aiReady = () => useProxy() || !!S.settings.apiKey;
 const TIMEOUT_MS = 45000;
 // Come chiedere risposte rapide, dal più nuovo al più vecchio. Il primo che il modello accetta viene ricordato.
 const THINK_MODES = [{ thinkingLevel: 'minimal' }, { thinkingBudget: 0 }, null];
 
 // Una richiesta con tempo massimo: se Gemini non risponde non resti a caricare all'infinito
 async function request(path, { method = 'GET', body, ms = TIMEOUT_MS } = {}) {
-  const { apiKey } = S.settings;
-  if (!apiKey) throw new AIError('Manca la chiave Gemini. Aggiungila in Impostazioni.');
+  const proxy = useProxy(), { apiKey } = S.settings;
+  if (!proxy && !apiKey) throw new AIError('Manca la chiave Gemini. Aggiungila in Impostazioni.');
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), S.settings.timeoutMs || ms);
   try {
-    const res = await fetch(BASE + path, {
-      method, signal: ctl.signal,
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+    const res = await fetch((proxy ? PROXY : BASE) + path, {
+      method, signal: ctl.signal, redirect: proxy ? 'manual' : 'follow',
+      headers: { 'Content-Type': 'application/json', ...(proxy ? {} : { 'x-goog-api-key': apiKey }) },
       body: body ? JSON.stringify(body) : undefined,
     });
+    // sessione di Cloudflare Access scaduta: il server rimanda al login
+    if (res.type === 'opaqueredirect' || res.status === 302) throw new AIError('Sessione scaduta: chiudi e riapri l\'app per accedere di nuovo.');
     let data = null;
     try { data = await res.json(); } catch {}
     return { status: res.status, ok: res.ok, data };
@@ -51,6 +60,7 @@ export async function gemini({ system, contents, json = false, temperature = 0.7
   if (!r.ok) {
     const msg = r.data?.error?.message || '';
     if (r.status === 400 && /api key/i.test(msg)) throw new AIError('Chiave non valida. Controllala in Impostazioni.');
+    if (r.status === 401) throw new AIError('Accesso non autorizzato. Chiudi e riapri l\'app per fare di nuovo il login. ' + msg);
     if (r.status === 403) throw new AIError('Gemini ha rifiutato la chiave o l\'accesso (403). ' + msg);
     if (r.status === 400) throw new AIError('Gemini ha rifiutato la richiesta (400). ' + msg);
     if (r.status === 404) throw new AIError('Modello non trovato. Sceglilo di nuovo in Impostazioni → Avanzate.');

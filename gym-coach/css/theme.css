@@ -203,3 +203,19 @@ input[type=time] { min-height: 48px; }
 [hidden] { display: none !important; }
 
 textarea[readonly] { user-select: text; -webkit-user-select: text; font-size: 13px; line-height: 1.4; }
+
+/* ---- blocco con password ---- */
+#lock-root:empty { display: none; }
+#lock-root { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(520px 320px at 85% -60px, rgba(182,255,59,.14), transparent 70%), var(--bg); }
+.lock { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 14px; align-items: stretch; text-align: center; }
+.lock h1 { text-align: center; } .lock input { text-align: center; font-size: 18px; min-height: 54px; }
+.lock-logo { width: 84px; height: 84px; border-radius: 24px; margin: 0 auto; box-shadow: var(--glow); }
+.linkbtn { color: var(--muted); font-size: 14px; text-decoration: underline; padding: 8px; }
+@keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+.lock.shake { animation: shake .35s; }
+body.locked #view, body.locked #tabs, body.locked #sheet-root, body.locked #rest-root { visibility: hidden; }
+body.veil #view, body.veil #tabs, body.veil #sheet-root, body.veil #rest-root { visibility: hidden; }
+
+.check { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; }
+.check input { width: 22px; height: 22px; flex: none; accent-color: var(--accent); margin-top: 1px; }

@@ -1,6 +1,7 @@
-import { S, save, resetAll, exportJSON } from './store.js';
+import { S, save, resetAll, exportJSON, importJSON, initStore, lockEnabled, enableLock, disableLock, changePassword } from './store.js';
+import { lockScreen, initAutoLock, softLock } from './lock.js';
 import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
-import { gemini, listModels, benchModel } from './ai.js';
+import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
 import { targets } from './nutrition.js';
@@ -47,6 +48,8 @@ async function boot() {
   try { LIB = await (await fetch('data/exercises.json')).json(); setLib(LIB); }
   catch { render(h('p', { class: 'err' }, 'Impossibile caricare gli esercizi.')); return; }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if (await initStore() === 'locked') await lockScreen({ cold: true });   // password prima di mostrare qualsiasi dato
+  initAutoLock();
   window.addEventListener('hashchange', route);
   route();
 }
@@ -121,7 +124,7 @@ function viewOnboarding() {
     return h('div', { class: 'stack' }, h('h3', {}, title), box);
   };
   const btn = h('button', { class: 'btn block', onclick: create });
-  const label = () => { btn.textContent = d.apiKey ? 'Crea la mia scheda' : 'Crea la scheda (senza IA)'; };
+  const label = () => { btn.textContent = (d.apiKey || useProxy()) ? 'Crea la mia scheda' : 'Crea la scheda (senza IA)'; };
   label();
 
   async function create() {
@@ -142,7 +145,9 @@ function viewOnboarding() {
       h('input', { type: 'number', inputmode: 'decimal', placeholder: '75', oninput: e => d.peso = e.target.value })),
     h('label', { class: 'field' }, 'Dolori o limiti? (facoltativo)',
       h('input', { type: 'text', placeholder: 'Es. mal di schiena', oninput: e => d.note = e.target.value })),
-    h('div', { class: 'card stack' },
+    useProxy()
+      ? h('div', { class: 'card stack' }, h('h3', {}, 'Coach IA ✅'), h('p', { class: 'muted small' }, 'Il coach è già collegato: non devi inserire nessuna chiave. I tuoi messaggi al coach passano dal Gemini di chi gestisce l\'app.'))
+      : h('div', { class: 'card stack' },
       h('h3', {}, 'Coach IA (gratis)'),
       h('p', { class: 'muted small' }, 'Incolla la chiave di Gemini: serve per la scheda su misura e per la chat col coach. Resta solo sul tuo telefono.'),
       h('input', { type: 'password', placeholder: 'Chiave Gemini', value: d.apiKey, autocomplete: 'off', oninput: e => { d.apiKey = e.target.value.trim(); label(); } }),
@@ -155,7 +160,7 @@ async function buildPlan() {
   render(h('div', { class: 'center stack', style: 'padding-top:30vh' },
     h('div', { class: 'spin' }), h('h2', {}, 'Il coach prepara la tua scheda…'), h('p', { class: 'muted small' }, 'Al massimo 45 secondi, poi uso una scheda pronta.')));
   let plan, note = '';
-  if (S.settings.apiKey) {
+  if (aiReady()) {
     try { plan = await aiPlan(S.profile, LIB); }
     catch (e) { S.lastError = errorText(e); note = 'IA non disponibile: ho usato una scheda pronta. Vedi Impostazioni → Avanzate → Copia ultimo errore.'; }
   }
@@ -430,7 +435,7 @@ function viewCoach() {
   async function send(text) {
     text = (text || input.value).trim();
     if (!text || busy) return;
-    if (!S.settings.apiKey) return toast('Aggiungi la chiave Gemini in Impostazioni');
+    if (!aiReady()) return toast('Aggiungi la chiave Gemini in Impostazioni');
     busy = true; input.value = '';
     S.chat.push({ role: 'user', text }); S.chat = S.chat.slice(-30); save(); draw();
     const cnt = h('span', { class: 'muted small' });
@@ -455,13 +460,84 @@ function viewCoach() {
       h('div', { class: 'coach-head' }, h('div', { class: 'avatar' }, icon('dumbbell')), h('div', {}, h('h1', {}, 'Coach'), h('div', { class: 'eyebrow', style: 'text-transform:none' }, 'Ti rispondo anche per cambiare la scheda'))),
       h('div', { class: 'row', style: 'gap:8px' },
         newBtn, gear())),
-    !S.settings.apiKey && h('div', { class: 'card stack' }, h('p', {}, 'Per parlare col coach serve la chiave Gemini (gratuita).'),
+    !aiReady() && h('div', { class: 'card stack' }, h('p', {}, 'Per parlare col coach serve la chiave Gemini (gratuita).'),
       h('a', { class: 'btn small', href: '#/profilo' }, 'Aggiungila qui')),
     list,
     h('div', { class: 'chips' }, sugg.map(q => h('button', { class: 'chip', onclick: () => send(q) }, q))),
     h('div', { style: 'height:64px' }),
     h('div', { class: 'composer' }, h('div', { class: 'in' }, input, h('button', { class: 'btn', onclick: () => send() }, 'Invia'))));
   draw();
+}
+
+function downloadFile(name, text, type = 'application/json') {
+  const a = h('a', { href: URL.createObjectURL(new Blob([text], { type })), download: name }); document.body.append(a); a.click(); a.remove();
+}
+
+/* ---------------------------- sicurezza: blocco con password ---------------------------- */
+const MIN_PW = 8;
+function securityCard() {
+  const box = h('div', { class: 'stack' });
+  const pwField = (label, ac) => h('label', { class: 'field' }, label, h('input', { type: 'password', autocomplete: ac, autocapitalize: 'off' }));
+  const val = (l) => l.querySelector('input').value;
+
+  function setupSheet() {
+    const p1 = pwField('Scegli una password (almeno 8 caratteri)', 'new-password'), p2 = pwField('Ripeti la password', 'new-password');
+    const ack = h('input', { type: 'checkbox' });
+    const err = h('p', { class: 'err' });
+    const btn = h('button', { class: 'btn block', onclick: async () => {
+      err.textContent = '';
+      if (val(p1).length < MIN_PW) return err.textContent = `Usa almeno ${MIN_PW} caratteri (meglio una frase facile da ricordare).`;
+      if (val(p1) !== val(p2)) return err.textContent = 'Le due password non coincidono.';
+      if (!ack.checked) return err.textContent = 'Conferma di aver capito che la password non si può recuperare.';
+      btn.disabled = true; btn.textContent = 'Cifro i dati…';
+      await enableLock(val(p1)); closeSheet(); draw(); toast('Blocco attivato ✅');
+    } }, 'Attiva il blocco');
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Blocco con password'),
+      h('p', { class: 'muted small' }, 'I dati sul telefono vengono cifrati: senza la password nessuno può leggerli, nemmeno guardando i file.'),
+      h('div', { class: 'tip' }, '⚠️ La password NON si può recuperare. Se la dimentichi, i dati vanno persi e si ricomincia da zero. Esporta un backup prima (Avanzate → Esporta backup).'),
+      p1, p2, h('label', { class: 'check' }, ack, h('span', {}, 'Ho capito che se dimentico la password perdo i dati.')), err, btn));
+  }
+  function changeSheet() {
+    const o = pwField('Password attuale', 'current-password'), n1 = pwField('Nuova password (almeno 8 caratteri)', 'new-password'), n2 = pwField('Ripeti la nuova password', 'new-password');
+    const err = h('p', { class: 'err' });
+    const btn = h('button', { class: 'btn block', onclick: async () => {
+      err.textContent = '';
+      if (val(n1).length < MIN_PW) return err.textContent = `Usa almeno ${MIN_PW} caratteri.`;
+      if (val(n1) !== val(n2)) return err.textContent = 'Le due password non coincidono.';
+      btn.disabled = true; btn.textContent = 'Controllo…';
+      if (await changePassword(val(o), val(n1))) { closeSheet(); toast('Password cambiata ✅'); }
+      else { err.textContent = 'La password attuale non è corretta.'; btn.disabled = false; btn.textContent = 'Cambia password'; }
+    } }, 'Cambia password');
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Cambia password'), o, n1, n2, err, btn));
+  }
+  function disableSheet() {
+    const o = pwField('Password attuale', 'current-password'); const err = h('p', { class: 'err' });
+    const btn = h('button', { class: 'btn danger block', onclick: async () => {
+      btn.disabled = true; btn.textContent = 'Controllo…';
+      if (await disableLock(val(o))) { closeSheet(); draw(); toast('Blocco disattivato'); }
+      else { err.textContent = 'Password non corretta.'; btn.disabled = false; btn.textContent = 'Disattiva il blocco'; }
+    } }, 'Disattiva il blocco');
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Disattiva il blocco'), h('p', { class: 'muted small' }, 'I dati tornano in chiaro sul telefono.'), o, err, btn));
+  }
+
+  function draw() {
+    if (!lockEnabled()) {
+      box.replaceChildren(
+        h('p', { class: 'muted small' }, 'Proteggi i tuoi dati con una password: viene chiesta all\'apertura dell\'app e dopo un po\' che resta in background. I dati sul telefono vengono cifrati.'),
+        h('button', { class: 'btn block', onclick: setupSheet }, 'Attiva il blocco con password'));
+      return;
+    }
+    box.replaceChildren(
+      h('p', {}, 'Blocco attivo ✅  ', h('span', { class: 'muted small' }, 'dati cifrati')),
+      h('div', { class: 'stack' }, h('h3', {}, 'Chiedi la password'),
+        h('div', { class: 'chips' }, [[0, 'Ogni volta'], [1, 'Dopo 1 min'], [5, 'Dopo 5 min'], [15, 'Dopo 15 min'], [-1, 'Solo all\'apertura']].map(([v, t]) =>
+          h('button', { class: 'chip' + (S.security.autoLockMin === v ? ' on' : ''), onclick: () => { S.security.autoLockMin = v; save(); draw(); } }, t)))),
+      h('button', { class: 'btn ghost block', onclick: () => softLock() }, 'Blocca ora'),
+      h('button', { class: 'btn ghost block', onclick: changeSheet }, 'Cambia password'),
+      h('button', { class: 'btn danger block', onclick: disableSheet }, 'Disattiva il blocco'));
+  }
+  draw();
+  return h('div', { class: 'card stack' }, h('h2', {}, 'Sicurezza'), box);
 }
 
 function bodyCard() {
@@ -498,10 +574,11 @@ function viewProfilo() {
   const keyIn = h('input', { type: 'password', value: S.settings.apiKey, placeholder: 'Chiave API Gemini', autocomplete: 'off' });
   const modelIn = h('input', { type: 'text', value: S.settings.model, autocapitalize: 'off' });
   const note = h('textarea', { placeholder: 'Dolori, infortuni…', value: p.note || '' });
-  const saveKeys = () => { S.settings.apiKey = keyIn.value.trim(); S.settings.model = modelIn.value.trim() || 'gemini-flash-latest'; save(); };
+  const saveKeys = () => { if (!proxyAvailable() || S.settings.ownKey) S.settings.apiKey = keyIn.value.trim(); S.settings.model = modelIn.value.trim() || 'gemini-flash-latest'; save(); };
 
   render(
     h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Impostazioni')),
+    securityCard(),
     bodyCard(),
     remindersCard(),
     h('div', { class: 'card stack' }, h('h2', {}, 'Casa'),
@@ -510,8 +587,12 @@ function viewProfilo() {
           S.profile.casa = v; save(); e.target.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); e.target.classList.add('on'); toast('Salvato'); } }, t)))),
     ),
     h('div', { class: 'card stack' }, h('h2', {}, 'Coach IA (Gemini)'),
-      h('label', { class: 'field' }, 'Chiave API', keyIn),
-      h('a', { href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener', class: 'small' }, 'Crea / vedi la chiave su Google AI Studio →'),
+      proxyAvailable() && h('div', { class: 'stack' },
+        h('div', { class: 'chips' }, [[false, 'Coach condiviso'], [true, 'La mia chiave']].map(([v, t]) =>
+          h('button', { class: 'chip lg' + (!!S.settings.ownKey === v ? ' on' : ''), onclick: () => { S.settings.ownKey = v; save(); viewProfilo(); } }, t))),
+        !S.settings.ownKey && h('p', { class: 'muted small' }, 'Nessuna chiave da inserire: il coach usa il Gemini collegato all\'app. I tuoi messaggi passano da lì.')),
+      (!proxyAvailable() || S.settings.ownKey) && h('label', { class: 'field' }, 'Chiave API', keyIn),
+      (!proxyAvailable() || S.settings.ownKey) && h('a', { href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener', class: 'small' }, 'Crea / vedi la chiave su Google AI Studio →'),
       h('div', { class: 'row' },
         h('button', { class: 'btn ghost grow', onclick: async (e) => {
           saveKeys(); e.target.disabled = true; e.target.textContent = 'Provo…';
@@ -562,7 +643,13 @@ function viewProfilo() {
                 h('div', { class: 'grow' }, h('h3', {}, n), n === S.settings.model && h('div', { class: 'muted small' }, 'in uso'))))));
           } catch (err) { toast(err.message); }
           e.target.disabled = false; e.target.textContent = 'Scegli il modello'; } }, 'Scegli il modello'),
-        h('button', { class: 'btn ghost block', onclick: () => { saveKeys(); h('a', { href: URL.createObjectURL(new Blob([exportJSON()], { type: 'application/json' })), download: 'gym-coach-backup.json' }).click(); } }, 'Esporta backup'),
+        h('button', { class: 'btn ghost block', onclick: () => { saveKeys(); downloadFile('gym-coach-backup.json', exportJSON()); toast('Backup salvato (senza la chiave Gemini). Conservalo con cura: non è cifrato.', 5000); } }, 'Esporta backup'),
+        h('label', { class: 'btn ghost block' }, 'Importa backup',
+          h('input', { type: 'file', accept: 'application/json,.json', hidden: true, onchange: async (e) => {
+            const f = e.target.files[0]; if (!f) return;
+            if (!confirm('Sostituire i dati attuali con quelli del backup?')) return;
+            try { importJSON(await f.text()); toast('Backup importato'); setTimeout(() => { location.hash = '#/oggi'; location.reload(); }, 600); } catch (err) { toast(err.message); }
+          } })),
         h('button', { class: 'btn danger block', onclick: () => { if (confirm('Cancellare TUTTI i dati (scheda, storico, chiave)?')) { resetAll(); location.hash = ''; location.reload(); } } }, 'Cancella tutto'))),
     h('p', { class: 'muted small center' }, 'Immagini esercizi: free-exercise-db (pubblico dominio).'));
 }

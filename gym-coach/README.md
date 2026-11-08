@@ -32,6 +32,10 @@ pubblica la cartella `gym-coach/` a ogni push sul branch `claude/ai-gym-coach-ap
 
 Indirizzo dell'app: https://francescopaoli98.github.io/bibez/
 
+## Sicurezza e Cloudflare
+- **Blocco con password** (Impostazioni → Sicurezza): all'apertura e dopo un po' in background; i dati sul telefono sono cifrati (AES-GCM, chiave dalla password con PBKDF2). La password non si può recuperare.
+- **Cloudflare Pages + Access + proxy Gemini**: vedi `CLOUDFLARE.md` nella radice del repository.
+
 ## Chiave Gemini
 Crea una chiave gratuita su https://aistudio.google.com/apikey e incollala nell'app (Profilo).
 Resta solo sul telefono e viene inviata solo a Google.
