@@ -51,7 +51,7 @@ export function templatePlan(profile) {
 }
 
 export async function aiPlan(profile, library) {
-  const lib = library.map(e => `${e.id} | ${e.nome} | ${e.gruppo} | ${e.attrezzo}`).join('\n');
+  const lib = library.filter(e => !e.soloCasa).map(e => `${e.id} | ${e.nome} | ${e.gruppo} | ${e.attrezzo}`).join('\n');
   const system = `Sei un personal trainer esperto. Crei schede di palestra semplici, sicure ed efficaci, in italiano.
 Rispondi SOLO con JSON valido, senza altro testo.`;
   const prompt = `Crea una scheda di allenamento per questa persona:
@@ -76,7 +76,7 @@ ${lib}`;
   const raw = await gemini({ system, json: true, temperature: 0.4, contents: [{ role: 'user', parts: [{ text: prompt }] }] });
   let data;
   try { data = JSON.parse(raw.replace(/^```json\s*|```$/g, '').trim()); } catch { throw new Error('La risposta dell\'IA non era leggibile.'); }
-  const ids = new Set(library.map(e => e.id));
+  const ids = new Set(library.filter(e => !e.soloCasa).map(e => e.id));
   const giorni = (data.giorni || []).map((d, i) => ({
     nome: String(d.nome || `Giorno ${i + 1}`),
     esercizi: (d.esercizi || []).filter(e => ids.has(e.id)).map(e => ({

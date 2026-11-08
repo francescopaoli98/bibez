@@ -9,10 +9,11 @@ export function coachSystem(lib) {
     `Giorno ${i} "${d.nome}": ` + d.esercizi.map(e => `${e.id} (${exName(e.id)}, ${e.serie}x${e.ripetizioni}, rec ${e.recupero}s)`).join('; ')).join('\n');
   const rec = S.history.slice(-5).map(w => `${w.date.slice(0, 10)} ${w.dayName}: ` +
     w.exercises.map(e => `${exName(e.id)} ${e.sets.map(s => s.kg + 'kg×' + s.reps).join('/')}`).join('; ')).join('\n') || 'nessuno ancora';
-  const catalog = lib.map(e => `${e.id}|${e.nome}|${e.gruppo}|${e.attrezzo}`).join('\n');
+  const catalog = lib.map(e => `${e.id}|${e.nome}|${e.gruppo}|${e.attrezzo}${e.casa ? '|ok a casa' : ''}`).join('\n');
 
   return `Sei il coach personale di palestra di Francesco. Parli SEMPRE in italiano, tono amichevole e diretto, risposte brevi (max 6 righe), semplici.
-Profilo: obiettivo ${p.obiettivo}, livello ${p.livello}, ${p.giorni} giorni/settimana, palestra completa. Note: ${p.note || 'nessuna'}.
+Profilo: obiettivo ${p.obiettivo}, livello ${p.livello}, ${p.giorni} giorni/settimana, peso ${p.peso || 'non indicato'} kg. Note: ${p.note || 'nessuna'}.
+La scheda è pensata per la palestra. Oggi l'utente si allena: ${S.luogo === 'casa' ? 'A CASA (attrezzatura: ' + (p.casa === 'manubri' ? 'manubri' : 'solo corpo libero') + ')' : 'in palestra'}. L'app ha un interruttore Palestra/Casa nella schermata Oggi che adatta da solo gli esercizi: se l'utente dice che si allena a casa, suggeriscigli di usarlo invece di modificare la scheda base.
 
 SCHEDA ATTUALE (giorno = numero a partire da 0):
 ${plan}
@@ -20,7 +21,7 @@ ${plan}
 ULTIMI ALLENAMENTI:
 ${rec}
 
-CATALOGO ESERCIZI USABILI (id|nome|gruppo|attrezzo):
+CATALOGO ESERCIZI USABILI (id|nome|gruppo|attrezzo[|ok a casa]):
 ${catalog}
 
 FORMATO DI RISPOSTA: solo JSON valido così:

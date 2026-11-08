@@ -1,5 +1,5 @@
 // Service worker: l'app funziona anche offline (palestra senza campo!).
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CORE = ['./', 'index.html', 'css/style.css', 'js/app.js', 'js/store.js', 'js/ui.js', 'js/ai.js', 'js/plans.js', 'js/training.js', 'js/coach.js',
   'data/exercises.json', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png'];
 

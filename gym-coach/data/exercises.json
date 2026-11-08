@@ -5,6 +5,8 @@
   "gruppo": "gambe",
   "muscoli": "Quadricipiti, glutei",
   "attrezzo": "bilanciere",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Bilanciere appoggiato sui trapezi, piedi alla larghezza delle spalle, punte leggermente aperte.",
    "Scendi sedendoti all'indietro, schiena dritta, ginocchia in linea con le punte.",
@@ -23,6 +25,8 @@
   "gruppo": "gambe",
   "muscoli": "Quadricipiti, glutei",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Siediti con schiena e bacino ben appoggiati, piedi a metà pedana.",
    "Sblocca e scendi controllato fino a circa 90° di ginocchio.",
@@ -41,6 +45,8 @@
   "gruppo": "gambe",
   "muscoli": "Femorali, glutei",
   "attrezzo": "bilanciere",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "In piedi col bilanciere davanti alle cosce, ginocchia appena flesse.",
    "Spingi il bacino indietro e fai scorrere il bilanciere vicino alle gambe.",
@@ -59,6 +65,8 @@
   "gruppo": "gambe",
   "muscoli": "Quadricipiti, glutei",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "Tieni un manubrio al petto con entrambe le mani.",
    "Scendi in squat tenendo il busto eretto e i gomiti dentro le ginocchia.",
@@ -77,6 +85,8 @@
   "gruppo": "gambe",
   "muscoli": "Quadricipiti, glutei",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "Un manubrio per mano, un passo lungo in avanti.",
    "Scendi finché entrambe le ginocchia sono a circa 90°.",
@@ -95,6 +105,8 @@
   "gruppo": "gambe",
   "muscoli": "Quadricipiti",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Regola lo schienale: il ginocchio è in linea con l'asse della macchina.",
    "Estendi le gambe fino in alto e stringi il quadricipite.",
@@ -113,6 +125,8 @@
   "gruppo": "gambe",
   "muscoli": "Femorali",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Sdraiato a pancia in giù, rullo sopra i talloni.",
    "Fletti le ginocchia portando i talloni verso i glutei.",
@@ -131,6 +145,8 @@
   "gruppo": "gambe",
   "muscoli": "Femorali",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Siediti, cuscino sopra le caviglie e fermo sulle cosce.",
    "Fletti le gambe portando i talloni sotto di te.",
@@ -149,6 +165,8 @@
   "gruppo": "gambe",
   "muscoli": "Polpacci",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Spalle sotto i supporti, punte dei piedi sulla pedana.",
    "Sali sulle punte il più in alto possibile.",
@@ -167,6 +185,8 @@
   "gruppo": "gambe",
   "muscoli": "Polpacci (soleo)",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Siediti con le ginocchia sotto il cuscino, punte sulla pedana.",
    "Sali sulle punte spingendo con i polpacci.",
@@ -185,6 +205,8 @@
   "gruppo": "gambe",
   "muscoli": "Glutei",
   "attrezzo": "bilanciere",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Schiena alta appoggiata alla panca, bilanciere sul bacino.",
    "Spingi con i talloni e solleva il bacino fino ad allineare busto e cosce.",
@@ -203,6 +225,8 @@
   "gruppo": "gambe",
   "muscoli": "Quadricipiti, glutei",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Schiena appoggiata, spalle sotto i cuscini, piedi sulla pedana.",
    "Scendi controllato fino a circa 90°.",
@@ -221,6 +245,8 @@
   "gruppo": "petto",
   "muscoli": "Petto, tricipiti, spalle",
   "attrezzo": "bilanciere",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Sdraiato, scapole strette e piedi ben piantati a terra.",
    "Scendi col bilanciere a metà petto, gomiti a circa 45°.",
@@ -239,6 +265,8 @@
   "gruppo": "petto",
   "muscoli": "Petto, tricipiti",
   "attrezzo": "manubri",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Sdraiato con un manubrio per mano all'altezza del petto.",
    "Spingi in alto avvicinando i manubri.",
@@ -257,6 +285,8 @@
   "gruppo": "petto",
   "muscoli": "Petto alto, spalle",
   "attrezzo": "manubri",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Panca inclinata a 30°, manubri ai lati del petto.",
    "Spingi in alto in linea con la parte alta del petto.",
@@ -275,6 +305,8 @@
   "gruppo": "petto",
   "muscoli": "Petto",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Schiena appoggiata, gomiti all'altezza delle spalle.",
    "Chiudi le braccia davanti al petto.",
@@ -293,6 +325,8 @@
   "gruppo": "petto",
   "muscoli": "Petto",
   "attrezzo": "cavi",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Cavi in alto, un passo avanti, gomiti leggermente flessi.",
    "Porta le mani davanti al corpo con un arco ampio.",
@@ -311,6 +345,8 @@
   "gruppo": "petto",
   "muscoli": "Petto, tricipiti, core",
   "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": false,
   "passi": [
    "Mani poco più larghe delle spalle, corpo in linea retta.",
    "Scendi finché il petto sfiora il pavimento.",
@@ -329,6 +365,8 @@
   "gruppo": "petto",
   "muscoli": "Petto",
   "attrezzo": "manubri",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Sdraiato, manubri sopra il petto, gomiti morbidi.",
    "Apri le braccia ad arco fino a sentire lo stiramento.",
@@ -347,6 +385,8 @@
   "gruppo": "schiena",
   "muscoli": "Dorsali, bicipiti",
   "attrezzo": "cavi",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Presa larga, cosce bloccate sotto il cuscino.",
    "Tira la barra al petto portando i gomiti verso il basso.",
@@ -365,6 +405,8 @@
   "gruppo": "schiena",
   "muscoli": "Dorsali, bicipiti",
   "attrezzo": "cavi",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Impugna la maniglia stretta, petto in fuori.",
    "Tira verso la parte alta del petto.",
@@ -383,6 +425,8 @@
   "gruppo": "schiena",
   "muscoli": "Dorsali, romboidi",
   "attrezzo": "cavi",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Seduto, schiena dritta, ginocchia leggermente flesse.",
    "Tira la maniglia verso l'addome stringendo le scapole.",
@@ -401,6 +445,8 @@
   "gruppo": "schiena",
   "muscoli": "Dorsali, romboidi, bicipiti",
   "attrezzo": "bilanciere",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Busto inclinato a circa 45°, schiena piatta, bilanciere davanti.",
    "Tira il bilanciere verso l'ombelico.",
@@ -419,6 +465,8 @@
   "gruppo": "schiena",
   "muscoli": "Dorsali, bicipiti",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "Una mano e un ginocchio sulla panca, manubrio nell'altra mano.",
    "Tira il manubrio verso il fianco.",
@@ -437,6 +485,8 @@
   "gruppo": "schiena",
   "muscoli": "Dorsali, bicipiti",
   "attrezzo": "corpo libero",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Presa prona poco più larga delle spalle, braccia distese.",
    "Sali finché il mento supera la sbarra.",
@@ -455,6 +505,8 @@
   "gruppo": "schiena",
   "muscoli": "Dorsali, bicipiti",
   "attrezzo": "corpo libero",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Presa supina alla larghezza delle spalle.",
    "Sali portando il mento sopra la sbarra.",
@@ -473,6 +525,8 @@
   "gruppo": "schiena",
   "muscoli": "Lombari, glutei",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Bacino appoggiato al cuscino, corpo in linea.",
    "Scendi col busto flettendo dai fianchi.",
@@ -491,6 +545,8 @@
   "gruppo": "schiena",
   "muscoli": "Schiena, glutei, femorali",
   "attrezzo": "bilanciere",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Bilanciere sopra la metà del piede, schiena dritta, petto in fuori.",
    "Spingi coi piedi e solleva il bilanciere vicino alle gambe.",
@@ -509,6 +565,8 @@
   "gruppo": "spalle",
   "muscoli": "Spalle, tricipiti",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "Seduto con schienale, manubri all'altezza delle orecchie.",
    "Spingi in alto fino a braccia quasi distese.",
@@ -527,6 +585,8 @@
   "gruppo": "spalle",
   "muscoli": "Spalle, tricipiti",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Regola il sedile: impugnature all'altezza delle spalle.",
    "Spingi in alto.",
@@ -545,6 +605,8 @@
   "gruppo": "spalle",
   "muscoli": "Deltoide laterale",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "In piedi, un manubrio per mano, gomiti leggermente flessi.",
    "Alza le braccia ai lati fino all'altezza delle spalle.",
@@ -563,6 +625,8 @@
   "gruppo": "spalle",
   "muscoli": "Deltoide posteriore, cuffia",
   "attrezzo": "cavi",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Cavo all'altezza del viso, corda in mano.",
    "Tira verso il viso aprendo i gomiti.",
@@ -581,6 +645,8 @@
   "gruppo": "spalle",
   "muscoli": "Deltoide posteriore",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Petto contro il cuscino, impugnature davanti.",
    "Apri le braccia all'indietro.",
@@ -599,6 +665,8 @@
   "gruppo": "spalle",
   "muscoli": "Deltoide anteriore",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "In piedi con i manubri davanti alle cosce.",
    "Alza un braccio davanti fino all'altezza delle spalle.",
@@ -617,6 +685,8 @@
   "gruppo": "braccia",
   "muscoli": "Bicipiti",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "In piedi, manubri ai lati, gomiti vicini al corpo.",
    "Fletti i gomiti portando i manubri alle spalle.",
@@ -635,6 +705,8 @@
   "gruppo": "braccia",
   "muscoli": "Bicipiti",
   "attrezzo": "bilanciere",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Presa alla larghezza delle spalle, braccia distese.",
    "Fletti i gomiti portando la barra al petto.",
@@ -653,6 +725,8 @@
   "gruppo": "braccia",
   "muscoli": "Bicipiti, avambracci",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "Manubri con i palmi rivolti l'uno verso l'altro.",
    "Fletti i gomiti mantenendo la presa neutra.",
@@ -671,6 +745,8 @@
   "gruppo": "braccia",
   "muscoli": "Bicipiti",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Regola il sedile: gomiti all'altezza dell'asse.",
    "Fletti portando le maniglie verso le spalle.",
@@ -689,6 +765,8 @@
   "gruppo": "braccia",
   "muscoli": "Tricipiti",
   "attrezzo": "cavi",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Cavo alto, gomiti attaccati ai fianchi.",
    "Estendi le braccia verso il basso.",
@@ -707,6 +785,8 @@
   "gruppo": "braccia",
   "muscoli": "Tricipiti",
   "attrezzo": "cavi",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Impugna la corda, gomiti ai fianchi.",
    "Estendi e apri leggermente la corda in basso.",
@@ -725,6 +805,8 @@
   "gruppo": "braccia",
   "muscoli": "Tricipiti",
   "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": false,
   "passi": [
    "Un manubrio con entrambe le mani sopra la testa.",
    "Fletti i gomiti portando il peso dietro la nuca.",
@@ -743,6 +825,8 @@
   "gruppo": "core",
   "muscoli": "Addome, core",
   "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": false,
   "passi": [
    "Appoggio su avambracci e punte dei piedi.",
    "Corpo in linea retta, addome e glutei contratti.",
@@ -761,6 +845,8 @@
   "gruppo": "core",
   "muscoli": "Addome",
   "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": false,
   "passi": [
    "Sdraiato, ginocchia flesse, mani ai lati della testa.",
    "Solleva spalle e petto contraendo l'addome.",
@@ -779,6 +865,8 @@
   "gruppo": "core",
   "muscoli": "Addome",
   "attrezzo": "cavi",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "In ginocchio sotto il cavo alto, corda vicino alla testa.",
    "Fletti il busto portando i gomiti verso le cosce.",
@@ -797,6 +885,8 @@
   "gruppo": "core",
   "muscoli": "Addome basso",
   "attrezzo": "corpo libero",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Appeso alla sbarra, corpo fermo.",
    "Solleva le gambe (o le ginocchia) fino a metà altezza.",
@@ -815,6 +905,8 @@
   "gruppo": "core",
   "muscoli": "Obliqui",
   "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": false,
   "passi": [
    "Seduto, busto leggermente inclinato indietro.",
    "Ruota il busto da un lato all'altro.",
@@ -833,6 +925,8 @@
   "gruppo": "cardio",
   "muscoli": "Cardio, tutto il corpo",
   "attrezzo": "macchina",
+  "casa": null,
+  "soloCasa": false,
   "passi": [
    "Sali sulla macchina e impugna le maniglie.",
    "Pedala a ritmo costante, postura eretta.",
@@ -844,5 +938,425 @@
    "img/ex/Elliptical_Trainer/1.jpg"
   ],
   "video": "https://www.youtube.com/results?search_query=come%20fare%20Ellittica%20tecnica%20corretta"
+ },
+ {
+  "id": "Bodyweight_Squat",
+  "nome": "Squat a corpo libero",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti, glutei",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Piedi alla larghezza delle spalle, braccia davanti per bilanciarti.",
+   "Scendi sedendoti all'indietro, schiena dritta, ginocchia in linea con le punte.",
+   "Spingi sui talloni e risali."
+  ],
+  "consiglio": "Parti da metà escursione se serve, poi scendi di più.",
+  "img": [
+   "img/ex/Bodyweight_Squat/0.jpg",
+   "img/ex/Bodyweight_Squat/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20a%20corpo%20libero%20tecnica%20corretta"
+ },
+ {
+  "id": "Butt_Lift_Bridge",
+  "nome": "Ponte glutei",
+  "gruppo": "gambe",
+  "muscoli": "Glutei, femorali",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Sdraiato sulla schiena, ginocchia flesse, piedi a terra.",
+   "Spingi con i talloni e solleva il bacino fino ad allinearti.",
+   "Stringi i glutei 1 secondo, poi scendi lentamente."
+  ],
+  "consiglio": "Non inarcare la schiena in alto.",
+  "img": [
+   "img/ex/Butt_Lift_Bridge/0.jpg",
+   "img/ex/Butt_Lift_Bridge/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Ponte%20glutei%20tecnica%20corretta"
+ },
+ {
+  "id": "Bodyweight_Walking_Lunge",
+  "nome": "Affondi a corpo libero",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti, glutei",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "In piedi, fai un passo lungo in avanti.",
+   "Scendi finché entrambe le ginocchia sono a circa 90°.",
+   "Spingi col piede davanti e porta avanti l'altra gamba."
+  ],
+  "consiglio": "Busto dritto, passo abbastanza lungo.",
+  "img": [
+   "img/ex/Bodyweight_Walking_Lunge/0.jpg",
+   "img/ex/Bodyweight_Walking_Lunge/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20a%20corpo%20libero%20tecnica%20corretta"
+ },
+ {
+  "id": "Step-up_with_Knee_Raise",
+  "nome": "Step-up su sedia",
+  "gruppo": "gambe",
+  "muscoli": "Glutei, quadricipiti",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Davanti a una sedia stabile o a un gradino.",
+   "Sali con un piede e porta l'altro ginocchio in alto.",
+   "Scendi controllato e alterna le gambe."
+  ],
+  "consiglio": "Usa una sedia che non scivola.",
+  "img": [
+   "img/ex/Step-up_with_Knee_Raise/0.jpg",
+   "img/ex/Step-up_with_Knee_Raise/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Step-up%20su%20sedia%20tecnica%20corretta"
+ },
+ {
+  "id": "Stiff-Legged_Dumbbell_Deadlift",
+  "nome": "Stacco gambe tese con manubri",
+  "gruppo": "gambe",
+  "muscoli": "Femorali, glutei",
+  "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": true,
+  "passi": [
+   "In piedi con un manubrio per mano davanti alle cosce.",
+   "Spingi il bacino indietro e fai scendere i manubri vicino alle gambe.",
+   "Quando senti i femorali tesi, risali stringendo i glutei."
+  ],
+  "consiglio": "Schiena sempre dritta, ginocchia appena flesse.",
+  "img": [
+   "img/ex/Stiff-Legged_Dumbbell_Deadlift/0.jpg",
+   "img/ex/Stiff-Legged_Dumbbell_Deadlift/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20gambe%20tese%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Dumbbell_Rear_Lunge",
+  "nome": "Affondi indietro con manubri",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti, glutei",
+  "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": true,
+  "passi": [
+   "In piedi con un manubrio per mano.",
+   "Fai un passo indietro e scendi con il ginocchio verso terra.",
+   "Spingi col piede davanti e torna su."
+  ],
+  "consiglio": "Più facile da controllare degli affondi in avanti.",
+  "img": [
+   "img/ex/Dumbbell_Rear_Lunge/0.jpg",
+   "img/ex/Dumbbell_Rear_Lunge/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20indietro%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Incline_Push-Up",
+  "nome": "Flessioni sulla sedia",
+  "gruppo": "petto",
+  "muscoli": "Petto, tricipiti",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Mani su una sedia o sul bordo del letto, corpo in linea retta.",
+   "Scendi con il petto verso il bordo.",
+   "Spingi e torna su."
+  ],
+  "consiglio": "Versione più facile delle flessioni a terra.",
+  "img": [
+   "img/ex/Incline_Push-Up/0.jpg",
+   "img/ex/Incline_Push-Up/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flessioni%20sulla%20sedia%20tecnica%20corretta"
+ },
+ {
+  "id": "Dumbbell_Floor_Press",
+  "nome": "Panca a terra con manubri",
+  "gruppo": "petto",
+  "muscoli": "Petto, tricipiti",
+  "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": true,
+  "passi": [
+   "Sdraiato a terra, manubri sopra il petto.",
+   "Scendi finché i gomiti toccano il pavimento.",
+   "Spingi in alto fino a braccia distese."
+  ],
+  "consiglio": "Sostituisce la panca piana a casa.",
+  "img": [
+   "img/ex/Dumbbell_Floor_Press/0.jpg",
+   "img/ex/Dumbbell_Floor_Press/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20a%20terra%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Bent_Over_Two-Dumbbell_Row",
+  "nome": "Rematore con due manubri",
+  "gruppo": "schiena",
+  "muscoli": "Dorsali, romboidi",
+  "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": true,
+  "passi": [
+   "Busto inclinato in avanti, schiena piatta, un manubrio per mano.",
+   "Tira i manubri verso i fianchi stringendo le scapole.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Ginocchia leggermente flesse, schiena mai curva.",
+  "img": [
+   "img/ex/Bent_Over_Two-Dumbbell_Row/0.jpg",
+   "img/ex/Bent_Over_Two-Dumbbell_Row/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20con%20due%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Superman",
+  "nome": "Superman",
+  "gruppo": "schiena",
+  "muscoli": "Lombari, glutei",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Sdraiato a pancia in giù, braccia davanti.",
+   "Solleva insieme braccia e gambe da terra.",
+   "Resta 1-2 secondi, poi scendi."
+  ],
+  "consiglio": "Movimento piccolo e controllato.",
+  "img": [
+   "img/ex/Superman/0.jpg",
+   "img/ex/Superman/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Superman%20tecnica%20corretta"
+ },
+ {
+  "id": "Reverse_Flyes",
+  "nome": "Alzate posteriori con manubri",
+  "gruppo": "spalle",
+  "muscoli": "Deltoide posteriore",
+  "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": true,
+  "passi": [
+   "Busto inclinato in avanti, manubri sotto di te.",
+   "Apri le braccia ai lati con i gomiti morbidi.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Peso leggero.",
+  "img": [
+   "img/ex/Reverse_Flyes/0.jpg",
+   "img/ex/Reverse_Flyes/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20posteriori%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Dumbbell_Shrug",
+  "nome": "Scrollate con manubri",
+  "gruppo": "spalle",
+  "muscoli": "Trapezi",
+  "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": true,
+  "passi": [
+   "In piedi con un manubrio per mano lungo i fianchi.",
+   "Alza le spalle verso le orecchie.",
+   "Pausa in alto, poi scendi lentamente."
+  ],
+  "consiglio": "Non ruotare le spalle.",
+  "img": [
+   "img/ex/Dumbbell_Shrug/0.jpg",
+   "img/ex/Dumbbell_Shrug/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Scrollate%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Bench_Dips",
+  "nome": "Dip su sedia",
+  "gruppo": "braccia",
+  "muscoli": "Tricipiti",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Mani sul bordo di una sedia stabile dietro di te, gambe avanti.",
+   "Fletti i gomiti scendendo con il bacino.",
+   "Spingi e risali."
+  ],
+  "consiglio": "Gomiti stretti e indietro, spalle basse.",
+  "img": [
+   "img/ex/Bench_Dips/0.jpg",
+   "img/ex/Bench_Dips/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Dip%20su%20sedia%20tecnica%20corretta"
+ },
+ {
+  "id": "Tricep_Dumbbell_Kickback",
+  "nome": "Kickback tricipiti",
+  "gruppo": "braccia",
+  "muscoli": "Tricipiti",
+  "attrezzo": "manubri",
+  "casa": "manubri",
+  "soloCasa": true,
+  "passi": [
+   "Busto inclinato, gomito vicino al fianco, manubrio in mano.",
+   "Estendi il braccio all'indietro.",
+   "Torna lentamente."
+  ],
+  "consiglio": "Si muove solo l'avambraccio.",
+  "img": [
+   "img/ex/Tricep_Dumbbell_Kickback/0.jpg",
+   "img/ex/Tricep_Dumbbell_Kickback/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Kickback%20tricipiti%20tecnica%20corretta"
+ },
+ {
+  "id": "Side_Bridge",
+  "nome": "Plank laterale",
+  "gruppo": "core",
+  "muscoli": "Obliqui, core",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Sul fianco, appoggio sull'avambraccio.",
+   "Solleva il bacino fino ad allinearti.",
+   "Mantieni la posizione e cambia lato."
+  ],
+  "consiglio": "Parti da 15-20 secondi per lato.",
+  "img": [
+   "img/ex/Side_Bridge/0.jpg",
+   "img/ex/Side_Bridge/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Plank%20laterale%20tecnica%20corretta"
+ },
+ {
+  "id": "Reverse_Crunch",
+  "nome": "Crunch inverso",
+  "gruppo": "core",
+  "muscoli": "Addome basso",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Sdraiato, gambe piegate in aria.",
+   "Porta le ginocchia al petto sollevando il bacino.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Niente slanci.",
+  "img": [
+   "img/ex/Reverse_Crunch/0.jpg",
+   "img/ex/Reverse_Crunch/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20inverso%20tecnica%20corretta"
+ },
+ {
+  "id": "Air_Bike",
+  "nome": "Bicicletta per addome",
+  "gruppo": "core",
+  "muscoli": "Addome, obliqui",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Sdraiato, mani dietro la testa.",
+   "Porta un gomito verso il ginocchio opposto, alternando.",
+   "Ritmo controllato."
+  ],
+  "consiglio": "Non tirare il collo.",
+  "img": [
+   "img/ex/Air_Bike/0.jpg",
+   "img/ex/Air_Bike/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Bicicletta%20per%20addome%20tecnica%20corretta"
+ },
+ {
+  "id": "Flutter_Kicks",
+  "nome": "Flutter kick",
+  "gruppo": "core",
+  "muscoli": "Addome basso, glutei",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Sdraiato, gambe tese e leggermente sollevate.",
+   "Muovi le gambe su e giù alternando, a piccoli colpi.",
+   "Schiena bassa appoggiata."
+  ],
+  "consiglio": "Se la schiena si stacca, alza di più le gambe.",
+  "img": [
+   "img/ex/Flutter_Kicks/0.jpg",
+   "img/ex/Flutter_Kicks/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flutter%20kick%20tecnica%20corretta"
+ },
+ {
+  "id": "Mountain_Climbers",
+  "nome": "Mountain climber",
+  "gruppo": "cardio",
+  "muscoli": "Cardio, core",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "In posizione di flessione, braccia tese.",
+   "Porta un ginocchio verso il petto, poi alterna velocemente.",
+   "Mantieni il bacino basso."
+  ],
+  "consiglio": "Ottimo per il cardio a casa.",
+  "img": [
+   "img/ex/Mountain_Climbers/0.jpg",
+   "img/ex/Mountain_Climbers/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Mountain%20climber%20tecnica%20corretta"
+ },
+ {
+  "id": "Star_Jump",
+  "nome": "Star jump",
+  "gruppo": "cardio",
+  "muscoli": "Cardio, tutto il corpo",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "In piedi, piedi uniti.",
+   "Salta aprendo braccia e gambe a stella.",
+   "Atterra morbido e ripeti."
+  ],
+  "consiglio": "Atterra sulle punte, ginocchia morbide.",
+  "img": [
+   "img/ex/Star_Jump/0.jpg",
+   "img/ex/Star_Jump/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Star%20jump%20tecnica%20corretta"
+ },
+ {
+  "id": "Freehand_Jump_Squat",
+  "nome": "Squat jump",
+  "gruppo": "cardio",
+  "muscoli": "Gambe, cardio",
+  "attrezzo": "corpo libero",
+  "casa": "libero",
+  "soloCasa": true,
+  "passi": [
+   "Scendi in squat.",
+   "Salta in alto spingendo con le gambe.",
+   "Atterra morbido e scendi subito di nuovo."
+  ],
+  "consiglio": "Solo se non hai dolori alle ginocchia.",
+  "img": [
+   "img/ex/Freehand_Jump_Squat/0.jpg",
+   "img/ex/Freehand_Jump_Squat/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20jump%20tecnica%20corretta"
  }
 ]

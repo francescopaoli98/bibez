@@ -2,7 +2,7 @@ import { S, save, resetAll, exportJSON } from './store.js';
 import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
 import { gemini } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
-import { isTime, topReps, suggestion, startSession, syncSession } from './training.js';
+import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges } from './coach.js';
 
 let LIB = [];
@@ -15,11 +15,12 @@ const go = (hash) => { location.hash = hash; };
 
 const GRUPPI = ['tutti', 'gambe', 'petto', 'schiena', 'spalle', 'braccia', 'core', 'cardio'];
 const OBIETTIVI = [['misto', 'Un po\' di tutto'], ['massa', 'Massa'], ['dimagrire', 'Dimagrire'], ['tonificare', 'Tonificare']];
+const CASA_OPT = [['libero', 'Niente (corpo libero)'], ['manubri', 'Manubri']];
 const LIVELLI = [['principiante', 'Principiante'], ['intermedio', 'Un po\' di esperienza']];
 
 /* ---------------------------- avvio e navigazione ---------------------------- */
 async function boot() {
-  try { LIB = await (await fetch('data/exercises.json')).json(); }
+  try { LIB = await (await fetch('data/exercises.json')).json(); setLib(LIB); }
   catch { render(h('p', { class: 'err' }, 'Impossibile caricare gli esercizi.')); return; }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   window.addEventListener('hashchange', route);
@@ -50,6 +51,16 @@ function renderTabs(active) {
     h('a', { class: 'tab' + (k === active ? ' on' : ''), href: '#/' + k }, icon(ic), label))));
 }
 
+// Interruttore Palestra / Casa
+function luogoSwitch(redraw) {
+  return h('div', { class: 'seg' }, [['palestra', '🏋️ Palestra'], ['casa', '🏠 Casa']].map(([v, t]) =>
+    h('button', { class: 'seg-b' + ((S.luogo || 'palestra') === v ? ' on' : ''), onclick: () => { S.luogo = v; save(); redraw(); } }, t)));
+}
+const homeHint = () => (S.luogo === 'casa' && (S.profile.casa || 'libero') === 'libero')
+  ? h('p', { class: 'muted small' }, 'A casa uso esercizi a corpo libero. Hai dei manubri? ', h('a', { href: '#/profilo' }, 'Dillo qui'))
+  : null;
+const kcalTxt = (exs) => `~${estKcal(exs)} kcal`;
+
 const gear = () => h('a', { class: 'iconbtn', href: '#/profilo', 'aria-label': 'Impostazioni' }, icon('user'));
 
 /* ---------------------------- dettaglio esercizio ---------------------------- */
@@ -75,7 +86,7 @@ function exRow(id, subtitle, onclick) {
 
 /* ---------------------------- primo avvio: una sola schermata ---------------------------- */
 function viewOnboarding() {
-  const d = { obiettivo: 'misto', livello: 'intermedio', giorni: 3, note: '', apiKey: S.settings.apiKey || '' };
+  const d = { obiettivo: 'misto', livello: 'intermedio', giorni: 3, casa: 'libero', peso: '', note: '', apiKey: S.settings.apiKey || '' };
   const pick = (title, key, opts) => {
     const box = h('div', { class: 'chips' });
     const draw = () => box.replaceChildren(...opts.map(([v, t]) =>
@@ -89,7 +100,7 @@ function viewOnboarding() {
 
   async function create() {
     S.settings.apiKey = d.apiKey;
-    S.profile = { obiettivo: d.obiettivo, livello: d.livello, giorni: d.giorni, note: d.note };
+    S.profile = { obiettivo: d.obiettivo, livello: d.livello, giorni: d.giorni, casa: d.casa, peso: parseFloat(d.peso) || 0, note: d.note };
     save();
     await buildPlan();
   }
@@ -99,6 +110,9 @@ function viewOnboarding() {
     pick('Obiettivo', 'obiettivo', OBIETTIVI),
     pick('Esperienza', 'livello', LIVELLI),
     pick('Giorni a settimana', 'giorni', [[2, '2'], [3, '3'], [4, '4'], [5, '5']]),
+    pick('A casa che attrezzatura hai?', 'casa', CASA_OPT),
+    h('label', { class: 'field' }, 'Il tuo peso in kg (per stimare le calorie, facoltativo)',
+      h('input', { type: 'number', inputmode: 'decimal', placeholder: '75', oninput: e => d.peso = e.target.value })),
     h('label', { class: 'field' }, 'Dolori o limiti? (facoltativo)',
       h('input', { type: 'text', placeholder: 'Es. mal di schiena', oninput: e => d.note = e.target.value })),
     h('div', { class: 'card stack' },
@@ -131,17 +145,20 @@ const weekCount = () => S.history.filter(w => new Date(w.date).getTime() > Date.
 function viewOggi() {
   const day = S.plan.giorni[S.nextDay % S.plan.giorni.length];
   const wk = weekCount(), target = S.profile.giorni;
-  const mins = Math.round(day.esercizi.reduce((a, e) => a + e.serie * (45 + (e.recupero || 60)) / 60, 0));
+  const exs = adaptDay(day, S.luogo);
+  const kcalWeek = Math.round(S.history.filter(w => new Date(w.date).getTime() > Date.now() - 7 * 864e5).reduce((a, w) => a + (w.kcal || 0), 0) / 10) * 10;
   render(
     h('div', { class: 'row between' }, h('h1', {}, 'Ciao 👋'), gear()),
+    !S.session && luogoSwitch(viewOggi),
+    !S.session && homeHint(),
     h('div', { class: 'hero' },
-      h('div', { class: 'kicker' }, S.session ? 'Allenamento in corso' : 'Oggi tocca a'),
+      h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? '🏠 Casa' : '🏋️ Palestra'}` : 'Oggi tocca a'),
       h('h1', {}, day.nome),
-      h('p', { class: 'muted' }, `${day.esercizi.length} esercizi · circa ${mins} minuti`),
+      h('p', { class: 'muted' }, `${exs.length} esercizi · circa ${estMin(exs)} min · ${kcalTxt(exs)}`),
       h('button', { class: 'btn big block', onclick: () => { if (!S.session) startSession(S.nextDay % S.plan.giorni.length); go('#/allenamento'); } },
         S.session ? 'Riprendi' : 'Inizia')),
     h('div', { class: 'card stack' },
-      h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}`)),
+      h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}${kcalWeek ? ' · ~' + kcalWeek + ' kcal' : ''}`)),
       h('div', { class: 'week' }, Array.from({ length: target }, (_, i) => h('i', { class: i < wk ? 'on' : '' })))),
     h('a', { class: 'card row between linkcard', href: '#/coach' },
       h('div', {}, h('h3', {}, 'Parla col coach'), h('p', { class: 'muted small' }, 'Dolore, poco tempo, esercizio da cambiare…')),
@@ -152,13 +169,14 @@ function viewOggi() {
 function viewScheda() {
   render(
     h('div', {}, h('h1', {}, S.plan.nome), h('p', { class: 'muted' }, 'Tocca un esercizio per vedere come si fa.')),
+    luogoSwitch(viewScheda), homeHint(),
     ...S.plan.giorni.map((d, i) => h('details', { class: 'card day', open: i === S.nextDay % S.plan.giorni.length },
-      h('summary', {}, h('div', {}, h('h3', {}, d.nome), h('div', { class: 'muted small' }, `${d.esercizi.length} esercizi`)),
+      h('summary', {}, h('div', {}, h('h3', {}, d.nome), h('div', { class: 'muted small' }, `${adaptDay(d, S.luogo).length} esercizi · ${kcalTxt(adaptDay(d, S.luogo))}`)),
         h('button', { class: 'btn small', onclick: (e) => {
           e.preventDefault();
           if (S.session && !confirm('Hai un allenamento in corso. Vuoi iniziarne un altro?')) return;
           startSession(i); go('#/allenamento'); } }, 'Inizia')),
-      h('div', { class: 'list' }, d.esercizi.map(e => exRow(e.id, `${e.serie} × ${e.ripetizioni}${e.recupero ? ' · rec. ' + e.recupero + 's' : ''}`))))),
+      h('div', { class: 'list' }, adaptDay(d, S.luogo).map(e => exRow(e.id, `${e.serie} × ${e.ripetizioni}${e.recupero ? ' · rec. ' + e.recupero + 's' : ''}`))))),
     h('a', { class: 'btn block', href: '#/coach' }, 'Chiedi al coach di cambiarla'),
     h('a', { class: 'btn ghost block', href: '#/esercizi' }, 'Tutti gli esercizi'));
 }
@@ -228,7 +246,7 @@ function viewAllenamento() {
 
   render(
     h('div', { class: 'sticky-head' },
-      h('div', {}, h('div', { class: 'muted small' }, s.dayName), h('h3', {}, `Esercizio ${s.cur + 1} di ${n}`)),
+      h('div', {}, h('div', { class: 'muted small' }, s.dayName + (s.luogo === 'casa' ? ' · 🏠 Casa' : '')), h('h3', {}, `Esercizio ${s.cur + 1} di ${n}`)),
       h('button', { class: 'btn ghost small', onclick: exitMenu }, 'Fine')),
     h('div', { class: 'progress' }, bar),
     h('button', { class: 'anim-btn', onclick: () => showExercise(ex.id), 'aria-label': 'Come si fa' }, exAnim(info), h('span', { class: 'pill' }, 'Come si fa ›')),
@@ -276,12 +294,14 @@ function finishSession() {
     exercises: done,
     sets: done.reduce((a, e) => a + e.sets.length, 0),
     volume: done.reduce((a, e) => a + e.sets.reduce((b, x) => b + x.kg * x.reps, 0), 0),
+    luogo: s.luogo || 'palestra',
+    kcal: estKcal(s.exercises.map(e => ({ ...e.target, id: e.id, serie: e.sets.filter(x => x.done).length })).filter(t => t.serie)),
   };
   S.history.push(rec);
   S.nextDay = (s.dayIndex + 1) % S.plan.giorni.length;
   S.session = null; save(); keepAwake(false); stopRest();
   go('#/oggi');
-  toast(`Ottimo lavoro! ${rec.sets} serie in ${rec.durata} min 💪`);
+  toast(`Ottimo lavoro! ${rec.sets} serie, ${rec.durata} min, ~${rec.kcal} kcal 💪`);
 }
 
 /* timer di recupero */
@@ -385,7 +405,7 @@ function viewCoach() {
 
 /* ---------------------------- impostazioni ---------------------------- */
 function viewProfilo() {
-  const p = { ...S.profile };
+  const p = { obiettivo: S.profile.obiettivo, livello: S.profile.livello, giorni: S.profile.giorni };
   const sel = (label, key, opts) => h('div', { class: 'stack' }, h('h3', {}, label),
     h('div', { class: 'chips' }, opts.map(([v, t]) => h('button', { class: 'chip lg' + (p[key] === v ? ' on' : ''), onclick: (e) => {
       p[key] = v; e.target.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); e.target.classList.add('on'); } }, t))));
@@ -396,6 +416,12 @@ function viewProfilo() {
 
   render(
     h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Impostazioni')),
+    h('div', { class: 'card stack' }, h('h2', {}, 'Casa e calorie'),
+      h('div', { class: 'stack' }, h('h3', {}, 'Attrezzatura a casa'),
+        h('div', { class: 'chips' }, CASA_OPT.map(([v, t]) => h('button', { class: 'chip lg' + ((S.profile.casa || 'libero') === v ? ' on' : ''), onclick: (e) => {
+          S.profile.casa = v; save(); e.target.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); e.target.classList.add('on'); toast('Salvato'); } }, t)))),
+      h('label', { class: 'field' }, 'Peso (kg)', h('input', { type: 'number', inputmode: 'decimal', placeholder: '75', value: S.profile.peso || '', onchange: e => { S.profile.peso = parseFloat(e.target.value) || 0; save(); toast('Salvato'); } })),
+      h('p', { class: 'muted small' }, 'Le calorie sono una stima indicativa (formula MET). Senza peso uso 75 kg.')),
     h('div', { class: 'card stack' }, h('h2', {}, 'Coach IA (Gemini)'),
       h('label', { class: 'field' }, 'Chiave API', keyIn),
       h('a', { href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener', class: 'small' }, 'Crea / vedi la chiave su Google AI Studio →'),
@@ -412,7 +438,7 @@ function viewProfilo() {
       h('label', { class: 'field' }, 'Limiti / infortuni', note),
       h('button', { class: 'btn block', onclick: async () => {
         if (S.session && !confirm('Hai un allenamento in corso: verrà annullato. Continuare?')) return;
-        saveKeys(); S.profile = { ...p, note: note.value }; save(); await buildPlan(); } }, 'Rigenera la scheda')),
+        saveKeys(); S.profile = { ...S.profile, ...p, note: note.value }; save(); await buildPlan(); } }, 'Rigenera la scheda')),
     h('details', { class: 'card' }, h('summary', { class: 'muted' }, 'Avanzate'),
       h('div', { class: 'stack', style: 'margin-top:12px' },
         h('label', { class: 'field' }, 'Modello Gemini', modelIn),

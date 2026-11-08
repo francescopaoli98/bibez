@@ -7,6 +7,7 @@ const DEFAULT = {
   settings: { apiKey: '', model: 'gemini-flash-latest' },
   session: null,            // allenamento in corso
   chat: [],                 // [{role:'user'|'model', text}]
+  luogo: 'palestra',        // 'palestra' | 'casa' (dove ti alleni oggi)
   nextDay: 0,               // indice del prossimo giorno in scheda
   planBackup: null,         // scheda prima dell'ultima modifica del coach (per annullare)
 };

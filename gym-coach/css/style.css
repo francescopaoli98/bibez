@@ -245,3 +245,7 @@ a.ex-item, .anim-btn { color: inherit; }
 .proposal.pending { border-color: var(--accent); background: rgba(182,255,59,.06); }
 .proposal .kicker { color: var(--accent); font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
 .proposal ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--card2); border: 1px solid var(--line); border-radius: 16px; }
+.seg-b { padding: 12px 8px; border-radius: 12px; font-weight: 700; color: var(--muted); font-size: 15px; }
+.seg-b.on { background: var(--accent); color: var(--accent-ink); }
