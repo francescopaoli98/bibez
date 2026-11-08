@@ -24,7 +24,27 @@ const SOUNDS = {
   switch:  () => tone(700, 0, 0.06, { gain: 0.04, to: 900 }),
 };
 export function play(name) { if (getTheme().sound) { try { SOUNDS[name]?.(); } catch {} } }
-export function buzz(ms = 8) { if (getTheme().haptics) { try { navigator.vibrate?.(ms); } catch {} } }
+// Vibrazione: Android usa l'API ufficiale. Su iPhone (Safari 17.4 o più recente) Apple non la offre, ma
+// il passaggio di un interruttore nativo (<input switch>) dà un piccolo "tic": lo usiamo come scorciatoia.
+let iosLabel = null;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function iosTap() {
+  if (!iosLabel) {
+    iosLabel = document.createElement('label');
+    iosLabel.setAttribute('aria-hidden', 'true');
+    iosLabel.style.cssText = 'position:fixed;left:-200px;top:-200px;width:1px;height:1px;opacity:0;pointer-events:none';
+    const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); i.tabIndex = -1;
+    iosLabel.append(i); document.body.append(iosLabel);
+  }
+  iosLabel.click();
+}
+export function buzz(ms = 8) {
+  if (!getTheme().haptics) return;
+  try {
+    if (typeof navigator.vibrate === 'function') navigator.vibrate(ms);
+    else if (isIOS()) iosTap();                              // un solo "tic" (su iPhone non si possono fare schemi più lunghi)
+  } catch {}
+}
 
 // Tocco su qualsiasi elemento "cliccabile" = piccolo suono (data-nosound lo esclude: ha già un suono suo)
 const TAPPABLE = 'button, a.tab, a.iconbtn, .chip, .seg-b, .ex-item, .ex-card, .linkcard, summary, .opt';

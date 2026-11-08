@@ -839,7 +839,7 @@ function appearanceCard() {
           h('button', { class: 'bgopt' + (T.bg === k ? ' sel' : ''), onclick: () => { setTheme({ bg: k }); draw(); } },
             h('div', { class: 'pv', style: `background:${v.bg}` }, h('i', { style: `background:${v.card}` }), h('i', { style: `background:${v.card2}` })), v.name)))),
       h('div', {}, toggle('sound', 'Suoni', 'Un piccolo "tic" quando tocchi e un suono per ogni serie fatta'),
-        toggle('haptics', 'Vibrazione', 'Una vibrazione leggera (solo Android: su iPhone non è possibile)'),
+        toggle('haptics', 'Vibrazione', 'Una vibrazione leggera ai tocchi. Su iPhone recenti è un piccolo "tic"'),
         toggle('anim', 'Animazioni', 'Effetti, coriandoli, numeri che salgono'),
         toggle('big', 'Testo più grande', 'Scritte più grandi in tutta l\'app')));
   }

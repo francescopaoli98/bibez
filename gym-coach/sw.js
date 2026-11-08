@@ -1,5 +1,5 @@
 // Service worker: l'app funziona anche offline (palestra senza campo!).
-const VERSION = 'v22';
+const VERSION = 'v23';
 const CORE = ['./', 'index.html', 'css/fonts.css', 'css/style.css', 'css/theme.css', 'js/app.js', 'js/store.js', 'js/ui.js', 'js/ai.js', 'js/plans.js', 'js/training.js', 'js/coach.js', 'js/nutrition.js', 'js/progress.js', 'js/reminders.js', 'js/lock.js', 'js/account.js', 'js/theme.js', 'js/sound.js', 'js/fx.js', 'js/chats.js', 'js/bio.js', 'js/install.js', 'js/salute.js',
   'data/exercises.json', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/apple-touch-icon.png',
   'fonts/HTxwL3I-JCGChYJ8VI-L6OO_au7B46r2z3bWuYMBYro.woff2', 'fonts/HTxwL3I-JCGChYJ8VI-L6OO_au7B47b1z3bWuYMBYro.woff2', 'fonts/HTxwL3I-JCGChYJ8VI-L6OO_au7B4873z3bWuYMBYro.woff2', 'fonts/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2'];
