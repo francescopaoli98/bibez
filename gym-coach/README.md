@@ -12,6 +12,7 @@ App per la palestra con coach IA (Gemini). PWA: si installa sul telefono, funzio
 - Chat col coach, che conosce scheda e ultimi allenamenti. Se chiedi un cambiamento (dolore, poco tempo, esercizio da cambiare) ti dice **cosa sta per modificare** e lo applica solo se premi "Sì, applica" (con "Annulla modifica" dopo)
 - **Interruttore Palestra / Casa** (schermata Oggi e Scheda): a casa gli esercizi da palestra vengono sostituiti in automatico con equivalenti dello stesso gruppo muscolare, a corpo libero o con manubri (impostabile)
 - **Stima di tempo e calorie** per ogni giorno di scheda e per ogni allenamento fatto (formula MET, indicativa; usa il tuo peso, altrimenti 75 kg)
+- **Calorie e proteine giornaliere** (formula Mifflin-St Jeor + obiettivo), calcolate da peso, altezza, età e sesso; il coach le conosce
 - Dati salvati solo sul telefono (localStorage), backup esportabile
 
 ## Provarla in locale

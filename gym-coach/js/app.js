@@ -3,6 +3,7 @@ import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
 import { gemini } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
+import { targets } from './nutrition.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges } from './coach.js';
 
 let LIB = [];
@@ -160,9 +161,22 @@ function viewOggi() {
     h('div', { class: 'card stack' },
       h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}${kcalWeek ? ' · ~' + kcalWeek + ' kcal' : ''}`)),
       h('div', { class: 'week' }, Array.from({ length: target }, (_, i) => h('i', { class: i < wk ? 'on' : '' })))),
+    nutritionCard(),
     h('a', { class: 'card row between linkcard', href: '#/coach' },
       h('div', {}, h('h3', {}, 'Parla col coach'), h('p', { class: 'muted small' }, 'Dolore, poco tempo, esercizio da cambiare…')),
       h('span', { class: 'arrow' }, '›')));
+}
+
+function nutritionCard() {
+  const t = targets(S.profile);
+  if (!t) return h('a', { class: 'card row between linkcard', href: '#/profilo' },
+    h('div', {}, h('h3', {}, 'Calcola calorie e proteine'), h('p', { class: 'muted small' }, 'Servono altezza, età e sesso')), h('span', { class: 'arrow' }, '›'));
+  return h('div', { class: 'card stack' },
+    h('div', { class: 'row between' }, h('h3', {}, 'Alimentazione di oggi'), h('span', { class: 'muted small' }, 'stima')),
+    h('div', { class: 'stats' },
+      h('div', { class: 'stat' }, h('b', {}, t.kcal), h('span', {}, 'kcal')),
+      h('div', { class: 'stat' }, h('b', {}, t.prot + ' g'), h('span', {}, 'proteine')),
+      h('div', { class: 'stat' }, h('b', {}, t.carb + ' g'), h('span', {}, 'carboidrati'))));
 }
 
 /* ---------------------------- Scheda ---------------------------- */
@@ -403,6 +417,31 @@ function viewCoach() {
   draw();
 }
 
+function bodyCard() {
+  const out = h('div', { class: 'stack' });
+  const num = (label, key, ph) => h('label', { class: 'field' }, label,
+    h('input', { type: 'number', inputmode: 'decimal', placeholder: ph, value: S.profile[key] || '', oninput: e => { S.profile[key] = parseFloat(e.target.value) || 0; save(); show(); } }));
+  const sesso = h('div', { class: 'chips' });
+  const drawSesso = () => sesso.replaceChildren(...[['uomo', 'Uomo'], ['donna', 'Donna']].map(([v, t]) =>
+    h('button', { class: 'chip lg' + (S.profile.sesso === v ? ' on' : ''), onclick: () => { S.profile.sesso = v; save(); drawSesso(); show(); } }, t)));
+  function show() {
+    const t = targets(S.profile);
+    out.replaceChildren(t
+      ? h('div', { class: 'stack' },
+          h('div', { class: 'stats' },
+            h('div', { class: 'stat' }, h('b', {}, t.kcal), h('span', {}, 'kcal al giorno')),
+            h('div', { class: 'stat' }, h('b', {}, t.prot + ' g'), h('span', {}, 'proteine')),
+            h('div', { class: 'stat' }, h('b', {}, t.fat + ' g'), h('span', {}, 'grassi'))),
+          h('p', { class: 'muted small' }, `Mantenimento circa ${t.mantenimento} kcal. Il resto è carboidrati (~${t.carb} g). Stima indicativa: pesati ogni settimana e correggi di ±100-150 kcal se serve. Non sostituisce il parere di un medico o di un nutrizionista.`))
+      : h('p', { class: 'muted small' }, 'Inserisci peso, altezza, età e sesso per calcolare calorie e proteine.'));
+  }
+  drawSesso(); show();
+  return h('div', { class: 'card stack' }, h('h2', {}, 'Il tuo corpo e l\'alimentazione'),
+    h('div', { class: 'row' }, h('div', { class: 'grow' }, num('Peso (kg)', 'peso', '87')), h('div', { class: 'grow' }, num('Altezza (cm)', 'altezza', '181'))),
+    h('div', { class: 'row' }, h('div', { class: 'grow' }, num('Età', 'eta', '30')), h('div', { class: 'grow' }, h('div', { class: 'field' }, 'Sesso (per la formula)', sesso))),
+    out);
+}
+
 /* ---------------------------- impostazioni ---------------------------- */
 function viewProfilo() {
   const p = { obiettivo: S.profile.obiettivo, livello: S.profile.livello, giorni: S.profile.giorni };
@@ -416,12 +455,12 @@ function viewProfilo() {
 
   render(
     h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Impostazioni')),
-    h('div', { class: 'card stack' }, h('h2', {}, 'Casa e calorie'),
+    bodyCard(),
+    h('div', { class: 'card stack' }, h('h2', {}, 'Casa'),
       h('div', { class: 'stack' }, h('h3', {}, 'Attrezzatura a casa'),
         h('div', { class: 'chips' }, CASA_OPT.map(([v, t]) => h('button', { class: 'chip lg' + ((S.profile.casa || 'libero') === v ? ' on' : ''), onclick: (e) => {
           S.profile.casa = v; save(); e.target.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); e.target.classList.add('on'); toast('Salvato'); } }, t)))),
-      h('label', { class: 'field' }, 'Peso (kg)', h('input', { type: 'number', inputmode: 'decimal', placeholder: '75', value: S.profile.peso || '', onchange: e => { S.profile.peso = parseFloat(e.target.value) || 0; save(); toast('Salvato'); } })),
-      h('p', { class: 'muted small' }, 'Le calorie sono una stima indicativa (formula MET). Senza peso uso 75 kg.')),
+    ),
     h('div', { class: 'card stack' }, h('h2', {}, 'Coach IA (Gemini)'),
       h('label', { class: 'field' }, 'Chiave API', keyIn),
       h('a', { href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener', class: 'small' }, 'Crea / vedi la chiave su Google AI Studio →'),
