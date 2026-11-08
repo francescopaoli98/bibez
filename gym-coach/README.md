@@ -13,6 +13,8 @@ App per la palestra con coach IA (Gemini). PWA: si installa sul telefono, funzio
 - **Interruttore Palestra / Casa** (schermata Oggi e Scheda): a casa gli esercizi da palestra vengono sostituiti in automatico con equivalenti dello stesso gruppo muscolare, a corpo libero o con manubri (impostabile)
 - **Stima di tempo e calorie** per ogni giorno di scheda e per ogni allenamento fatto (formula MET, indicativa; usa il tuo peso, altrimenti 75 kg)
 - **Calorie e proteine giornaliere** (formula Mifflin-St Jeor + obiettivo), calcolate da peso, altezza, età e sesso; il coach le conosce
+- **Progressi**: peso corporeo (grafico), forza per esercizio, record personali e storico degli allenamenti
+- **Promemoria**: scegli giorni e ora e scarichi un file calendario (.ics) con eventi settimanali e avviso 15 minuti prima (niente notifiche push: richiederebbero un server)
 - Dati salvati solo sul telefono (localStorage), backup esportabile
 
 ## Provarla in locale
@@ -37,4 +39,4 @@ Il modello di default è `gemini-flash-latest` (modificabile in Profilo).
 Immagini ed esercizi base: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (pubblico dominio).
 
 ## Prossimi passi
-Grafici dei progressi, record personali, video diretti nell'app, notifiche, alimentazione.
+Video diretti nell'app (servono video scelti e verificati), controllo della postura con la fotocamera, elastici/sbarra per la modalità casa.

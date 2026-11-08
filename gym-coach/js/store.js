@@ -3,7 +3,9 @@ const KEY = 'gymcoach:v1';
 const DEFAULT = {
   profile: null,            // {obiettivo, livello, giorni, note}
   plan: null,               // {nome, giorni:[{nome, esercizi:[{id, serie, ripetizioni, recupero}]}]}
-  history: [],              // allenamenti completati
+  history: [],
+  pesi: [],                 // [{date, kg}] peso corporeo
+  reminder: null,           // {days:[1,3,5], time:'18:00'}              // allenamenti completati
   settings: { apiKey: '', model: 'gemini-flash-latest' },
   session: null,            // allenamento in corso
   chat: [],                 // [{role:'user'|'model', text}]

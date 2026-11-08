@@ -249,3 +249,24 @@ a.ex-item, .anim-btn { color: inherit; }
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--card2); border: 1px solid var(--line); border-radius: 16px; }
 .seg-b { padding: 12px 8px; border-radius: 12px; font-weight: 700; color: var(--muted); font-size: 15px; }
 .seg-b.on { background: var(--accent); color: var(--accent-ink); }
+
+/* ---- progressi ---- */
+.chart { position: relative; }
+.chart svg { width: 100%; height: auto; display: block; touch-action: pan-y; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .axis { fill: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+.chart .val { fill: var(--text); font-size: 11px; font-weight: 700; }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .dot { fill: var(--accent); stroke: var(--card); stroke-width: 2; }
+.chart .cross { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart .tip { position: absolute; top: 2px; transform: translate(-50%, 0); pointer-events: none; z-index: 2; white-space: nowrap;
+  background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 12px; }
+.chart .tip[hidden] { display: none; }
+.tbl table { width: 100%; font-size: 13px; border-collapse: collapse; margin-top: 8px; }
+.tbl td { padding: 6px 4px; border-top: 1px solid var(--line); }
+.rec { padding: 8px 0; border-top: 1px solid var(--line); }
+.rec:first-of-type { border-top: 0; }
+.hist { border-top: 1px solid var(--line); padding: 10px 0; }
+.hist:first-of-type { border-top: 0; }
+.hist summary { cursor: pointer; list-style: none; }
+.hist summary::-webkit-details-marker { display: none; }

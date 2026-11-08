@@ -4,6 +4,8 @@ import { gemini } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
 import { targets } from './nutrition.js';
+import { viewProgressi } from './progress.js';
+import { remindersCard } from './reminders.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges } from './coach.js';
 
 let LIB = [];
@@ -28,9 +30,9 @@ async function boot() {
   route();
 }
 
-const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach,
+const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach, progressi: () => viewProgressi({ render, LIB, go }),
                  profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding };
-const TAB_OF = { oggi: 'oggi', profilo: 'oggi', scheda: 'scheda', esercizi: 'scheda', coach: 'coach' };
+const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'oggi', scheda: 'scheda', esercizi: 'scheda', coach: 'coach' };
 
 function route() {
   closeSheet();
@@ -162,6 +164,8 @@ function viewOggi() {
       h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}${kcalWeek ? ' · ~' + kcalWeek + ' kcal' : ''}`)),
       h('div', { class: 'week' }, Array.from({ length: target }, (_, i) => h('i', { class: i < wk ? 'on' : '' })))),
     nutritionCard(),
+    h('a', { class: 'card row between linkcard', href: '#/progressi' },
+      h('div', {}, h('h3', {}, 'I tuoi progressi'), h('p', { class: 'muted small' }, S.history.length ? 'Peso, forza, record e storico' : 'Peso, forza e record: appaiono qui')), h('span', { class: 'arrow' }, '›')),
     h('a', { class: 'card row between linkcard', href: '#/coach' },
       h('div', {}, h('h3', {}, 'Parla col coach'), h('p', { class: 'muted small' }, 'Dolore, poco tempo, esercizio da cambiare…')),
       h('span', { class: 'arrow' }, '›')));
@@ -456,6 +460,7 @@ function viewProfilo() {
   render(
     h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Impostazioni')),
     bodyCard(),
+    remindersCard(),
     h('div', { class: 'card stack' }, h('h2', {}, 'Casa'),
       h('div', { class: 'stack' }, h('h3', {}, 'Attrezzatura a casa'),
         h('div', { class: 'chips' }, CASA_OPT.map(([v, t]) => h('button', { class: 'chip lg' + ((S.profile.casa || 'libero') === v ? ' on' : ''), onclick: (e) => {
