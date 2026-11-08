@@ -1,7 +1,7 @@
 name: Pubblica Gym Coach
 on:
   push:
-    branches: [main]
+    branches: [claude/ai-gym-coach-app-gvnftg]
     paths: ['gym-coach/**']
   workflow_dispatch:
 permissions:
