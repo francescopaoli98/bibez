@@ -103,7 +103,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 }
 .opt b { font-size: 16px; }
 .opt span { color: var(--muted); font-size: 13px; }
-.opt.on { border-color: var(--accent); background: rgba(182,255,59,.08); }
+.opt.on { border-color: var(--accent); background: rgba(var(--accent-rgb),.08); }
 .opts.grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 .opts.grid .opt { align-items: center; text-align: center; padding: 18px 0; }
 .opts.grid .opt b { font-size: 22px; }
@@ -159,7 +159,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
 @keyframes flip { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 .anim img:first-child { animation: none; }
 .steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
-.tip { background: rgba(182,255,59,.08); border: 1px solid rgba(182,255,59,.3); border-radius: 14px; padding: 12px 14px; font-size: 14px; }
+.tip { background: rgba(var(--accent-rgb),.08); border: 1px solid rgba(var(--accent-rgb),.3); border-radius: 14px; padding: 12px 14px; font-size: 14px; }
 
 /* ---- workout ---- */
 .sticky-head {
@@ -242,7 +242,7 @@ a.ex-item, .anim-btn { color: inherit; }
 .chk { height: 54px; }
 .chk svg { width: 26px; height: 26px; }
 .proposal { align-self: stretch; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-.proposal.pending { border-color: var(--accent); background: rgba(182,255,59,.06); }
+.proposal.pending { border-color: var(--accent); background: rgba(var(--accent-rgb),.06); }
 .proposal .kicker { color: var(--accent); font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
 .proposal ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
 

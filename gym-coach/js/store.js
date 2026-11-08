@@ -23,7 +23,9 @@ const DEFAULT = {
   account: null,            // {user, name, token, exp}: l'account con cui hai fatto accesso
   security: { autoLockMin: 5 },   // minuti in background prima di richiedere la password (-1 = mai)
   session: null,            // allenamento in corso
-  chat: [],                 // [{role:'user'|'model', text}]
+  chat: [],                 // (vecchio formato, migrato in chats)
+  chats: [],                // [{id, title, created, updated, messages:[{role, text, proposal?}]}]
+  activeChat: null,         // id della chat aperta (null = nuova chat vuota)
   luogo: 'palestra',        // 'palestra' | 'casa' (dove ti alleni oggi)
   nextDay: 0,               // indice del prossimo giorno in scheda
   planBackup: null,         // scheda prima dell'ultima modifica del coach (per annullare)
@@ -36,6 +38,7 @@ function applyData(d) {
   Object.assign(S, structuredClone(DEFAULT), d || {});
   S.settings = { ...DEFAULT.settings, ...((d && d.settings) || {}) };
   S.security = { ...DEFAULT.security, ...((d && d.security) || {}) };
+  // (la migrazione di S.chat in S.chats arriverà insieme alla nuova schermata delle chat, dopo l'approvazione)
 }
 
 /* ---------- cifratura ---------- */
