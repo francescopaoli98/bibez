@@ -6,6 +6,9 @@ import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable } fro
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
 import { targets } from './nutrition.js';
+import { applyTheme, setTheme, getTheme, PRESETS, BACKGROUNDS } from './theme.js';
+import { initSound, play, buzz } from './sound.js';
+import { countUps, confetti } from './fx.js';
 import { viewProgressi } from './progress.js';
 import { remindersCard } from './reminders.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges } from './coach.js';
@@ -46,6 +49,7 @@ const LIVELLI = [['principiante', 'Principiante'], ['intermedio', 'Un po\' di es
 
 /* ---------------------------- avvio e navigazione ---------------------------- */
 async function boot() {
+  applyTheme(); initSound();                      // colori e suoni scelti, subito
   try { LIB = await (await fetch('data/exercises.json')).json(); setLib(LIB); }
   catch { render(h('p', { class: 'err' }, 'Impossibile caricare gli esercizi.')); return; }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -87,7 +91,7 @@ async function accessFlow() {
 
 const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach, progressi: () => viewProgressi({ render, LIB, go }),
                  profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding };
-const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'oggi', scheda: 'scheda', esercizi: 'scheda', coach: 'coach' };
+const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'progressi', scheda: 'scheda', esercizi: 'scheda', coach: 'coach' };
 
 function route() {
   closeSheet();
@@ -101,12 +105,13 @@ function route() {
   renderTabs(tab);
   window.scrollTo(0, 0);
   ROUTES[name]();
+  countUps(view);                                 // i numeri salgono da 0
 }
 
 function renderTabs(active) {
   tabsEl.hidden = !active;
   if (!active) return;
-  const items = [['oggi', 'Oggi', 'home'], ['scheda', 'Scheda', 'list'], ['coach', 'Coach', 'chat']];
+  const items = [['oggi', 'Oggi', 'home'], ['scheda', 'Scheda', 'list'], ['coach', 'Coach', 'chat'], ['progressi', 'Progressi', 'chart']];
   tabsEl.replaceChildren(h('div', { class: 'inner' }, items.map(([k, label, ic]) =>
     h('a', { class: 'tab' + (k === active ? ' on' : ''), href: '#/' + k }, icon(ic), label))));
 }
@@ -121,7 +126,22 @@ const homeHint = () => (S.luogo === 'casa' && (S.profile.casa || 'libero') === '
   : null;
 const kcalTxt = (exs) => `~${estKcal(exs)} kcal`;
 
-const gear = () => h('a', { class: 'iconbtn', href: '#/profilo', 'aria-label': 'Impostazioni' }, icon('user'));
+const gear = () => h('a', { class: 'iconbtn', href: '#/profilo', 'aria-label': 'Impostazioni' }, icon('gear'));
+
+// Aiuto: spiegazioni brevi, in parole semplici, per ogni schermata
+const HELP = {
+  oggi: ['Oggi', ['Qui vedi l\'allenamento di oggi.', 'Tocca il grande pulsante verde per cominciare: l\'app ti guida un esercizio alla volta.', 'I cerchi della settimana si colorano a ogni allenamento fatto.', 'In alto a destra, l\'ingranaggio apre le impostazioni.']],
+  scheda: ['Scheda', ['Qui c\'è tutta la tua scheda, giorno per giorno.', 'Tocca un esercizio per vedere come si fa.', '"Palestra" o "Casa": scegli dove ti alleni, gli esercizi si adattano da soli.', 'Vuoi cambiare qualcosa? Tocca "Chiedi al coach di cambiarla".']],
+  coach: ['Coach', ['Scrivi al coach come parleresti a una persona.', 'Per esempio: "mi fa male la spalla" o "ho poco tempo oggi".', 'Se serve cambiare la scheda, il coach te lo dice prima e aspetta il tuo "sì".', 'Toccando il titolo vedi le chat vecchie. Con + ne inizi una nuova.']],
+  progressi: ['Progressi', ['Qui vedi come stai andando.', 'Scrivi il tuo peso ogni settimana: il grafico ti mostra il cambiamento.', 'Il grafico "Forza" sale quando riesci a sollevare di più.', 'In fondo trovi tutti gli allenamenti fatti.']],
+  allenamento: ['Durante l\'allenamento', ['Guarda la foto: è l\'esercizio da fare. "Come si fa" ti spiega i passi.', 'Fai la serie, poi tocca ✓. Il riposo parte da solo e alla fine senti un suono.', 'I numeri sono già scritti: cambiali solo se hai usato un peso diverso.', 'Quando hai finito tocca "Prossimo esercizio".']],
+};
+function helpBtn(topic) {
+  return h('button', { class: 'helpbtn', onclick: () => {
+    const [title, lines] = HELP[topic];
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, title), h('ul', { class: 'helplist' }, lines.map(l => h('li', {}, l))), h('button', { class: 'btn big block', onclick: closeSheet }, 'Ho capito')));
+  } }, icon('help'), 'Aiuto');
+}
 
 /* ---------------------------- dettaglio esercizio ---------------------------- */
 const exAnim = (ex) => h('div', { class: 'anim' }, ex.img.map(src => h('img', { src, alt: ex.nome })));
@@ -211,36 +231,44 @@ function weekDots() {
   return h('div', { class: 'days' }, ['L', 'M', 'M', 'G', 'V', 'S', 'D'].map((l, i) => {
     const d = new Date(mon); d.setDate(mon.getDate() + i);
     const done = S.history.some(w => new Date(w.date).toDateString() === d.toDateString());
-    return h('div', { class: 'day-dot' + (done ? ' done' : '') + (d.toDateString() === today ? ' today' : '') }, h('i'), l);
+    return h('div', { class: 'day-dot' + (done ? ' done' : '') + (d.toDateString() === today ? ' today' : ''), style: `--n:${i}` }, h('i'), l);
   }));
 }
-const saluto = () => { const hr = new Date().getHours(); const s = hr < 12 ? 'Buongiorno' : hr < 18 ? 'Buon pomeriggio' : 'Buonasera'; const n = S.profile?.nome || S.account?.name; return n ? `${s}, ${n}` : s; };
-const oggiTxt = () => { const t = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }); return t[0].toUpperCase() + t.slice(1); };
+const saluto = () => { const hr = new Date().getHours(); return hr < 12 ? 'Buongiorno' : hr < 18 ? 'Buon pomeriggio' : 'Buonasera'; };
+const utente = () => S.profile?.nome || S.account?.name || '';
+const oggiTxt = () => new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 
 function viewOggi() {
   const day = S.plan.giorni[S.nextDay % S.plan.giorni.length];
   const wk = weekCount(), target = S.profile.giorni;
   const exs = adaptDay(day, S.luogo);
   const kcalWeek = Math.round(thisWeek().reduce((a, w) => a + (w.kcal || 0), 0) / 10) * 10;
+  const first = !S.seen?.start && !S.history.length && !S.session;      // la prima volta: invito a toccare il pulsante giusto
+  const startBtn = h('button', { class: 'btn big block start' + (first ? ' pulse' : ''), onclick: () => {
+    S.seen = { ...(S.seen || {}), start: true };
+    if (!S.session) startSession(S.nextDay % S.plan.giorni.length);
+    go('#/allenamento');
+  } }, S.session ? '▶ RIPRENDI L\'ALLENAMENTO' : '▶ INIZIA L\'ALLENAMENTO');
   render(
-    h('div', { class: 'row between' }, h('div', {}, h('div', { class: 'eyebrow' }, oggiTxt()), h('h1', {}, saluto())), gear()),
+    h('div', { class: 'row between' },
+      h('div', {}, h('div', { class: 'eyebrow' }, `${saluto()} · ${oggiTxt()}`), h('h1', {}, utente() || 'Ciao')),
+      h('div', { class: 'row', style: 'gap:8px' }, helpBtn('oggi'), gear())),
     !S.session && luogoSwitch(viewOggi),
     !S.session && homeHint(),
     h('div', { class: 'hero' },
-      h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? '🏠 Casa' : '🏋️ Palestra'}` : 'Oggi tocca a'),
+      h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? '🏠 Casa' : '🏋️ Palestra'}` : 'Il tuo allenamento di oggi'),
       h('h1', { class: 'hero-title' }, day.nome),
       h('div', { class: 'meta' }, h('span', {}, '⏱ ' + estMin(exs) + ' min'), h('span', {}, '🔥 ' + kcalTxt(exs)), h('span', {}, '🏋️ ' + exs.length + ' esercizi')),
       h('div', { class: 'chips' }, [...new Set(exs.map(e => EX(e.id)?.gruppo))].filter(Boolean).map(g => h('span', { class: 'chip' }, g))),
-      h('button', { class: 'btn big block', onclick: () => { if (!S.session) startSession(S.nextDay % S.plan.giorni.length); go('#/allenamento'); } },
-        S.session ? 'Riprendi' : 'Inizia')),
+      first && h('div', { class: 'hint-bubble' }, '👇 Tocca qui per cominciare'),
+      startBtn),
     h('div', { class: 'card stack' },
       h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}${kcalWeek ? ' · ~' + kcalWeek + ' kcal' : ''}`)),
-      weekDots()),
+      weekDots(),
+      h('p', { class: 'muted small' }, 'Ogni allenamento fatto colora un cerchio.')),
     nutritionCard(),
-    h('a', { class: 'card row between linkcard', href: '#/progressi' },
-      h('div', {}, h('h3', {}, 'I tuoi progressi'), h('p', { class: 'muted small' }, S.history.length ? 'Peso, forza, record e storico' : 'Peso, forza e record: appaiono qui')), h('span', { class: 'arrow' }, '›')),
     h('a', { class: 'card row between linkcard', href: '#/coach' },
-      h('div', {}, h('h3', {}, 'Parla col coach'), h('p', { class: 'muted small' }, 'Dolore, poco tempo, esercizio da cambiare…')),
+      h('div', {}, h('h3', {}, 'Hai un dubbio? Scrivi al coach'), h('p', { class: 'muted small' }, 'Come faresti con una persona')),
       h('span', { class: 'arrow' }, '›')));
 }
 
@@ -259,7 +287,7 @@ function nutritionCard() {
 /* ---------------------------- Scheda ---------------------------- */
 function viewScheda() {
   render(
-    h('div', {}, h('h1', {}, S.plan.nome), h('p', { class: 'muted' }, 'Tocca un esercizio per vedere come si fa.')),
+    h('div', { class: 'row between' }, h('div', {}, h('h1', {}, S.plan.nome), h('p', { class: 'muted' }, 'Tocca un esercizio per vedere come si fa.')), h('div', { class: 'row', style: 'gap:8px' }, helpBtn('scheda'), gear())),
     luogoSwitch(viewScheda), homeHint(),
     ...S.plan.giorni.map((d, i) => h('details', { class: 'card day', open: i === S.nextDay % S.plan.giorni.length },
       h('summary', {}, h('div', {}, h('h3', {}, d.nome), h('div', { class: 'muted small' }, `${adaptDay(d, S.luogo).length} esercizi · ${kcalTxt(adaptDay(d, S.luogo))}`)),
@@ -288,7 +316,7 @@ function viewEsercizi() {
   const drawChips = () => chips.replaceChildren(...GRUPPI.map(g =>
     h('button', { class: 'chip' + (g === fGruppo ? ' on' : ''), onclick: () => { fGruppo = g; drawChips(); draw(); } }, g)));
   drawChips(); draw();
-  render(h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/scheda', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Esercizi')),
+  render(h('div', { class: 'row between' }, h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/scheda', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Esercizi')), gear()),
     h('input', { type: 'search', placeholder: 'Cerca (es. panca, squat…)', value: fQuery, oninput: e => { fQuery = e.target.value; draw(); } }),
     chips, grid);
 }
@@ -317,11 +345,12 @@ function viewAllenamento() {
   const rows = ex.sets.map((st, si) => {
     const kg = h('input', { type: 'number', inputmode: 'decimal', step: '0.5', min: '0', placeholder: 'kg', value: st.kg, disabled: time, oninput: e => { st.kg = e.target.value; save(); } });
     const reps = h('input', { type: 'number', inputmode: 'numeric', min: '0', placeholder: ex.target.ripetizioni, value: st.reps, disabled: time, oninput: e => { st.reps = e.target.value; save(); } });
-    const chk = h('button', { class: 'chk', 'aria-label': 'Serie fatta' }, icon('check'));
+    const chk = h('button', { class: 'chk', 'aria-label': 'Serie fatta', 'data-nosound': '' }, icon('check'));
     const cells = [h('div', { class: 'n' }, si + 1), kg, reps, chk];
     const paint = () => cells.forEach(c => c.classList.toggle('set-done', st.done));
     chk.addEventListener('click', () => {
       st.done = !st.done; paint(); save(); upd();
+      if (st.done) { play('check'); buzz(14); }
       if (st.done && ex.target.recupero) startRest(ex.target.recupero);
       if (!st.done) stopRest();
     });
@@ -334,14 +363,15 @@ function viewAllenamento() {
   render(
     h('div', { class: 'sticky-head' },
       h('div', {}, h('div', { class: 'muted small' }, s.dayName + (s.luogo === 'casa' ? ' · 🏠 Casa' : '')), h('h3', {}, `Esercizio ${s.cur + 1} di ${n}`)),
-      h('button', { class: 'btn ghost small', onclick: exitMenu }, 'Fine')),
+      h('div', { class: 'row', style: 'gap:8px' }, helpBtn('allenamento'), h('button', { class: 'btn ghost small', onclick: exitMenu }, 'Fine'))),
     h('div', { class: 'segs' }, segEls),
     h('button', { class: 'anim-btn', onclick: () => showExercise(ex.id), 'aria-label': 'Come si fa' }, exAnim(info), h('span', { class: 'pill' }, 'Come si fa ›')),
-    h('div', {}, h('h1', { class: 'wk-title' }, info.nome), h('p', { class: 'muted' }, `${ex.target.serie} × ${ex.target.ripetizioni}${ex.target.recupero ? ' · recupero ' + ex.target.recupero + 's' : ''}`)),
+    h('div', {}, h('h1', { class: 'wk-title' }, info.nome), h('p', { class: 'muted' }, `${ex.target.serie} serie da ${ex.target.ripetizioni}${ex.target.recupero ? ' · riposo ' + ex.target.recupero + ' secondi' : ''}. Fai la serie, poi tocca ✓.`)),
     sg && h('div', { class: 'hint' }, 'Ultima volta: ', sg.txt, sg.up ? h('span', {}, ' · ', h('b', {}, `prova ${sg.up} kg 🔥`)) : ''),
+    h('div', { id: 'rest-slot' }),
     h('div', { class: 'sets' },
-      h('div', { class: 'hd' }, ''), h('div', { class: 'hd' }, time ? '' : 'Kg'), h('div', { class: 'hd' }, time ? '' : 'Ripet.'), h('div', { class: 'hd' }, ''), rows),
-    h('p', { class: 'muted small center' }, time ? 'Tocca ✓ quando hai finito.' : 'I valori sono già compilati: tocca ✓ a ogni serie, cambia solo se serve.'),
+      h('div', { class: 'hd' }, ''), h('div', { class: 'hd' }, time ? '' : 'Peso (kg)'), h('div', { class: 'hd' }, time ? '' : 'Quante volte'), h('div', { class: 'hd' }, 'Fatto'), rows),
+    h('p', { class: 'muted small center' }, time ? 'Tocca ✓ quando hai finito.' : 'I numeri sono già scritti: cambiali solo se hai fatto diverso.'),
     h('button', { class: 'btn ghost block', onclick: () => swapExercise(s.cur) }, '↔ Sostituisci esercizio'),
     h('div', { class: 'bottom-bar' }, h('div', { class: 'in' },
       s.cur > 0 && h('button', { class: 'btn ghost', onclick: () => goTo(s.cur - 1), 'aria-label': 'Precedente' }, '‹'),
@@ -388,6 +418,7 @@ function finishSession() {
   S.nextDay = (s.dayIndex + 1) % S.plan.giorni.length;
   S.session = null; save(); keepAwake(false); stopRest();
   go('#/oggi');
+  play('win'); buzz([30, 60, 30]); confetti();
   toast(`Ottimo lavoro! ${rec.sets} serie, ${rec.durata} min, ~${rec.kcal} kcal 💪`);
 }
 
@@ -400,7 +431,7 @@ function beep() {
     o.start(); o.stop(audioCtx.currentTime + 0.35);
   } catch {}
 }
-function stopRest() { clearInterval(restTimer); restTimer = null; document.getElementById('rest-root').replaceChildren(); }
+function stopRest() { clearInterval(restTimer); restTimer = null; document.getElementById('rest-root').replaceChildren(); document.getElementById('rest-slot')?.replaceChildren(); }
 function startRest(sec) {
   try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume?.(); } catch {}
   stopRest();
@@ -413,10 +444,11 @@ function startRest(sec) {
     const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
     fg.style.strokeDashoffset = C * (1 - Math.min(1, left / Math.max(sec, (end - Date.now()) / 1000)));
     t.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
-    if (left === 0) { clearInterval(restTimer); restTimer = null; beep(); navigator.vibrate?.([200, 100, 200]); t.textContent = 'Via! 💥'; setTimeout(stopRest, 2500); }
+    if (left === 0) { clearInterval(restTimer); restTimer = null; play('done'); buzz([200, 100, 200]); t.textContent = 'Via! 💥'; setTimeout(stopRest, 2500); }
   };
-  document.getElementById('rest-root').replaceChildren(h('div', { class: 'rest' }, ring,
-    h('div', { class: 'grow' }, h('div', { class: 'muted small' }, 'Recupero'), t),
+  const slot = document.getElementById('rest-slot');
+  (slot || document.getElementById('rest-root')).replaceChildren(h('div', { class: 'rest' + (slot ? ' inline' : '') }, ring,
+    h('div', { class: 'grow' }, h('div', { class: 'muted small' }, 'Riposo: riprendi tra…'), t),
     h('button', { class: 'btn ghost small', onclick: () => { end += 15000; draw(); } }, '+15s'),
     h('button', { class: 'btn small', onclick: stopRest }, 'Salta')));
   draw(); restTimer = setInterval(draw, 250);
@@ -610,6 +642,38 @@ function securityCard() {
   return h('div', { class: 'card stack' }, h('h2', {}, 'Sicurezza'), box);
 }
 
+/* ---------------------------- aspetto: colori, suoni, animazioni ---------------------------- */
+function appearanceCard() {
+  const box = h('div', { class: 'stack' });
+  const toggle = (key, title, desc) => {
+    const on = !!getTheme()[key];
+    return h('div', { class: 'setrow' }, h('div', {}, h('b', {}, title), h('div', { class: 'muted small' }, desc)),
+      h('button', { class: 'switch' + (on ? ' on' : ''), role: 'switch', 'aria-checked': String(on), 'aria-label': title, 'data-nosound': '', onclick: () => {
+        setTheme({ [key]: !on }); if (key === 'sound' && !on) play('check'); if (key === 'haptics' && !on) buzz(30); draw(); } }));
+  };
+  function draw() {
+    const T = getTheme(), cur = T.accent.toLowerCase();
+    const preset = PRESETS.some(([, hex]) => hex === cur);
+    box.replaceChildren(
+      h('div', { class: 'stack' }, h('h3', {}, 'Colore principale'),
+        h('div', { class: 'chips', style: 'gap:10px' },
+          PRESETS.map(([name, hex]) => h('button', { class: 'sw' + (hex === cur ? ' sel' : ''), style: `background:${hex}`, 'aria-label': name, onclick: () => { setTheme({ accent: hex }); draw(); } }, hex === cur && icon('check'))),
+          h('label', { class: 'sw rainbow' + (!preset ? ' sel' : ''), 'aria-label': 'Scegli un colore tuo' }, h('span', {}, '+'),
+            h('input', { type: 'color', value: cur, oninput: e => setTheme({ accent: e.target.value }), onchange: draw }))),
+        h('p', { class: 'muted small' }, 'Il "+" apre la tavolozza: scegli qualsiasi colore. L\'app si ricolora subito.')),
+      h('div', { class: 'stack' }, h('h3', {}, 'Sfondo'),
+        h('div', { class: 'row', style: 'gap:10px' }, Object.entries(BACKGROUNDS).map(([k, v]) =>
+          h('button', { class: 'bgopt' + (T.bg === k ? ' sel' : ''), onclick: () => { setTheme({ bg: k }); draw(); } },
+            h('div', { class: 'pv', style: `background:${v.bg}` }, h('i', { style: `background:${v.card}` }), h('i', { style: `background:${v.card2}` })), v.name)))),
+      h('div', {}, toggle('sound', 'Suoni', 'Un piccolo "tic" quando tocchi e un suono per ogni serie fatta'),
+        toggle('haptics', 'Vibrazione', 'Una vibrazione leggera (solo Android: su iPhone non è possibile)'),
+        toggle('anim', 'Animazioni', 'Effetti, coriandoli, numeri che salgono'),
+        toggle('big', 'Testo più grande', 'Scritte più grandi in tutta l\'app')));
+  }
+  draw();
+  return h('div', { class: 'card stack' }, h('h2', {}, 'Aspetto'), box);
+}
+
 function bodyCard() {
   const out = h('div', { class: 'stack' });
   const num = (label, key, ph) => h('label', { class: 'field' }, label,
@@ -649,6 +713,7 @@ function viewProfilo() {
   render(
     h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Impostazioni')),
     securityCard(),
+    appearanceCard(),
     bodyCard(),
     remindersCard(),
     h('div', { class: 'card stack' }, h('h2', {}, 'Casa'),

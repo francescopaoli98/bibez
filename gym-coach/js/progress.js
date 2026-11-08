@@ -1,6 +1,6 @@
 // Pagina Progressi: peso corporeo, forza per esercizio, record e storico. Grafici in SVG, senza librerie.
 import { S, save } from './store.js';
-import { h, toast } from './ui.js';
+import { h, toast, icon } from './ui.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const sv = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
@@ -124,7 +124,7 @@ export function viewProgressi({ render, LIB, go }) {
     h('div', { class: 'stack small', style: 'padding:8px 0 4px' }, w.exercises.map(e => h('div', {}, h('b', {}, name(e.id)), h('div', { class: 'muted' }, e.sets.map(s => s.kg ? `${s.kg}×${s.reps}` : `${s.reps} rip.`).join('  ·  ')))))));
 
   render(
-    h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', {}, 'Progressi')),
+    h('div', { class: 'row between' }, h('h1', {}, 'Progressi'), h('a', { class: 'iconbtn', href: '#/profilo', 'aria-label': 'Impostazioni' }, icon('gear'))),
     h('div', { class: 'stats' }, tile(S.history.length, 'Allenamenti'), tile(weekStreak(), 'Settimane di fila'), tile(tons, 'Tonn. sollevate')),
 
     h('div', { class: 'card stack' },

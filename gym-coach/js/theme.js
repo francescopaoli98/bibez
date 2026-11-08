@@ -8,7 +8,7 @@ export const BACKGROUNDS = {
   nero:    { name: 'Nero',    bg: '#000000', card: '#0e0f12', card2: '#17181c', line: '#25262b' },
   notte:   { name: 'Notte',   bg: '#070b1a', card: '#0f1630', card2: '#171f3f', line: '#263056' },
 };
-const DEFAULT = { accent: '#b6ff3b', bg: 'grafite', sound: true, haptics: true };
+const DEFAULT = { accent: '#b6ff3b', bg: 'grafite', sound: true, haptics: true, anim: true, big: false };
 let T = { ...DEFAULT };
 try { T = { ...DEFAULT, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch {}
 export const getTheme = () => T;
@@ -27,6 +27,8 @@ export function applyTheme() {
   st.setProperty('--accent-ink', luminance(a) > .35 ? '#10140a' : '#ffffff');      // testo leggibile sopra il colore
   for (const k of ['bg', 'card', 'card2', 'line']) st.setProperty('--' + k, bg[k]);
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', bg.bg);
+  document.body?.classList.toggle('no-anim', !T.anim);
+  document.body?.classList.toggle('big', !!T.big);
 }
 export function setTheme(patch) {
   T = { ...T, ...patch };
