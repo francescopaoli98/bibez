@@ -34,7 +34,7 @@ Indirizzo dell'app: https://francescopaoli98.github.io/bibez/
 
 ## Sicurezza e Cloudflare
 - **Blocco con password** (Impostazioni → Sicurezza): all'apertura e dopo un po' in background; i dati sul telefono sono cifrati (AES-GCM, chiave dalla password con PBKDF2). La password non si può recuperare.
-- **Cloudflare Pages + Access + proxy Gemini**: vedi `CLOUDFLARE.md` nella radice del repository.
+- **Account (tu e Irene) su Cloudflare Pages**: accesso con nome utente e password controllati dal server, dati cifrati sul telefono, coach tramite proxy con la chiave Gemini nascosta. Vedi `CLOUDFLARE.md` nella radice del repository.
 
 ## Chiave Gemini
 Crea una chiave gratuita su https://aistudio.google.com/apikey e incollala nell'app (Profilo).

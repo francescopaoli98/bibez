@@ -4,6 +4,13 @@
 const KEY = 'gymcoach:v1';          // dati in chiaro (blocco non attivo)
 const ENC = 'gymcoach:enc';          // dati cifrati (blocco attivo)
 const FAILS = 'gymcoach:fails';
+
+// Con gli account ogni persona ha i suoi dati sul telefono (chiavi con il suffisso del nome utente)
+let user = '';
+export const setUser = (u) => { user = u || ''; };
+const K = () => (user ? `${KEY}:${user}` : KEY);
+const E = () => (user ? `${ENC}:${user}` : ENC);
+export const hasUserData = (u) => !!localStorage.getItem(u ? `${ENC}:${u}` : ENC);
 const ITER = 600_000;
 
 const DEFAULT = {
@@ -13,6 +20,7 @@ const DEFAULT = {
   pesi: [],                 // [{date, kg}] peso corporeo
   reminder: null,           // {days:[1,3,5], time:'18:00'}
   settings: { apiKey: '', model: 'gemini-flash-latest' },
+  account: null,            // {user, name, token, exp}: l'account con cui hai fatto accesso
   security: { autoLockMin: 5 },   // minuti in background prima di richiedere la password (-1 = mai)
   session: null,            // allenamento in corso
   chat: [],                 // [{role:'user'|'model', text}]
@@ -47,9 +55,9 @@ async function writeEnc(json) {
   if (!aesKey || !meta) return;
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, te.encode(json)));
-  localStorage.setItem(ENC, JSON.stringify({ v: 1, salt: toB64(meta.salt), iter: meta.iter, iv: toB64(iv), ct: toB64(ct) }));
+  localStorage.setItem(E(), JSON.stringify({ v: 1, salt: toB64(meta.salt), iter: meta.iter, iv: toB64(iv), ct: toB64(ct) }));
 }
-function readBlob() { try { return JSON.parse(localStorage.getItem(ENC)); } catch { return null; } }
+function readBlob() { try { return JSON.parse(localStorage.getItem(E())); } catch { return null; } }
 async function decryptBlob(blob, password) {
   try {
     const salt = fromB64(blob.salt);
@@ -59,11 +67,11 @@ async function decryptBlob(blob, password) {
   } catch { return null; }        // password sbagliata (il tag di autenticazione non torna)
 }
 
-export const lockEnabled = () => !!localStorage.getItem(ENC);
+export const lockEnabled = () => !!localStorage.getItem(E());
 
 export async function initStore() {
   if (lockEnabled()) return 'locked';
-  try { applyData(JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { applyData({}); }
+  try { applyData(JSON.parse(localStorage.getItem(K()) || '{}')); } catch { applyData({}); }
   return 'ok';
 }
 export async function unlock(password) {
@@ -78,13 +86,13 @@ export async function enableLock(password) {
   meta = { salt: crypto.getRandomValues(new Uint8Array(16)), iter: ITER };
   aesKey = await derive(password, meta.salt, meta.iter);
   await writeEnc(JSON.stringify(S));
-  localStorage.removeItem(KEY);                   // via i dati in chiaro
+  localStorage.removeItem(K());                   // via i dati in chiaro
 }
 export async function disableLock(password) {
   if (!(await verifyPassword(password))) return false;
   await chain;
-  localStorage.setItem(KEY, JSON.stringify(S));
-  localStorage.removeItem(ENC); aesKey = null; meta = null;
+  localStorage.setItem(K(), JSON.stringify(S));
+  localStorage.removeItem(E()); aesKey = null; meta = null;
   return true;
 }
 export async function changePassword(oldPw, newPw) {
@@ -101,11 +109,11 @@ export function save() {
     if (lockEnabled() || aesKey) {
       const snap = JSON.stringify(S);
       chain = chain.then(() => writeEnc(snap)).catch(e => console.warn('save failed', e));
-    } else localStorage.setItem(KEY, JSON.stringify(S));
+    } else localStorage.setItem(K(), JSON.stringify(S));
   } catch (e) { console.warn('save failed', e); }
 }
 
-export function resetAll() { [KEY, ENC, FAILS].forEach(k => localStorage.removeItem(k)); aesKey = null; meta = null; }
+export function resetAll() { [K(), E(), FAILS].forEach(k => localStorage.removeItem(k)); aesKey = null; meta = null; }
 // Il backup non contiene mai la chiave Gemini
 export function exportJSON() { const c = structuredClone(S); c.settings.apiKey = ''; return JSON.stringify(c, null, 2); }
 export function importJSON(text) {

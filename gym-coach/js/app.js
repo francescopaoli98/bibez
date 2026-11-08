@@ -1,5 +1,6 @@
-import { S, save, resetAll, exportJSON, importJSON, initStore, lockEnabled, enableLock, disableLock, changePassword } from './store.js';
-import { lockScreen, initAutoLock, softLock } from './lock.js';
+import { S, save, resetAll, exportJSON, importJSON, initStore, lockEnabled, enableLock, disableLock, changePassword, unlock, setUser, hasUserData } from './store.js';
+import { lockScreen, loginScreen, initAutoLock, softLock, setUnlockHook } from './lock.js';
+import { accountsMode, knownUsers, rememberUser, lastUser, forgetLast, getSession, setSession, refreshSession, changeAccountPassword } from './account.js';
 import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
 import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
@@ -48,10 +49,40 @@ async function boot() {
   try { LIB = await (await fetch('data/exercises.json')).json(); setLib(LIB); }
   catch { render(h('p', { class: 'err' }, 'Impossibile caricare gli esercizi.')); return; }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-  if (await initStore() === 'locked') await lockScreen({ cold: true });   // password prima di mostrare qualsiasi dato
+  if (accountsMode()) await accessFlow();                                  // account dell'app (sito su Cloudflare)
+  else if (await initStore() === 'locked') await lockScreen({ cold: true });   // solo password
   initAutoLock();
   window.addEventListener('hashchange', route);
   route();
+}
+
+// Accesso con account: prima volta = nome utente e password (controllati dal server); poi basta la password sul telefono
+async function accessFlow() {
+  setUnlockHook(pw => { const s = getSession(); if (s) s.pw = pw; });
+  let pick = lastUser();
+  for (;;) {
+    const known = knownUsers(), k = known.find(x => x.u === pick);
+    if (k && hasUserData(k.u)) {
+      setUser(k.u);
+      const r = await lockScreen({ cold: true, title: `Ciao ${k.name}`, canSwitch: true });
+      if (r === 'switch') { pick = ''; forgetLast(); continue; }
+      rememberUser(k.u, k.name);                         // alla prossima apertura si parte da questo account
+      setSession({ user: k.u, name: S.account?.name || k.name, token: S.account?.token, exp: S.account?.exp, pw: r.password });
+      refreshSession().catch(() => {});                  // rinnova l'accesso in silenzio (se sei offline resta quello di prima)
+      return;
+    }
+    const res = await loginScreen({ known: known.filter(x => hasUserData(x.u)) });
+    if (res.pick) { pick = res.pick; continue; }
+    setUser(res.user);
+    if (hasUserData(res.user)) {                         // c'erano già dati di questa persona su questo telefono
+      if (!(await unlock(res.password))) { pick = res.user; rememberUser(res.user, res.name); toast('La password è diversa da quella usata qui prima: inserisci quella vecchia.', 6000); continue; }
+    } else { await initStore(); await enableLock(res.password); }
+    S.account = { user: res.user, name: res.name, token: res.token, exp: res.exp };
+    S.profile && !S.profile.nome && (S.profile.nome = res.name);
+    save(); rememberUser(res.user, res.name);
+    setSession({ ...S.account, pw: res.password });
+    return;
+  }
 }
 
 const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach, progressi: () => viewProgressi({ render, LIB, go }),
@@ -129,7 +160,7 @@ function viewOnboarding() {
 
   async function create() {
     S.settings.apiKey = d.apiKey;
-    S.profile = { obiettivo: d.obiettivo, livello: d.livello, giorni: d.giorni, casa: d.casa, peso: parseFloat(d.peso) || 0, note: d.note };
+    S.profile = { nome: S.account?.name || '', obiettivo: d.obiettivo, livello: d.livello, giorni: d.giorni, casa: d.casa, peso: parseFloat(d.peso) || 0, note: d.note };
     save();
     await buildPlan();
   }
@@ -183,7 +214,7 @@ function weekDots() {
     return h('div', { class: 'day-dot' + (done ? ' done' : '') + (d.toDateString() === today ? ' today' : '') }, h('i'), l);
   }));
 }
-const saluto = () => { const hr = new Date().getHours(); return hr < 12 ? 'Buongiorno' : hr < 18 ? 'Buon pomeriggio' : 'Buonasera'; };
+const saluto = () => { const hr = new Date().getHours(); const s = hr < 12 ? 'Buongiorno' : hr < 18 ? 'Buon pomeriggio' : 'Buonasera'; const n = S.profile?.nome || S.account?.name; return n ? `${s}, ${n}` : s; };
 const oggiTxt = () => { const t = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }); return t[0].toUpperCase() + t.slice(1); };
 
 function viewOggi() {
@@ -473,9 +504,48 @@ function downloadFile(name, text, type = 'application/json') {
   const a = h('a', { href: URL.createObjectURL(new Blob([text], { type })), download: name }); document.body.append(a); a.click(); a.remove();
 }
 
+/* ---------------------------- account (sito su Cloudflare) ---------------------------- */
+function accountCard() {
+  const ses = getSession();
+  const pwField = (label, ac) => h('label', { class: 'field' }, label, h('input', { type: 'password', autocomplete: ac, autocapitalize: 'off' }));
+  const val = (l) => l.querySelector('input').value;
+  const box = h('div', { class: 'stack' });
+
+  function changeSheet() {
+    const o = pwField('Password attuale', 'current-password'), n1 = pwField('Nuova password (almeno 8 caratteri)', 'new-password'), n2 = pwField('Ripeti la nuova password', 'new-password');
+    const err = h('p', { class: 'err' });
+    const btn = h('button', { class: 'btn block', onclick: async () => {
+      err.textContent = '';
+      if (val(n1).length < 8) return err.textContent = 'Usa almeno 8 caratteri.';
+      if (val(n1) !== val(n2)) return err.textContent = 'Le due password non coincidono.';
+      btn.disabled = true; btn.textContent = 'Controllo…';
+      try {
+        await changeAccountPassword(val(o), val(n1));         // prima il server…
+        await changePassword(val(o), val(n1));                // …poi i dati sul telefono
+        closeSheet(); toast('Password cambiata ✅');
+      } catch (e) { err.textContent = e.message; btn.disabled = false; btn.textContent = 'Cambia password'; }
+    } }, 'Cambia password');
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Cambia password'), o, n1, n2, err, btn));
+  }
+  function draw() {
+    box.replaceChildren(
+      h('p', {}, '👤 ', h('b', {}, S.account?.name || ses?.name || ''), '  ', h('span', { class: 'muted small' }, '@' + (S.account?.user || ses?.user || ''))),
+      h('p', { class: 'muted small' }, 'I tuoi dati restano cifrati su questo telefono. Il coach funziona solo con il tuo account.'),
+      h('div', { class: 'stack' }, h('h3', {}, 'Chiedi la password'),
+        h('div', { class: 'chips' }, [[0, 'Ogni volta'], [1, 'Dopo 1 min'], [5, 'Dopo 5 min'], [15, 'Dopo 15 min'], [-1, 'Solo all\'apertura']].map(([v, t]) =>
+          h('button', { class: 'chip' + (S.security.autoLockMin === v ? ' on' : ''), onclick: () => { S.security.autoLockMin = v; save(); draw(); } }, t)))),
+      h('button', { class: 'btn ghost block', onclick: () => softLock() }, 'Blocca ora'),
+      h('button', { class: 'btn ghost block', onclick: changeSheet }, 'Cambia password'),
+      h('button', { class: 'btn ghost block', onclick: () => { if (confirm('Uscire da questo account? I dati restano cifrati sul telefono.')) { forgetLast(); location.hash = ''; location.reload(); } } }, 'Cambia account / Esci'));
+  }
+  draw();
+  return h('div', { class: 'card stack' }, h('h2', {}, 'Account e sicurezza'), box);
+}
+
 /* ---------------------------- sicurezza: blocco con password ---------------------------- */
 const MIN_PW = 8;
 function securityCard() {
+  if (accountsMode()) return accountCard();
   const box = h('div', { class: 'stack' });
   const pwField = (label, ac) => h('label', { class: 'field' }, label, h('input', { type: 'password', autocomplete: ac, autocapitalize: 'off' }));
   const val = (l) => l.querySelector('input').value;

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<title>Crea account · Gym Coach</title>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<main id="view" class="no-tabs">
+  <h1>Crea account</h1>
+  <p class="muted small">Strumento per chi gestisce l'app. Tutto avviene in questa pagina: la password non viene inviata da nessuna parte (la pagina non può nemmeno collegarsi a internet). Ti dà due righe da copiare in Cloudflare.</p>
+
+  <div class="card stack">
+    <h2>1. Nuovo account</h2>
+    <label class="field">Nome utente (minuscolo, senza spazi, es. <b>francesco</b>)<input id="u" type="text" autocapitalize="none" autocomplete="off"></label>
+    <label class="field">Nome da mostrare (es. Francesco)<input id="n" type="text" autocomplete="off"></label>
+    <label class="field">Password (almeno 8 caratteri)<input id="p" type="password" autocomplete="new-password"></label>
+    <label class="field">Versione (lascia 1; per rifare la password di un account già esistente metti un numero più alto, così i vecchi accessi smettono di valere)<input id="v" type="number" value="1" min="1"></label>
+    <p id="err" class="err"></p>
+    <button id="go" class="btn block">Crea le righe</button>
+  </div>
+
+  <div id="out" class="stack"></div>
+
+  <div class="card stack">
+    <h2>2. Segreto per i gettoni di accesso</h2>
+    <p class="muted small">Si crea una volta sola e si incolla in Cloudflare come <b>SESSION_SECRET</b>. Non cambiarlo dopo, altrimenti tutti dovranno rifare il login.</p>
+    <button id="sec" class="btn ghost block">Genera SESSION_SECRET</button>
+    <div id="secout"></div>
+  </div>
+</main>
+<div id="toast"></div>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,11 +1,14 @@
-// Schermata di blocco: password all'apertura e dopo un po' in background.
+// Schermate di accesso: login con account (primo accesso) e blocco con password (aperture successive).
 import { S, unlock, verifyPassword, lockEnabled, resetAll } from './store.js';
 import { h } from './ui.js';
+import { apiLogin } from './account.js';
 
 const FAILS = 'gymcoach:fails';
 const root = () => document.getElementById('lock-root');
 const getFails = () => { try { return JSON.parse(localStorage.getItem(FAILS)) || { n: 0, until: 0 }; } catch { return { n: 0, until: 0 }; } };
 let active = false;
+let unlockHook = () => {};
+export const setUnlockHook = (fn) => { unlockHook = fn; };       // riceve la password appena inserita (per rinnovare l'accesso)
 
 // Dopo 5 errori: attese sempre più lunghe (5 s, 10 s, 20 s… fino a 5 minuti)
 function registerFail() {
@@ -14,11 +17,13 @@ function registerFail() {
   localStorage.setItem(FAILS, JSON.stringify(f));
   return f;
 }
+const logo = () => h('img', { src: 'icons/icon-192.png', alt: '', class: 'lock-logo' });
+const close = () => { root().replaceChildren(); document.body.classList.remove('locked'); active = false; };
 
-export function lockScreen({ cold }) {
+/* ---- password (dati cifrati sul telefono) ---- */
+export function lockScreen({ cold, title = 'Gym Coach', canSwitch = false } = {}) {
   if (active) return new Promise(() => {});
-  active = true;
-  document.body.classList.add('locked');
+  active = true; document.body.classList.add('locked');
   return new Promise(resolve => {
     const input = h('input', { type: 'password', placeholder: 'Password', autocomplete: 'current-password', enterkeyhint: 'go', 'aria-label': 'Password' });
     const msg = h('p', { class: 'err center', role: 'alert' });
@@ -34,31 +39,61 @@ export function lockScreen({ cold }) {
 
     async function submit() {
       if (btn.disabled || !input.value) return;
+      const pw = input.value;
       btn.disabled = true; btn.textContent = 'Controllo…'; msg.textContent = '';
-      const ok = cold ? await unlock(input.value) : await verifyPassword(input.value);
+      const ok = cold ? await unlock(pw) : await verifyPassword(pw);
       btn.textContent = 'Sblocca';
-      if (ok) {
-        localStorage.removeItem(FAILS); clearInterval(timer);
-        root().replaceChildren(); document.body.classList.remove('locked'); active = false; resolve(); return;
-      }
+      if (ok) { localStorage.removeItem(FAILS); clearInterval(timer); unlockHook(pw); close(); resolve({ password: pw }); return; }
       const f = registerFail(); input.value = '';
-      root().firstChild?.classList.remove('shake'); void root().firstChild?.offsetWidth; root().firstChild?.classList.add('shake');
+      const box = root().firstChild; box?.classList.remove('shake'); void box?.offsetWidth; box?.classList.add('shake');
       if (f.until > Date.now()) startTick(); else { msg.textContent = 'Password sbagliata.'; btn.disabled = false; input.focus(); }
     }
     btn.addEventListener('click', submit);
     input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
 
     const forgot = h('button', { class: 'linkbtn', onclick: () => {
-      if (!confirm('Se hai dimenticato la password i dati non si possono recuperare. Vuoi CANCELLARE tutto e ricominciare da zero?')) return;
-      if (!confirm('Ultima conferma: scheda, storico, chat e impostazioni verranno cancellati.')) return;
+      if (!confirm('Se hai dimenticato la password i dati di questo telefono non si possono recuperare. Vuoi CANCELLARLI e ricominciare da zero?')) return;
+      if (!confirm('Ultima conferma: scheda, storico e chat salvati qui verranno cancellati.')) return;
       resetAll(); location.hash = ''; location.reload();
     } }, 'Password dimenticata?');
+    const sw = canSwitch && h('button', { class: 'linkbtn', onclick: () => { clearInterval(timer); close(); resolve('switch'); } }, 'Non sei tu? Cambia account');
 
-    root().replaceChildren(h('div', { class: 'lock' },
-      h('img', { src: 'icons/icon-192.png', alt: '', class: 'lock-logo' }),
-      h('h1', {}, 'Gym Coach'), h('p', { class: 'muted center' }, 'Inserisci la password per entrare.'),
-      input, msg, btn, forgot));
+    root().replaceChildren(h('div', { class: 'lock' }, logo(), h('h1', {}, title),
+      h('p', { class: 'muted center' }, 'Inserisci la password per entrare.'), input, msg, btn, forgot, sw));
     startTick(); setTimeout(() => input.focus(), 50);
+  });
+}
+
+/* ---- accesso con account (nome utente + password, controllati dal server) ---- */
+export function loginScreen({ known = [] } = {}) {
+  if (active) return new Promise(() => {});
+  active = true; document.body.classList.add('locked');
+  return new Promise(resolve => {
+    const user = h('input', { type: 'text', placeholder: 'Nome utente', autocomplete: 'username', autocapitalize: 'none', autocorrect: 'off', 'aria-label': 'Nome utente' });
+    const pw = h('input', { type: 'password', placeholder: 'Password', autocomplete: 'current-password', enterkeyhint: 'go', 'aria-label': 'Password' });
+    const msg = h('p', { class: 'err center', role: 'alert' });
+    const btn = h('button', { class: 'btn big block' }, 'Accedi');
+    async function submit() {
+      if (btn.disabled || !user.value.trim() || !pw.value) return;
+      btn.disabled = true; btn.textContent = 'Accesso…'; msg.textContent = '';
+      try {
+        const d = await apiLogin(user.value.trim(), pw.value);
+        const password = pw.value; pw.value = '';
+        close(); resolve({ ...d, password });
+      } catch (e) {
+        msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Accedi';
+        const box = root().firstChild; box?.classList.remove('shake'); void box?.offsetWidth; box?.classList.add('shake');
+      }
+    }
+    btn.addEventListener('click', submit);
+    [user, pw].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); }));
+    const people = known.length > 0 && h('div', { class: 'stack' }, h('p', { class: 'muted small center' }, 'Già su questo telefono:'),
+      h('div', { class: 'chips', style: 'justify-content:center' }, known.map(k => h('button', { class: 'chip lg', onclick: () => { close(); resolve({ pick: k.u }); } }, k.name))));
+
+    root().replaceChildren(h('div', { class: 'lock' }, logo(), h('h1', {}, 'Gym Coach'),
+      h('p', { class: 'muted center' }, 'Accedi con il tuo account.'), user, pw, msg, btn, people,
+      h('p', { class: 'muted small center' }, 'Gli account li crea chi gestisce l\'app.')));
+    setTimeout(() => user.focus(), 50);
   });
 }
 
