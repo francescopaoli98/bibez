@@ -3,7 +3,7 @@ import { bioAvailable, bioRegister } from './bio.js';
 import { lockScreen, loginScreen, initAutoLock, softLock, setUnlockHook } from './lock.js';
 import { accountsMode, knownUsers, rememberUser, lastUser, forgetLast, getSession, setSession, refreshSession, changeAccountPassword } from './account.js';
 import { h, icon, toast, openSheet, closeSheet, mdLite } from './ui.js';
-import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable } from './ai.js';
+import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable, lastTiming } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
 import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
 import { targets } from './nutrition.js';
@@ -18,6 +18,7 @@ import * as Chats from './chats.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges } from './coach.js';
 
 let LIB = [];
+let needReload = false;
 const EX = (id) => LIB.find(e => e.id === id);
 const view = document.getElementById('view');
 const tabsEl = document.getElementById('tabs');
@@ -25,7 +26,7 @@ const tabsEl = document.getElementById('tabs');
 const render = (...kids) => view.replaceChildren(...kids.flat(Infinity).filter(k => k != null && k !== false));
 const go = (hash) => { location.hash = hash; };
 
-const APP_VERSION = 'v10';
+let APP_VERSION = '?';                                  // si legge da sw.js all'avvio
 
 // Errori di Gemini: mostrati per intero e copiabili, per poterli incollare in chat
 const errorText = (err) => `Errore Gemini: ${err.message}\nModello: ${S.settings.model}\nApp: ${APP_VERSION}\nOra: ${new Date().toISOString()}`;
@@ -54,9 +55,15 @@ const LIVELLI = [['principiante', 'Principiante'], ['intermedio', 'Un po\' di es
 /* ---------------------------- avvio e navigazione ---------------------------- */
 async function boot() {
   applyTheme(); initSound();                      // colori e suoni scelti, subito
+  fetch('sw.js').then(r => r.text()).then(t => { APP_VERSION = /VERSION = '([^']+)'/.exec(t)?.[1] || '?'; }).catch(() => {});
   try { LIB = await (await fetch('data/exercises.json')).json(); setLib(LIB); }
   catch { render(h('p', { class: 'err' }, 'Impossibile caricare gli esercizi.')); return; }
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
+    // c'è una versione nuova: ricarico da solo appena si può (non durante un allenamento)
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) needReload = true; });
+  }
   if (accountsMode()) await accessFlow();                                  // account dell'app (sito su Cloudflare)
   else if (await initStore() === 'locked') await lockScreen({ cold: true });   // solo password
   initAutoLock();
@@ -122,6 +129,7 @@ function route() {
   view.className = (tab ? '' : 'no-tabs') + ' enter';
   clearTimeout(route.t); route.t = setTimeout(() => view.classList.remove('enter'), 800);
   renderTabs(tab);
+  if (needReload && !S.session && (name === 'oggi' || name === 'scheda' || name === 'coach' || name === 'progressi')) { needReload = false; location.reload(); return; }
   window.scrollTo(0, 0);
   ROUTES[name]();
   countUps(view);                                 // i numeri salgono da 0
@@ -273,18 +281,64 @@ function viewOnboarding() {
   draw();
 }
 
-async function buildPlan() {
+// Cerca un modello veloce (prima i "lite"): lo misura con una domanda minuscola e prende il primo sotto i 15 secondi
+async function pickFastModel() {
+  try {
+    const names = await listModels();
+    const cand = [...names.filter(n => /lite/.test(n)), ...names.filter(n => !/lite/.test(n))].filter(n => n !== S.settings.model).slice(0, 2);
+    for (const n of cand) { const r = await benchModel(n); if (r.sec != null && r.sec < 15) return n; }
+  } catch {}
+  return null;
+}
+
+// Schermata di attesa: barra con percentuale (stima del tempo) e quattro passi che si spuntano, con il nome della persona
+function loadingScreen() {
+  const nome = utente();
+  const pct = h('div', { class: 'pct' }, '0%'), fill = h('i', { style: 'width:0%' });
+  const title = h('h1', {}, nome ? `${nome}, il coach prepara la tua scheda` : 'Il coach prepara la tua scheda');
+  const sub = h('p', { class: 'lead' }, 'Ci vogliono circa 20 secondi. Se il coach è lento, uso una scheda pronta.');
+  const ico = h('div', { class: 'big-ic' }, '🧠');
+  const rows = ['Leggo i tuoi dati', 'Scelgo gli esercizi giusti per te', 'Preparo i giorni di allenamento', 'Controllo che sia tutto sicuro'].map(t => h('div', { class: 'todo' }, h('span', { class: 'd' }), t));
   view.className = 'no-tabs'; renderTabs(null);
-  render(h('div', { class: 'center stack', style: 'padding-top:30vh' },
-    h('div', { class: 'spin' }), h('h2', {}, 'Il coach prepara la tua scheda…'), h('p', { class: 'muted small' }, 'Al massimo 45 secondi, poi uso una scheda pronta.')));
+  render(h('div', { class: 'load' }, ico, h('div', {}, title, sub),
+    h('div', { class: 'stack', style: 'gap:10px' }, pct, h('div', { class: 'pbar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': 'Preparazione della scheda' }, fill)),
+    h('div', { class: 'steps4' }, rows)));
+  const apply = (p) => {
+    fill.style.width = p + '%'; pct.textContent = Math.round(p) + '%';
+    rows.forEach((r, i) => { const ok = p >= [25, 55, 80, 100][i], now = !ok && p >= [0, 25, 55, 80][i]; r.className = ok ? 'ok' : now ? 'now' : 'todo'; r.firstChild.textContent = ok ? '✓' : now ? '•' : ''; });
+  };
+  const t0 = Date.now(); let done = false;
+  const timer = setInterval(() => { if (!done) apply(92 * (1 - Math.exp(-(Date.now() - t0) / 9000))); }, 200);   // sale piano piano: è una stima, non il vero avanzamento
+  apply(0);
+  return { async finish() {                               // la scheda è pronta: la barra scatta al 100%
+    done = true; clearInterval(timer); apply(100);
+    title.textContent = nome ? `${nome}, scheda pronta!` : 'Scheda pronta!'; sub.textContent = 'Ti porto subito a vederla.'; ico.textContent = '🎉';
+    await new Promise(r => setTimeout(r, 1100));
+  }, stop() { done = true; clearInterval(timer); } };
+}
+
+async function buildPlan() {
+  const load = loadingScreen();
   let plan, note = '';
   if (aiReady()) {
     try { plan = await aiPlan(S.profile, LIB); }
-    catch (e) { S.lastError = errorText(e); note = 'IA non disponibile: ho usato una scheda pronta. Vedi Impostazioni → Avanzate → Copia ultimo errore.'; }
+    catch (e) {
+      let last = e;
+      if (/troppo/i.test(e.message)) {                       // il modello è lento: provo uno più veloce prima di arrendermi
+        const m = await pickFastModel();
+        if (m) {
+          const old = S.settings.model; S.settings.model = m;
+          try { plan = await aiPlan(S.profile, LIB); note = `Il modello era lento: ne ho scelto uno più veloce (${m}).`; }
+          catch (e2) { S.settings.model = old; last = e2; }
+        }
+      }
+      if (!plan) { S.lastError = errorText(last); note = 'IA non disponibile: ho usato una scheda pronta. Vedi Impostazioni → Avanzate → Copia ultimo errore.'; }
+    }
   }
   S.plan = Sal.adjustPlan(plan || templatePlan(S.profile), S.profile.salute);        // con schiena o articolazioni delicate: esercizi più dolci
   S.nextDay = 0; S.session = null; S.planBackup = null;
   save();
+  await load.finish();
   const dest = S.seen?.guida ? '#/oggi' : '#/guida';
   if (location.hash === dest) route(); else go(dest);
   setTimeout(() => toast(note || 'Scheda pronta! 🎉'), 300);
@@ -651,7 +705,7 @@ function viewCoach() {
     busy = true; input.value = '';
     const chat = Chats.push({ role: 'user', text });
     animateFrom = chat.messages.length - 1; draw(); play('send'); buzz(10);
-    const cnt = h('span', { class: 'muted small' });
+    const cnt = h('span', { class: 'muted small cnt' });
     const typing = h('div', { class: 'msg ai enter' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span'), cnt));
     list.append(typing); bottom();
     const t0 = Date.now();
@@ -659,7 +713,17 @@ function viewCoach() {
     try {
       const hist = chat.messages.slice(-30).map(m => ({ role: m.role, parts: [{ text: m.text }] }));
       while (hist.length && hist[0].role !== 'user') hist.shift();
-      const raw = await gemini({ system: coachSystem(LIB), contents: hist, json: true, temperature: 0.5 });
+      const ask = () => gemini({ system: coachSystem(LIB), contents: hist, json: true, temperature: 0.5 });
+      let raw;
+      try { raw = await ask(); }
+      catch (e) {
+        if (!/troppo|in tempo/i.test(e.message)) throw e;
+        cnt.textContent = ' · cerco un modello più veloce…';
+        const m = await pickFastModel();                    // il modello è lento: ne scelgo uno più veloce e riprovo una volta
+        if (!m) throw e;
+        S.settings.model = m; save(); toast(`Il modello era lento: ne ho scelto uno più veloce (${m}).`, 5000);
+        raw = await ask();
+      }
       const { text: reply, changes } = parseReply(raw);
       const ok = normChanges(changes, LIB);
       Chats.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : {}) });
@@ -959,7 +1023,7 @@ function viewProfilo() {
         h('button', { class: 'btn ghost grow', onclick: async (e) => {
           saveKeys(); e.target.disabled = true; e.target.textContent = 'Provo…';
           const t0 = Date.now();
-          try { await gemini({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }] }); toast(`Collegamento riuscito ✅ (${((Date.now() - t0) / 1000).toFixed(1)} s)`); }
+          try { await gemini({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }] }); const lt = lastTiming; toast(`Collegamento riuscito ✅ (${((Date.now() - t0) / 1000).toFixed(1)} s${lt?.server != null ? ' · Google ' + lt.server.toFixed(1) + ' s' : ''})`, 5000); }
           catch (err) { showError(err); }
           e.target.disabled = false; e.target.textContent = 'Prova collegamento'; } }, 'Prova collegamento'),
         h('button', { class: 'btn grow', onclick: () => { saveKeys(); toast('Salvato'); } }, 'Salva')),

@@ -21,7 +21,7 @@ const DEFAULT = {
   reminder: null,           // {days:[1,3,5], time:'18:00'}
   settings: { apiKey: '', model: 'gemini-flash-latest' },
   account: null,            // {user, name, token, exp}: l'account con cui hai fatto accesso
-  security: { autoLockMin: 5, stay: true, stayDays: 90 },   // blocco dopo N minuti (-1 = mai); resta connesso (giorni)
+  security: { autoLockMin: -1, stay: true, stayDays: 90, v: 2 },   // blocco dopo N minuti in background (-1 = mai: la password solo all'apertura); resta connesso (giorni)
   session: null,            // allenamento in corso
   chat: [],                 // (vecchio formato, migrato in chats)
   chats: [],                // [{id, title, created, updated, messages:[{role, text, proposal?}]}]
@@ -40,6 +40,7 @@ function applyData(d) {
   Object.assign(S, structuredClone(DEFAULT), d || {});
   S.settings = { ...DEFAULT.settings, ...((d && d.settings) || {}) };
   S.security = { ...DEFAULT.security, ...((d && d.security) || {}) };
+  if ((S.security.v || 0) < 2) { S.security.autoLockMin = -1; S.security.v = 2; }     // chi aveva il vecchio valore (5 minuti): ora la password si chiede solo all'apertura
   if (S.chat?.length && !S.chats.length) {                 // migra la vecchia chat unica nello storico
     const first = S.chat.find(m => m.role === 'user')?.text || 'Chat';
     S.chats = [{ id: 'c' + Date.now().toString(36), title: first.length > 30 ? first.slice(0, 28) + '…' : first, created: Date.now(), updated: Date.now(), messages: S.chat }];

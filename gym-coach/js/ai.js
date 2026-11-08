@@ -3,6 +3,7 @@ import { S, save } from './store.js';
 import { accountsMode, getSession, refreshSession } from './account.js';
 
 export class AIError extends Error {}
+export let lastTiming = null;           // {total, server} in secondi, dell'ultima richiesta (per la diagnosi)
 const BASE = 'https://generativelanguage.googleapis.com/v1beta';
 const PROXY = '/api/gemini';
 
@@ -21,6 +22,7 @@ async function request(path, { method = 'GET', body, ms = TIMEOUT_MS } = {}) {
   if (!proxy && !apiKey) throw new AIError('Manca la chiave Gemini. Aggiungila in Impostazioni.');
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), S.settings.timeoutMs || ms);
+  const tStart = performance.now();
   const send = () => fetch((proxy ? PROXY : BASE) + path, {
     method, signal: ctl.signal,
     headers: { 'Content-Type': 'application/json', ...(proxy ? { Authorization: 'Bearer ' + (getSession()?.token || '') } : { 'x-goog-api-key': apiKey }) },
@@ -32,6 +34,8 @@ async function request(path, { method = 'GET', body, ms = TIMEOUT_MS } = {}) {
     if (proxy && res.status === 401 && getSession()?.pw) { try { await refreshSession(); res = await send(); } catch {} }
     let data = null;
     try { data = await res.json(); } catch {}
+    const srv = parseFloat(res.headers.get('x-gemini-ms'));
+    lastTiming = { total: (performance.now() - tStart) / 1000, server: Number.isFinite(srv) ? srv / 1000 : null };
     return { status: res.status, ok: res.ok, data };
   } catch (e) {
     if (e.name === 'AbortError') throw new AIError('Gemini ci sta mettendo troppo. Riprova, oppure scegli un modello più veloce in Impostazioni → Avanzate.');
@@ -68,6 +72,7 @@ export async function gemini({ system, contents, json = false, temperature = 0.7
     if (r.status === 404) throw new AIError('Modello non trovato. Sceglilo di nuovo in Impostazioni → Avanzate.');
     if (r.status === 429) throw new AIError('Limite gratuito raggiunto. Riprova tra un minuto.');
     if (r.status === 503) throw new AIError('Gemini è sovraccarico in questo momento. Riprova tra poco.');
+    if (r.status === 504) throw new AIError(msg || 'Gemini non ha risposto in tempo. Riprova, oppure scegli un modello più veloce in Impostazioni → Avanzate.');
     throw new AIError(`Errore Gemini (${r.status}). ${msg}`);
   }
   const text = r.data?.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('') || '';
@@ -79,7 +84,7 @@ export async function gemini({ system, contents, json = false, temperature = 0.7
 export async function benchModel(name) {
   const t0 = performance.now();
   try {
-    await gemini({ model: name, ms: 25000, contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }] });
+    await gemini({ model: name, ms: 12000, contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }] });
     return { name, sec: (performance.now() - t0) / 1000 };
   } catch (e) { return { name, sec: null, err: e.message }; }
 }

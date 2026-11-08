@@ -336,3 +336,22 @@ body.big { zoom: 1.12; }
 .setrow2:first-of-type { border-top: 0; }
 .setrow2 .ic2 { width: 44px; height: 44px; border-radius: 14px; background: var(--card2); display: grid; place-items: center; flex: none; font-size: 22px; }
 .setrow2 b { font-size: 16px; }
+
+/* ======== v25: barra di caricamento della scheda ======== */
+.load { min-height: calc(100dvh - 60px); display: flex; flex-direction: column; justify-content: center; gap: 26px; text-align: center; }
+.load .big-ic { animation: none; }
+.load h1 { font-size: 34px; }
+.pbar { height: 18px; border-radius: 18px; background: var(--card2); border: 1px solid var(--line); overflow: hidden; position: relative; }
+.pbar i { display: block; height: 100%; border-radius: 18px; background: linear-gradient(90deg, var(--accent-lo), var(--accent), var(--accent-hi)); box-shadow: 0 0 22px rgba(var(--accent-rgb), .6); transition: width .25s linear; }
+.pbar::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .3) 50%, transparent 70%); background-size: 200% 100%; animation: shimmer 1.8s linear infinite; }
+.pct { font: 800 54px 'Barlow Condensed', sans-serif; color: var(--accent); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.steps4 { display: flex; flex-direction: column; gap: 12px; text-align: left; margin: 0 6px; }
+.steps4 div { display: flex; align-items: center; gap: 12px; font-size: 17px; font-weight: 600; transition: color .3s; }
+.steps4 .d { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 15px; font-weight: 900; background: var(--card2); border: 2px solid var(--line); color: var(--muted); transition: all .3s; }
+.steps4 .ok .d { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); animation: popin .35s cubic-bezier(.3, 1.6, .5, 1); }
+.steps4 .now .d { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .18); }
+.steps4 .todo { color: var(--muted); font-weight: 500; }
+
+/* ======== v27: fumetto "sto pensando" ======== */
+.dots-anim { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; max-width: 250px; }
+.dots-anim span.cnt { flex-basis: 100%; width: auto; height: auto; margin: 6px 0 0; border-radius: 0; background: none; animation: none; display: block; line-height: 1.35; }

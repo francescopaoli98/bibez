@@ -26,13 +26,17 @@ export async function handleGemini({ request, env, path }) {
     await env.APP.put(k, String(n + 1), { expirationTtl: 172800 });
   }
 
-  const upstream = await fetch(GOOGLE + path + (isList ? '?pageSize=200' : ''), {
-    method: request.method,
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-    body,
-  });
+  const t0 = Date.now();
+  let upstream;
+  try {
+    upstream = await fetch(GOOGLE + path + (isList ? '?pageSize=200' : ''), {
+      method: request.method,
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      body, signal: AbortSignal.timeout(40000),
+    });
+  } catch { return err(504, 'Gemini non ha risposto in tempo (il server ha aspettato 40 secondi).'); }
   return new Response(upstream.body, {
     status: upstream.status,
-    headers: { 'Content-Type': upstream.headers.get('Content-Type') || 'application/json', 'Cache-Control': 'no-store' },
+    headers: { 'Content-Type': upstream.headers.get('Content-Type') || 'application/json', 'Cache-Control': 'no-store', 'x-gemini-ms': String(Date.now() - t0) },
   });
 }
