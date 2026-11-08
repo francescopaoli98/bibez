@@ -1,0 +1,848 @@
+[
+ {
+  "id": "Barbell_Squat",
+  "nome": "Squat con bilanciere",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti, glutei",
+  "attrezzo": "bilanciere",
+  "passi": [
+   "Bilanciere appoggiato sui trapezi, piedi alla larghezza delle spalle, punte leggermente aperte.",
+   "Scendi sedendoti all'indietro, schiena dritta, ginocchia in linea con le punte.",
+   "Spingi sui talloni e risali senza staccare i piedi."
+  ],
+  "consiglio": "Petto in fuori e sguardo avanti. Se non arrivi in basso, riduci il peso.",
+  "img": [
+   "img/ex/Barbell_Squat/0.jpg",
+   "img/ex/Barbell_Squat/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20con%20bilanciere%20tecnica%20corretta"
+ },
+ {
+  "id": "Leg_Press",
+  "nome": "Leg press",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti, glutei",
+  "attrezzo": "macchina",
+  "passi": [
+   "Siediti con schiena e bacino ben appoggiati, piedi a metà pedana.",
+   "Sblocca e scendi controllato fino a circa 90° di ginocchio.",
+   "Spingi senza bloccare del tutto le ginocchia in alto."
+  ],
+  "consiglio": "Il bacino non deve staccarsi dallo schienale.",
+  "img": [
+   "img/ex/Leg_Press/0.jpg",
+   "img/ex/Leg_Press/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20press%20tecnica%20corretta"
+ },
+ {
+  "id": "Romanian_Deadlift",
+  "nome": "Stacco rumeno",
+  "gruppo": "gambe",
+  "muscoli": "Femorali, glutei",
+  "attrezzo": "bilanciere",
+  "passi": [
+   "In piedi col bilanciere davanti alle cosce, ginocchia appena flesse.",
+   "Spingi il bacino indietro e fai scorrere il bilanciere vicino alle gambe.",
+   "Quando senti i femorali tesi, torna su contraendo i glutei."
+  ],
+  "consiglio": "Schiena sempre neutra: non curvarla mai.",
+  "img": [
+   "img/ex/Romanian_Deadlift/0.jpg",
+   "img/ex/Romanian_Deadlift/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20rumeno%20tecnica%20corretta"
+ },
+ {
+  "id": "Goblet_Squat",
+  "nome": "Goblet squat",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti, glutei",
+  "attrezzo": "manubri",
+  "passi": [
+   "Tieni un manubrio al petto con entrambe le mani.",
+   "Scendi in squat tenendo il busto eretto e i gomiti dentro le ginocchia.",
+   "Risali spingendo sui talloni."
+  ],
+  "consiglio": "Ottimo per imparare lo squat.",
+  "img": [
+   "img/ex/Goblet_Squat/0.jpg",
+   "img/ex/Goblet_Squat/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Goblet%20squat%20tecnica%20corretta"
+ },
+ {
+  "id": "Dumbbell_Lunges",
+  "nome": "Affondi con manubri",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti, glutei",
+  "attrezzo": "manubri",
+  "passi": [
+   "Un manubrio per mano, un passo lungo in avanti.",
+   "Scendi finché entrambe le ginocchia sono a circa 90°.",
+   "Spingi col piede davanti e torna alla partenza."
+  ],
+  "consiglio": "Busto dritto, ginocchio davanti sopra la caviglia.",
+  "img": [
+   "img/ex/Dumbbell_Lunges/0.jpg",
+   "img/ex/Dumbbell_Lunges/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Leg_Extensions",
+  "nome": "Leg extension",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti",
+  "attrezzo": "macchina",
+  "passi": [
+   "Regola lo schienale: il ginocchio è in linea con l'asse della macchina.",
+   "Estendi le gambe fino in alto e stringi il quadricipite.",
+   "Scendi lentamente senza far cadere i pesi."
+  ],
+  "consiglio": "Niente slanci: movimento lento.",
+  "img": [
+   "img/ex/Leg_Extensions/0.jpg",
+   "img/ex/Leg_Extensions/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20extension%20tecnica%20corretta"
+ },
+ {
+  "id": "Lying_Leg_Curls",
+  "nome": "Leg curl sdraiato",
+  "gruppo": "gambe",
+  "muscoli": "Femorali",
+  "attrezzo": "macchina",
+  "passi": [
+   "Sdraiato a pancia in giù, rullo sopra i talloni.",
+   "Fletti le ginocchia portando i talloni verso i glutei.",
+   "Torna giù lentamente."
+  ],
+  "consiglio": "Il bacino resta appoggiato alla panca.",
+  "img": [
+   "img/ex/Lying_Leg_Curls/0.jpg",
+   "img/ex/Lying_Leg_Curls/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20curl%20sdraiato%20tecnica%20corretta"
+ },
+ {
+  "id": "Seated_Leg_Curl",
+  "nome": "Leg curl seduto",
+  "gruppo": "gambe",
+  "muscoli": "Femorali",
+  "attrezzo": "macchina",
+  "passi": [
+   "Siediti, cuscino sopra le caviglie e fermo sulle cosce.",
+   "Fletti le gambe portando i talloni sotto di te.",
+   "Risali piano fino alla partenza."
+  ],
+  "consiglio": "Controlla la fase di ritorno.",
+  "img": [
+   "img/ex/Seated_Leg_Curl/0.jpg",
+   "img/ex/Seated_Leg_Curl/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20curl%20seduto%20tecnica%20corretta"
+ },
+ {
+  "id": "Standing_Calf_Raises",
+  "nome": "Calf in piedi",
+  "gruppo": "gambe",
+  "muscoli": "Polpacci",
+  "attrezzo": "macchina",
+  "passi": [
+   "Spalle sotto i supporti, punte dei piedi sulla pedana.",
+   "Sali sulle punte il più in alto possibile.",
+   "Scendi fino a sentire lo stiramento del polpaccio."
+  ],
+  "consiglio": "Pausa di 1 secondo in alto.",
+  "img": [
+   "img/ex/Standing_Calf_Raises/0.jpg",
+   "img/ex/Standing_Calf_Raises/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Calf%20in%20piedi%20tecnica%20corretta"
+ },
+ {
+  "id": "Seated_Calf_Raise",
+  "nome": "Calf seduto",
+  "gruppo": "gambe",
+  "muscoli": "Polpacci (soleo)",
+  "attrezzo": "macchina",
+  "passi": [
+   "Siediti con le ginocchia sotto il cuscino, punte sulla pedana.",
+   "Sali sulle punte spingendo con i polpacci.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Movimento ampio, non rimbalzare.",
+  "img": [
+   "img/ex/Seated_Calf_Raise/0.jpg",
+   "img/ex/Seated_Calf_Raise/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Calf%20seduto%20tecnica%20corretta"
+ },
+ {
+  "id": "Barbell_Hip_Thrust",
+  "nome": "Hip thrust",
+  "gruppo": "gambe",
+  "muscoli": "Glutei",
+  "attrezzo": "bilanciere",
+  "passi": [
+   "Schiena alta appoggiata alla panca, bilanciere sul bacino.",
+   "Spingi con i talloni e solleva il bacino fino ad allineare busto e cosce.",
+   "Stringi i glutei in alto, poi scendi controllato."
+  ],
+  "consiglio": "Mento verso il petto, non inarcare la schiena.",
+  "img": [
+   "img/ex/Barbell_Hip_Thrust/0.jpg",
+   "img/ex/Barbell_Hip_Thrust/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Hip%20thrust%20tecnica%20corretta"
+ },
+ {
+  "id": "Hack_Squat",
+  "nome": "Hack squat",
+  "gruppo": "gambe",
+  "muscoli": "Quadricipiti, glutei",
+  "attrezzo": "macchina",
+  "passi": [
+   "Schiena appoggiata, spalle sotto i cuscini, piedi sulla pedana.",
+   "Scendi controllato fino a circa 90°.",
+   "Spingi e risali senza bloccare le ginocchia."
+  ],
+  "consiglio": "Alternativa stabile allo squat libero.",
+  "img": [
+   "img/ex/Hack_Squat/0.jpg",
+   "img/ex/Hack_Squat/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Hack%20squat%20tecnica%20corretta"
+ },
+ {
+  "id": "Barbell_Bench_Press_-_Medium_Grip",
+  "nome": "Panca piana con bilanciere",
+  "gruppo": "petto",
+  "muscoli": "Petto, tricipiti, spalle",
+  "attrezzo": "bilanciere",
+  "passi": [
+   "Sdraiato, scapole strette e piedi ben piantati a terra.",
+   "Scendi col bilanciere a metà petto, gomiti a circa 45°.",
+   "Spingi in alto fino a braccia distese."
+  ],
+  "consiglio": "Chiedi a qualcuno di assisterti sui carichi alti.",
+  "img": [
+   "img/ex/Barbell_Bench_Press_-_Medium_Grip/0.jpg",
+   "img/ex/Barbell_Bench_Press_-_Medium_Grip/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20piana%20con%20bilanciere%20tecnica%20corretta"
+ },
+ {
+  "id": "Dumbbell_Bench_Press",
+  "nome": "Panca piana con manubri",
+  "gruppo": "petto",
+  "muscoli": "Petto, tricipiti",
+  "attrezzo": "manubri",
+  "passi": [
+   "Sdraiato con un manubrio per mano all'altezza del petto.",
+   "Spingi in alto avvicinando i manubri.",
+   "Scendi lentamente fino a sentire lo stiramento del petto."
+  ],
+  "consiglio": "Più sicura del bilanciere per iniziare.",
+  "img": [
+   "img/ex/Dumbbell_Bench_Press/0.jpg",
+   "img/ex/Dumbbell_Bench_Press/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20piana%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Incline_Dumbbell_Press",
+  "nome": "Panca inclinata con manubri",
+  "gruppo": "petto",
+  "muscoli": "Petto alto, spalle",
+  "attrezzo": "manubri",
+  "passi": [
+   "Panca inclinata a 30°, manubri ai lati del petto.",
+   "Spingi in alto in linea con la parte alta del petto.",
+   "Scendi controllato."
+  ],
+  "consiglio": "Non salire oltre i 30-40° di inclinazione.",
+  "img": [
+   "img/ex/Incline_Dumbbell_Press/0.jpg",
+   "img/ex/Incline_Dumbbell_Press/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20inclinata%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Butterfly",
+  "nome": "Pec deck (butterfly)",
+  "gruppo": "petto",
+  "muscoli": "Petto",
+  "attrezzo": "macchina",
+  "passi": [
+   "Schiena appoggiata, gomiti all'altezza delle spalle.",
+   "Chiudi le braccia davanti al petto.",
+   "Riapri lentamente sentendo lo stiramento."
+  ],
+  "consiglio": "Spalle basse, non alzarle verso le orecchie.",
+  "img": [
+   "img/ex/Butterfly/0.jpg",
+   "img/ex/Butterfly/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pec%20deck%20%28butterfly%29%20tecnica%20corretta"
+ },
+ {
+  "id": "Cable_Crossover",
+  "nome": "Croci ai cavi",
+  "gruppo": "petto",
+  "muscoli": "Petto",
+  "attrezzo": "cavi",
+  "passi": [
+   "Cavi in alto, un passo avanti, gomiti leggermente flessi.",
+   "Porta le mani davanti al corpo con un arco ampio.",
+   "Ritorna lentamente."
+  ],
+  "consiglio": "Gomiti sempre leggermente piegati.",
+  "img": [
+   "img/ex/Cable_Crossover/0.jpg",
+   "img/ex/Cable_Crossover/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Croci%20ai%20cavi%20tecnica%20corretta"
+ },
+ {
+  "id": "Pushups",
+  "nome": "Flessioni",
+  "gruppo": "petto",
+  "muscoli": "Petto, tricipiti, core",
+  "attrezzo": "corpo libero",
+  "passi": [
+   "Mani poco più larghe delle spalle, corpo in linea retta.",
+   "Scendi finché il petto sfiora il pavimento.",
+   "Spingi e torna su."
+  ],
+  "consiglio": "Se è dura, appoggia le ginocchia.",
+  "img": [
+   "img/ex/Pushups/0.jpg",
+   "img/ex/Pushups/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flessioni%20tecnica%20corretta"
+ },
+ {
+  "id": "Dumbbell_Flyes",
+  "nome": "Croci con manubri",
+  "gruppo": "petto",
+  "muscoli": "Petto",
+  "attrezzo": "manubri",
+  "passi": [
+   "Sdraiato, manubri sopra il petto, gomiti morbidi.",
+   "Apri le braccia ad arco fino a sentire lo stiramento.",
+   "Richiudi stringendo il petto."
+  ],
+  "consiglio": "Peso leggero: è un esercizio di isolamento.",
+  "img": [
+   "img/ex/Dumbbell_Flyes/0.jpg",
+   "img/ex/Dumbbell_Flyes/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Croci%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Wide-Grip_Lat_Pulldown",
+  "nome": "Lat machine",
+  "gruppo": "schiena",
+  "muscoli": "Dorsali, bicipiti",
+  "attrezzo": "cavi",
+  "passi": [
+   "Presa larga, cosce bloccate sotto il cuscino.",
+   "Tira la barra al petto portando i gomiti verso il basso.",
+   "Risali lentamente a braccia distese."
+  ],
+  "consiglio": "Non dondolare col busto.",
+  "img": [
+   "img/ex/Wide-Grip_Lat_Pulldown/0.jpg",
+   "img/ex/Wide-Grip_Lat_Pulldown/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Lat%20machine%20tecnica%20corretta"
+ },
+ {
+  "id": "Close-Grip_Front_Lat_Pulldown",
+  "nome": "Lat machine presa stretta",
+  "gruppo": "schiena",
+  "muscoli": "Dorsali, bicipiti",
+  "attrezzo": "cavi",
+  "passi": [
+   "Impugna la maniglia stretta, petto in fuori.",
+   "Tira verso la parte alta del petto.",
+   "Torna su controllato."
+  ],
+  "consiglio": "Immagina di portare i gomiti nelle tasche.",
+  "img": [
+   "img/ex/Close-Grip_Front_Lat_Pulldown/0.jpg",
+   "img/ex/Close-Grip_Front_Lat_Pulldown/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Lat%20machine%20presa%20stretta%20tecnica%20corretta"
+ },
+ {
+  "id": "Seated_Cable_Rows",
+  "nome": "Pulley (rematore ai cavi)",
+  "gruppo": "schiena",
+  "muscoli": "Dorsali, romboidi",
+  "attrezzo": "cavi",
+  "passi": [
+   "Seduto, schiena dritta, ginocchia leggermente flesse.",
+   "Tira la maniglia verso l'addome stringendo le scapole.",
+   "Torna avanti lentamente senza curvare la schiena."
+  ],
+  "consiglio": "Non usare la schiena per dare slancio.",
+  "img": [
+   "img/ex/Seated_Cable_Rows/0.jpg",
+   "img/ex/Seated_Cable_Rows/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pulley%20%28rematore%20ai%20cavi%29%20tecnica%20corretta"
+ },
+ {
+  "id": "Bent_Over_Barbell_Row",
+  "nome": "Rematore con bilanciere",
+  "gruppo": "schiena",
+  "muscoli": "Dorsali, romboidi, bicipiti",
+  "attrezzo": "bilanciere",
+  "passi": [
+   "Busto inclinato a circa 45°, schiena piatta, bilanciere davanti.",
+   "Tira il bilanciere verso l'ombelico.",
+   "Scendi controllato."
+  ],
+  "consiglio": "Schiena neutra, ginocchia morbide.",
+  "img": [
+   "img/ex/Bent_Over_Barbell_Row/0.jpg",
+   "img/ex/Bent_Over_Barbell_Row/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20con%20bilanciere%20tecnica%20corretta"
+ },
+ {
+  "id": "One-Arm_Dumbbell_Row",
+  "nome": "Rematore a un braccio",
+  "gruppo": "schiena",
+  "muscoli": "Dorsali, bicipiti",
+  "attrezzo": "manubri",
+  "passi": [
+   "Una mano e un ginocchio sulla panca, manubrio nell'altra mano.",
+   "Tira il manubrio verso il fianco.",
+   "Scendi lentamente e cambia lato."
+  ],
+  "consiglio": "Spalle ferme, niente rotazioni del busto.",
+  "img": [
+   "img/ex/One-Arm_Dumbbell_Row/0.jpg",
+   "img/ex/One-Arm_Dumbbell_Row/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20a%20un%20braccio%20tecnica%20corretta"
+ },
+ {
+  "id": "Pullups",
+  "nome": "Trazioni alla sbarra",
+  "gruppo": "schiena",
+  "muscoli": "Dorsali, bicipiti",
+  "attrezzo": "corpo libero",
+  "passi": [
+   "Presa prona poco più larga delle spalle, braccia distese.",
+   "Sali finché il mento supera la sbarra.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Troppo difficile? Usa la macchina assistita o la lat machine.",
+  "img": [
+   "img/ex/Pullups/0.jpg",
+   "img/ex/Pullups/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Trazioni%20alla%20sbarra%20tecnica%20corretta"
+ },
+ {
+  "id": "Chin-Up",
+  "nome": "Trazioni presa supina",
+  "gruppo": "schiena",
+  "muscoli": "Dorsali, bicipiti",
+  "attrezzo": "corpo libero",
+  "passi": [
+   "Presa supina alla larghezza delle spalle.",
+   "Sali portando il mento sopra la sbarra.",
+   "Scendi controllato."
+  ],
+  "consiglio": "Più facile delle trazioni a presa prona.",
+  "img": [
+   "img/ex/Chin-Up/0.jpg",
+   "img/ex/Chin-Up/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Trazioni%20presa%20supina%20tecnica%20corretta"
+ },
+ {
+  "id": "Hyperextensions_Back_Extensions",
+  "nome": "Iperestensioni",
+  "gruppo": "schiena",
+  "muscoli": "Lombari, glutei",
+  "attrezzo": "macchina",
+  "passi": [
+   "Bacino appoggiato al cuscino, corpo in linea.",
+   "Scendi col busto flettendo dai fianchi.",
+   "Risali fino ad allineare il corpo, senza inarcare."
+  ],
+  "consiglio": "Non iperestendere in alto.",
+  "img": [
+   "img/ex/Hyperextensions_Back_Extensions/0.jpg",
+   "img/ex/Hyperextensions_Back_Extensions/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Iperestensioni%20tecnica%20corretta"
+ },
+ {
+  "id": "Barbell_Deadlift",
+  "nome": "Stacco da terra",
+  "gruppo": "schiena",
+  "muscoli": "Schiena, glutei, femorali",
+  "attrezzo": "bilanciere",
+  "passi": [
+   "Bilanciere sopra la metà del piede, schiena dritta, petto in fuori.",
+   "Spingi coi piedi e solleva il bilanciere vicino alle gambe.",
+   "Scendi controllato mantenendo la schiena neutra."
+  ],
+  "consiglio": "Esercizio tecnico: parti leggero e chiedi un check della forma.",
+  "img": [
+   "img/ex/Barbell_Deadlift/0.jpg",
+   "img/ex/Barbell_Deadlift/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20da%20terra%20tecnica%20corretta"
+ },
+ {
+  "id": "Dumbbell_Shoulder_Press",
+  "nome": "Shoulder press con manubri",
+  "gruppo": "spalle",
+  "muscoli": "Spalle, tricipiti",
+  "attrezzo": "manubri",
+  "passi": [
+   "Seduto con schienale, manubri all'altezza delle orecchie.",
+   "Spingi in alto fino a braccia quasi distese.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Core contratto, non inarcare la schiena.",
+  "img": [
+   "img/ex/Dumbbell_Shoulder_Press/0.jpg",
+   "img/ex/Dumbbell_Shoulder_Press/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Shoulder%20press%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Machine_Shoulder_Military_Press",
+  "nome": "Shoulder press alla macchina",
+  "gruppo": "spalle",
+  "muscoli": "Spalle, tricipiti",
+  "attrezzo": "macchina",
+  "passi": [
+   "Regola il sedile: impugnature all'altezza delle spalle.",
+   "Spingi in alto.",
+   "Scendi controllato."
+  ],
+  "consiglio": "Ottima per iniziare.",
+  "img": [
+   "img/ex/Machine_Shoulder_Military_Press/0.jpg",
+   "img/ex/Machine_Shoulder_Military_Press/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Shoulder%20press%20alla%20macchina%20tecnica%20corretta"
+ },
+ {
+  "id": "Side_Lateral_Raise",
+  "nome": "Alzate laterali",
+  "gruppo": "spalle",
+  "muscoli": "Deltoide laterale",
+  "attrezzo": "manubri",
+  "passi": [
+   "In piedi, un manubrio per mano, gomiti leggermente flessi.",
+   "Alza le braccia ai lati fino all'altezza delle spalle.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Peso leggero: contano controllo e tecnica.",
+  "img": [
+   "img/ex/Side_Lateral_Raise/0.jpg",
+   "img/ex/Side_Lateral_Raise/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20laterali%20tecnica%20corretta"
+ },
+ {
+  "id": "Face_Pull",
+  "nome": "Face pull",
+  "gruppo": "spalle",
+  "muscoli": "Deltoide posteriore, cuffia",
+  "attrezzo": "cavi",
+  "passi": [
+   "Cavo all'altezza del viso, corda in mano.",
+   "Tira verso il viso aprendo i gomiti.",
+   "Torna avanti controllato."
+  ],
+  "consiglio": "Ottimo per la postura.",
+  "img": [
+   "img/ex/Face_Pull/0.jpg",
+   "img/ex/Face_Pull/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Face%20pull%20tecnica%20corretta"
+ },
+ {
+  "id": "Reverse_Machine_Flyes",
+  "nome": "Pec deck inverso",
+  "gruppo": "spalle",
+  "muscoli": "Deltoide posteriore",
+  "attrezzo": "macchina",
+  "passi": [
+   "Petto contro il cuscino, impugnature davanti.",
+   "Apri le braccia all'indietro.",
+   "Torna lentamente."
+  ],
+  "consiglio": "Non spingere con la schiena.",
+  "img": [
+   "img/ex/Reverse_Machine_Flyes/0.jpg",
+   "img/ex/Reverse_Machine_Flyes/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pec%20deck%20inverso%20tecnica%20corretta"
+ },
+ {
+  "id": "Front_Dumbbell_Raise",
+  "nome": "Alzate frontali",
+  "gruppo": "spalle",
+  "muscoli": "Deltoide anteriore",
+  "attrezzo": "manubri",
+  "passi": [
+   "In piedi con i manubri davanti alle cosce.",
+   "Alza un braccio davanti fino all'altezza delle spalle.",
+   "Scendi e alterna."
+  ],
+  "consiglio": "Niente slanci col busto.",
+  "img": [
+   "img/ex/Front_Dumbbell_Raise/0.jpg",
+   "img/ex/Front_Dumbbell_Raise/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20frontali%20tecnica%20corretta"
+ },
+ {
+  "id": "Dumbbell_Bicep_Curl",
+  "nome": "Curl con manubri",
+  "gruppo": "braccia",
+  "muscoli": "Bicipiti",
+  "attrezzo": "manubri",
+  "passi": [
+   "In piedi, manubri ai lati, gomiti vicini al corpo.",
+   "Fletti i gomiti portando i manubri alle spalle.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "I gomiti restano fermi.",
+  "img": [
+   "img/ex/Dumbbell_Bicep_Curl/0.jpg",
+   "img/ex/Dumbbell_Bicep_Curl/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20con%20manubri%20tecnica%20corretta"
+ },
+ {
+  "id": "Barbell_Curl",
+  "nome": "Curl con bilanciere",
+  "gruppo": "braccia",
+  "muscoli": "Bicipiti",
+  "attrezzo": "bilanciere",
+  "passi": [
+   "Presa alla larghezza delle spalle, braccia distese.",
+   "Fletti i gomiti portando la barra al petto.",
+   "Scendi controllato."
+  ],
+  "consiglio": "Evita di dondolare con la schiena.",
+  "img": [
+   "img/ex/Barbell_Curl/0.jpg",
+   "img/ex/Barbell_Curl/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20con%20bilanciere%20tecnica%20corretta"
+ },
+ {
+  "id": "Hammer_Curls",
+  "nome": "Curl a martello",
+  "gruppo": "braccia",
+  "muscoli": "Bicipiti, avambracci",
+  "attrezzo": "manubri",
+  "passi": [
+   "Manubri con i palmi rivolti l'uno verso l'altro.",
+   "Fletti i gomiti mantenendo la presa neutra.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Lavora anche gli avambracci.",
+  "img": [
+   "img/ex/Hammer_Curls/0.jpg",
+   "img/ex/Hammer_Curls/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20a%20martello%20tecnica%20corretta"
+ },
+ {
+  "id": "Machine_Bicep_Curl",
+  "nome": "Curl alla macchina",
+  "gruppo": "braccia",
+  "muscoli": "Bicipiti",
+  "attrezzo": "macchina",
+  "passi": [
+   "Regola il sedile: gomiti all'altezza dell'asse.",
+   "Fletti portando le maniglie verso le spalle.",
+   "Torna giù lentamente."
+  ],
+  "consiglio": "Facile da controllare per iniziare.",
+  "img": [
+   "img/ex/Machine_Bicep_Curl/0.jpg",
+   "img/ex/Machine_Bicep_Curl/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20alla%20macchina%20tecnica%20corretta"
+ },
+ {
+  "id": "Triceps_Pushdown",
+  "nome": "Push down ai cavi",
+  "gruppo": "braccia",
+  "muscoli": "Tricipiti",
+  "attrezzo": "cavi",
+  "passi": [
+   "Cavo alto, gomiti attaccati ai fianchi.",
+   "Estendi le braccia verso il basso.",
+   "Risali lentamente fino a 90° al gomito."
+  ],
+  "consiglio": "Solo l'avambraccio si muove.",
+  "img": [
+   "img/ex/Triceps_Pushdown/0.jpg",
+   "img/ex/Triceps_Pushdown/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Push%20down%20ai%20cavi%20tecnica%20corretta"
+ },
+ {
+  "id": "Triceps_Pushdown_-_Rope_Attachment",
+  "nome": "Push down con corda",
+  "gruppo": "braccia",
+  "muscoli": "Tricipiti",
+  "attrezzo": "cavi",
+  "passi": [
+   "Impugna la corda, gomiti ai fianchi.",
+   "Estendi e apri leggermente la corda in basso.",
+   "Risali controllato."
+  ],
+  "consiglio": "Stringi forte il tricipite a fine movimento.",
+  "img": [
+   "img/ex/Triceps_Pushdown_-_Rope_Attachment/0.jpg",
+   "img/ex/Triceps_Pushdown_-_Rope_Attachment/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Push%20down%20con%20corda%20tecnica%20corretta"
+ },
+ {
+  "id": "Standing_Dumbbell_Triceps_Extension",
+  "nome": "Estensioni sopra la testa",
+  "gruppo": "braccia",
+  "muscoli": "Tricipiti",
+  "attrezzo": "manubri",
+  "passi": [
+   "Un manubrio con entrambe le mani sopra la testa.",
+   "Fletti i gomiti portando il peso dietro la nuca.",
+   "Estendi di nuovo."
+  ],
+  "consiglio": "Gomiti stretti e puntati in alto.",
+  "img": [
+   "img/ex/Standing_Dumbbell_Triceps_Extension/0.jpg",
+   "img/ex/Standing_Dumbbell_Triceps_Extension/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Estensioni%20sopra%20la%20testa%20tecnica%20corretta"
+ },
+ {
+  "id": "Plank",
+  "nome": "Plank",
+  "gruppo": "core",
+  "muscoli": "Addome, core",
+  "attrezzo": "corpo libero",
+  "passi": [
+   "Appoggio su avambracci e punte dei piedi.",
+   "Corpo in linea retta, addome e glutei contratti.",
+   "Mantieni la posizione respirando."
+  ],
+  "consiglio": "Parti da 20-30 secondi.",
+  "img": [
+   "img/ex/Plank/0.jpg",
+   "img/ex/Plank/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Plank%20tecnica%20corretta"
+ },
+ {
+  "id": "Crunches",
+  "nome": "Crunch",
+  "gruppo": "core",
+  "muscoli": "Addome",
+  "attrezzo": "corpo libero",
+  "passi": [
+   "Sdraiato, ginocchia flesse, mani ai lati della testa.",
+   "Solleva spalle e petto contraendo l'addome.",
+   "Scendi lentamente."
+  ],
+  "consiglio": "Non tirare il collo con le mani.",
+  "img": [
+   "img/ex/Crunches/0.jpg",
+   "img/ex/Crunches/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20tecnica%20corretta"
+ },
+ {
+  "id": "Cable_Crunch",
+  "nome": "Crunch ai cavi",
+  "gruppo": "core",
+  "muscoli": "Addome",
+  "attrezzo": "cavi",
+  "passi": [
+   "In ginocchio sotto il cavo alto, corda vicino alla testa.",
+   "Fletti il busto portando i gomiti verso le cosce.",
+   "Risali controllato."
+  ],
+  "consiglio": "Si muove il busto, non i fianchi.",
+  "img": [
+   "img/ex/Cable_Crunch/0.jpg",
+   "img/ex/Cable_Crunch/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20ai%20cavi%20tecnica%20corretta"
+ },
+ {
+  "id": "Hanging_Leg_Raise",
+  "nome": "Sollevamento gambe alla sbarra",
+  "gruppo": "core",
+  "muscoli": "Addome basso",
+  "attrezzo": "corpo libero",
+  "passi": [
+   "Appeso alla sbarra, corpo fermo.",
+   "Solleva le gambe (o le ginocchia) fino a metà altezza.",
+   "Scendi senza dondolare."
+  ],
+  "consiglio": "Versione facile: porta solo le ginocchia al petto.",
+  "img": [
+   "img/ex/Hanging_Leg_Raise/0.jpg",
+   "img/ex/Hanging_Leg_Raise/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Sollevamento%20gambe%20alla%20sbarra%20tecnica%20corretta"
+ },
+ {
+  "id": "Russian_Twist",
+  "nome": "Russian twist",
+  "gruppo": "core",
+  "muscoli": "Obliqui",
+  "attrezzo": "corpo libero",
+  "passi": [
+   "Seduto, busto leggermente inclinato indietro.",
+   "Ruota il busto da un lato all'altro.",
+   "Mantieni il ritmo controllato."
+  ],
+  "consiglio": "Puoi tenere un piccolo peso.",
+  "img": [
+   "img/ex/Russian_Twist/0.jpg",
+   "img/ex/Russian_Twist/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Russian%20twist%20tecnica%20corretta"
+ },
+ {
+  "id": "Elliptical_Trainer",
+  "nome": "Ellittica",
+  "gruppo": "cardio",
+  "muscoli": "Cardio, tutto il corpo",
+  "attrezzo": "macchina",
+  "passi": [
+   "Sali sulla macchina e impugna le maniglie.",
+   "Pedala a ritmo costante, postura eretta.",
+   "Mantieni un'intensità in cui riesci ancora a parlare."
+  ],
+  "consiglio": "10-15 minuti a fine allenamento vanno bene.",
+  "img": [
+   "img/ex/Elliptical_Trainer/0.jpg",
+   "img/ex/Elliptical_Trainer/1.jpg"
+  ],
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Ellittica%20tecnica%20corretta"
+ }
+]
