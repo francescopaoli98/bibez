@@ -2,6 +2,7 @@
 import { S, save } from './store.js';
 import { syncSession } from './training.js';
 import { targets } from './nutrition.js';
+import { topics } from './chats.js';
 
 export function coachSystem(lib) {
   const p = S.profile;
@@ -22,6 +23,8 @@ ${plan}
 
 ULTIMI ALLENAMENTI:
 ${rec}
+
+ARGOMENTI GIÀ DISCUSSI IN ALTRE CHAT (titoli, per continuità; richiamali solo se utile): ${topics().join('; ') || 'nessuno'}
 
 CATALOGO ESERCIZI USABILI (id|nome|gruppo|attrezzo[|ok a casa]):
 ${catalog}

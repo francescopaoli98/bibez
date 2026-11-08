@@ -11,6 +11,7 @@ import { initSound, play, buzz } from './sound.js';
 import { countUps, confetti } from './fx.js';
 import { viewProgressi } from './progress.js';
 import { remindersCard } from './reminders.js';
+import * as Chats from './chats.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges } from './coach.js';
 
 let LIB = [];
@@ -457,17 +458,23 @@ function startRest(sec) {
 /* ---------------------------- coach IA ---------------------------- */
 const STATUS = { pending: 'Sto per modificare la scheda', applied: 'Modifica applicata ✅', rejected: 'Nessuna modifica fatta', undone: 'Modifica annullata' };
 
+function relDate(t) {
+  const d = new Date(t), now = new Date(), dd = Math.round((new Date(now.toDateString()) - new Date(d.toDateString())) / 864e5);
+  return dd === 0 ? 'Oggi' : dd === 1 ? 'Ieri' : d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+}
+
 function viewCoach() {
   const list = h('div', { class: 'chat' });
-  const input = h('input', { type: 'text', placeholder: 'Scrivi al coach…', enterkeyhint: 'send' });
-  let busy = false;
-  const newBtn = h('button', { class: 'btn ghost small', onclick: () => { S.chat = []; save(); draw(); } }, 'Nuova chat');
-  const bottom = () => window.scrollTo(0, document.body.scrollHeight);
+  const input = h('input', { type: 'text', placeholder: 'Scrivi al coach…', enterkeyhint: 'send', 'data-nosound': '' });
+  let busy = false, animateFrom = Infinity;               // dal messaggio animateFrom in poi: comparsa animata
+  const titleEl = h('h1', {}), subEl = h('div', { class: 'eyebrow', style: 'text-transform:none' });
+  const bottom = () => window.scrollTo({ top: document.body.scrollHeight, behavior: getTheme().anim ? 'smooth' : 'auto' });
+  const refreshHead = () => { const c = Chats.current(); titleEl.textContent = c?.title || 'Coach'; subEl.textContent = c ? `${c.messages.length} messaggi` : 'Scrivimi quello che vuoi'; };
 
-  function proposalCard(m) {
+  function proposalCard(m, isNew) {
     const p = m.proposal;
     const setStatus = (st) => { p.status = st; save(); draw(); };
-    return h('div', { class: 'proposal' + (p.status === 'pending' ? ' pending' : '') },
+    return h('div', { class: 'proposal' + (p.status === 'pending' ? ' pending' : '') + (isNew ? ' enter' : '') },
       h('div', { class: 'kicker' }, STATUS[p.status]),
       h('ul', {}, p.changes.map(c => h('li', {}, c.desc))),
       p.status === 'pending' && h('div', { class: 'row' },
@@ -475,8 +482,8 @@ function viewCoach() {
           const ok = normChanges(p.changes, LIB);        // ricontrolla: la scheda potrebbe essere cambiata
           if (!ok.length) { toast('Queste modifiche non sono più applicabili'); return setStatus('rejected'); }
           applyChanges(ok);
-          S.chat.forEach(x => x.proposal && (x.proposal.undoable = false));
-          p.undoable = true; setStatus('applied');
+          Chats.allMessages().forEach(x => x.proposal && (x.proposal.undoable = false));
+          p.undoable = true; setStatus('applied'); play('check');
           toast(S.session ? 'Fatto! Allenamento aggiornato' : 'Fatto! Scheda aggiornata');
         } }, 'Sì, applica'),
         h('button', { class: 'btn ghost grow', onclick: () => setStatus('rejected') }, 'No, lascia così')),
@@ -485,14 +492,37 @@ function viewCoach() {
   }
 
   function draw() {
-    newBtn.hidden = !S.chat.length;
-    const msgs = S.chat.length ? S.chat : [{ role: 'model', text: 'Ciao! Sono il tuo coach. Dimmi se qualcosa ti dà fastidio, se hai poco tempo o se vuoi cambiare un esercizio: ti dico io cosa modificare, e prima di toccare la scheda ti chiedo il permesso. 💪' }];
-    list.replaceChildren(...msgs.flatMap(m => {
-      const b = h('div', { class: 'msg ' + (m.role === 'user' ? 'me' : 'ai') });
-      b.append(m.role === 'user' ? document.createTextNode(m.text) : mdLite(m.text));
-      return [b, m.proposal && proposalCard(m)];
+    const c = Chats.current(); refreshHead();
+    const msgs = c?.messages.length ? c.messages : [{ role: 'model', text: 'Ciao! Sono il tuo coach. Dimmi se qualcosa ti dà fastidio, se hai poco tempo o se vuoi cambiare un esercizio: ti dico io cosa modificare, e prima di toccare la scheda ti chiedo il permesso. 💪' }];
+    list.replaceChildren(...msgs.flatMap((m, i) => {
+      const isNew = !!c && i >= animateFrom;
+      const b = h('div', { class: 'msg ' + (m.role === 'user' ? 'me' : 'ai') + (isNew ? ' enter' : '') });
+      b.append(m.role === 'user' ? document.createTextNode(m.text) : mdLite(m.text, isNew));
+      return [b, m.proposal && proposalCard(m, isNew)];
     }).filter(Boolean));
-    bottom();
+    animateFrom = Infinity; bottom();
+  }
+
+  // Elenco di tutte le chat, con anteprima e cestino
+  function chatsSheet() {
+    const items = Chats.sorted();
+    openSheet(h('div', { class: 'stack' },
+      h('div', { class: 'row between' }, h('h2', {}, 'Le tue chat'),
+        h('button', { class: 'btn small', onclick: () => { Chats.startNew(); closeSheet(); viewCoach(); } }, '+ Nuova chat')),
+      h('p', { class: 'muted small' }, 'I titoli li scrive il coach. Il coach si ricorda di cosa avete parlato.'),
+      items.length
+        ? items.map(c => {
+            const last = c.messages.at(-1)?.text || '';
+            return h('div', { class: 'chat-item' + (c.id === S.activeChat ? ' on' : '') },
+              c.id === S.activeChat && h('span', { class: 'dot' }),
+              h('button', { class: 'chat-open grow', onclick: () => { Chats.open(c.id); closeSheet(); viewCoach(); } },
+                h('b', {}, c.title || 'Chat'), h('div', { class: 'muted small ellipsis' }, last.replace(/\*\*/g, ''))),
+              h('span', { class: 't' }, relDate(c.updated)),
+              h('button', { class: 'ic-d', 'aria-label': 'Cancella la chat', onclick: () => {
+                if (!confirm('Cancellare questa chat?')) return;
+                Chats.remove(c.id); closeSheet(); viewCoach(); } }, icon('trash')));
+          })
+        : h('p', { class: 'muted' }, 'Nessuna chat ancora: scrivi qualcosa al coach.')));
   }
 
   async function send(text) {
@@ -500,35 +530,41 @@ function viewCoach() {
     if (!text || busy) return;
     if (!aiReady()) return toast('Aggiungi la chiave Gemini in Impostazioni');
     busy = true; input.value = '';
-    S.chat.push({ role: 'user', text }); S.chat = S.chat.slice(-30); save(); draw();
+    const chat = Chats.push({ role: 'user', text });
+    animateFrom = chat.messages.length - 1; draw(); play('send'); buzz(10);
     const cnt = h('span', { class: 'muted small' });
-    list.append(h('div', { class: 'msg ai' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span'), cnt))); bottom();
+    const typing = h('div', { class: 'msg ai enter' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span'), cnt));
+    list.append(typing); bottom();
     const t0 = Date.now();
     const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); cnt.textContent = s < 4 ? '' : ` ${s} s` + (s >= 15 ? ' · Gemini è lento: prova un modello più veloce in Impostazioni' : ''); }, 500);
     try {
-      const hist = S.chat.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
+      const hist = chat.messages.slice(-30).map(m => ({ role: m.role, parts: [{ text: m.text }] }));
       while (hist.length && hist[0].role !== 'user') hist.shift();
       const raw = await gemini({ system: coachSystem(LIB), contents: hist, json: true, temperature: 0.5 });
       const { text: reply, changes } = parseReply(raw);
       const ok = normChanges(changes, LIB);
-      S.chat.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : {}) });
-    } catch (e) { S.chat.pop(); input.value = text; showError(e); }
-    clearInterval(tick); S.chat = S.chat.slice(-30); save(); busy = false; draw();
+      Chats.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : {}) });
+      animateFrom = chat.messages.length - 1; play('receive'); buzz(12);
+      if (!chat.aiTitled && chat.messages.length >= 2) Chats.aiTitle(chat).then(refreshHead).catch(() => {});   // titolo scritto dal coach
+    } catch (e) { Chats.popLast(); input.value = text; play('error'); showError(e); }
+    clearInterval(tick); busy = false; draw();
   }
   input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
 
   const sugg = ['Mi fa male una cosa', 'Cambia un esercizio', 'Ho poco tempo oggi', 'Mi sembra troppo facile'];
   render(
     h('div', { class: 'row between' },
-      h('div', { class: 'coach-head' }, h('div', { class: 'avatar' }, icon('dumbbell')), h('div', {}, h('h1', {}, 'Coach'), h('div', { class: 'eyebrow', style: 'text-transform:none' }, 'Ti rispondo anche per cambiare la scheda'))),
+      h('div', { class: 'coach-head' }, h('div', { class: 'avatar' }, icon('dumbbell')),
+        h('button', { class: 'coach-title', onclick: chatsSheet, 'aria-label': 'Le tue chat' }, h('div', {}, titleEl, subEl), icon('chev'))),
       h('div', { class: 'row', style: 'gap:8px' },
-        newBtn, gear())),
+        h('button', { class: 'iconbtn', 'aria-label': 'Nuova chat', onclick: () => { Chats.startNew(); viewCoach(); } }, icon('plus')), gear())),
     !aiReady() && h('div', { class: 'card stack' }, h('p', {}, 'Per parlare col coach serve la chiave Gemini (gratuita).'),
       h('a', { class: 'btn small', href: '#/profilo' }, 'Aggiungila qui')),
     list,
-    h('div', { class: 'chips' }, sugg.map(q => h('button', { class: 'chip', onclick: () => send(q) }, q))),
+    !Chats.messages().length && h('div', { class: 'chips' }, sugg.map(q => h('button', { class: 'chip', onclick: () => send(q) }, q)),
+      h('button', { class: 'chip', onclick: () => { const [t, l] = HELP.coach; openSheet(h('div', { class: 'stack' }, h('h2', {}, t), h('ul', { class: 'helplist' }, l.map(x => h('li', {}, x))), h('button', { class: 'btn big block', onclick: closeSheet }, 'Ho capito'))); } }, '❓ Come funziona')),
     h('div', { style: 'height:64px' }),
-    h('div', { class: 'composer' }, h('div', { class: 'in' }, input, h('button', { class: 'btn', onclick: () => send() }, 'Invia'))));
+    h('div', { class: 'composer' }, h('div', { class: 'in' }, input, h('button', { class: 'btn', 'data-nosound': '', onclick: () => send() }, 'Invia'))));
   draw();
 }
 

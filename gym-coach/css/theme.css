@@ -269,3 +269,23 @@ body.veil #view, body.veil #tabs, body.veil #sheet-root, body.veil #rest-root { 
 body.no-anim *, body.no-anim *::before, body.no-anim *::after { animation: none !important; transition: none !important; }
 body.big { zoom: 1.12; }
 @media (prefers-reduced-motion: reduce) { .hero .btn.big, .hero::after, .pulse, .hint-bubble { animation: none !important; } }
+
+/* ======== v17: chat animata e storico ======== */
+.coach-title { display: flex; align-items: center; gap: 6px; text-align: left; background: none; color: inherit; padding: 0; min-width: 0; }
+.coach-title h1 { font-size: 23px; max-width: 176px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.coach-title > svg { width: 20px; height: 20px; flex: none; stroke: var(--accent); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.msg.enter { animation: msgpop .5s cubic-bezier(.3, 1.5, .5, 1) both; }
+.msg.me.enter { transform-origin: 100% 100%; } .msg.ai.enter { transform-origin: 0 100%; }
+@keyframes msgpop { from { opacity: 0; transform: translateY(16px) scale(.82); } to { opacity: 1; transform: none; } }
+.reveal { animation: rise .5s ease both; animation-delay: calc(var(--i, 0) * 150ms + 150ms); }
+.proposal.enter { animation: rise .55s ease both; animation-delay: .55s; }
+.dots-anim span { animation-duration: .9s; }
+.chat-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; background: var(--card2); border: 1px solid var(--line); }
+.chat-item.on { border-color: var(--accent); background: rgba(var(--accent-rgb), .08); }
+.chat-open { text-align: left; background: none; color: inherit; padding: 0; min-width: 0; }
+.chat-open b { font-size: 15px; display: block; }
+.chat-item .t { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.chat-item .ic-d { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--card); border: 1px solid var(--line); color: var(--muted); flex: none; }
+.chat-item .ic-d svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.chat-item .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex: none; }
+.ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }

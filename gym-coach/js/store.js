@@ -38,7 +38,11 @@ function applyData(d) {
   Object.assign(S, structuredClone(DEFAULT), d || {});
   S.settings = { ...DEFAULT.settings, ...((d && d.settings) || {}) };
   S.security = { ...DEFAULT.security, ...((d && d.security) || {}) };
-  // (la migrazione di S.chat in S.chats arriverà insieme alla nuova schermata delle chat, dopo l'approvazione)
+  if (S.chat?.length && !S.chats.length) {                 // migra la vecchia chat unica nello storico
+    const first = S.chat.find(m => m.role === 'user')?.text || 'Chat';
+    S.chats = [{ id: 'c' + Date.now().toString(36), title: first.length > 30 ? first.slice(0, 28) + '…' : first, created: Date.now(), updated: Date.now(), messages: S.chat }];
+    S.chat = [];
+  }
 }
 
 /* ---------- cifratura ---------- */
