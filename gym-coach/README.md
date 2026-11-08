@@ -30,6 +30,8 @@ pubblica la cartella `gym-coach/` a ogni push sul branch `claude/ai-gym-coach-ap
    poi Settings → Environments → github-pages → Deployment branches → aggiungi `claude/ai-gym-coach-app-gvnftg`
 2. Apri l'URL dal telefono → menu del browser → **Aggiungi a schermata Home**
 
+Indirizzo dell'app: https://francescopaoli98.github.io/bibez/
+
 ## Chiave Gemini
 Crea una chiave gratuita su https://aistudio.google.com/apikey e incollala nell'app (Profilo).
 Resta solo sul telefono e viene inviata solo a Google.
