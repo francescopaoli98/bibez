@@ -5,7 +5,7 @@ import { accountsMode, knownUsers, rememberUser, lastUser, forgetLast, getSessio
 import { h, icon, tile, toast, openSheet, closeSheet, mdLite } from './ui.js';
 import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable, lastTiming, expert } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
-import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib } from './training.js';
+import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib, shortList } from './training.js';
 import { targets } from './nutrition.js';
 import { applyTheme, setTheme, getTheme, PRESETS, BACKGROUNDS } from './theme.js';
 import { initSound, play, buzz } from './sound.js';
@@ -421,6 +421,20 @@ function reminderCards() {
   return out;
 }
 
+// Titolo semplice al posto del nome tecnico ("Full body A"): dice solo cosa si allena
+const GRP = { gambe: 'Gambe', petto: 'Petto', schiena: 'Schiena', spalle: 'Spalle', braccia: 'Braccia', core: 'Addome', cardio: 'Cardio' };
+function friendlyTitle(exs) {
+  const g = [...new Set(exs.map(e => EX(e.id)?.gruppo))].filter(Boolean);
+  if (g.length >= 4) return 'Tutto il corpo';
+  const n = g.map(x => GRP[x] || x);
+  return n.length ? n.slice(0, 3).join(' e ') : 'Allenamento';
+}
+// Quanto è impegnativo, in parole semplici
+function livelloTxt(exs) {
+  const base = S.profile?.livello === 'intermedio' ? 1 : 0, big = exs.length > 6 ? 1 : 0;
+  return ['Facile', 'Medio', 'Impegnativo'][Math.min(2, base + big)];
+}
+
 function viewOggi() {
   const day = S.plan.giorni[S.nextDay % S.plan.giorni.length];
   const wk = weekCount(), target = S.profile.giorni;
@@ -434,25 +448,32 @@ function viewOggi() {
   } }, S.session ? '▶ RIPRENDI L\'ALLENAMENTO' : '▶ INIZIA L\'ALLENAMENTO');
   render(
     h('div', { class: 'row between' },
-      h('div', {}, h('div', { class: 'eyebrow' }, `${saluto()} · ${oggiTxt()}`), h('h1', {}, utente() || 'Ciao')),
+      h('div', {}, h('div', { class: 'eyebrow' }, `${saluto()} · ${oggiTxt()}`), h('h1', { class: 'hi' }, utente() ? 'Ciao ' + utente() : 'Ciao')),
       h('div', { class: 'row', style: 'gap:8px' }, helpBtn('oggi'), gear())),
     ...(!S.session ? reminderCards() : []),
     !S.session && luogoSwitch(viewOggi),
     !S.session && homeHint(),
-    h('div', { class: 'hero' },
-      h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? 'Casa' : 'Palestra'}` : 'Il tuo allenamento di oggi'),
-      h('h1', { class: 'hero-title' }, day.nome),
-      h('div', { class: 'meta' }, h('span', {}, tile('tempo', 14), estMin(exs) + ' min'), h('span', {}, tile('kcal', 14), kcalTxt(exs)), h('span', {}, tile('palestra', 14), exs.length + ' esercizi')),
-      h('div', { class: 'chips' }, [...new Set(exs.map(e => EX(e.id)?.gruppo))].filter(Boolean).map(g => h('span', { class: 'chip' }, g))),
-      first && h('div', { class: 'hint-bubble' }, '👇 Tocca qui per cominciare'),
-      startBtn),
+    h('div', { class: 'hero photo' },
+      exs[0] && EX(exs[0].id)?.img?.[0] && h('img', { class: 'hero-bg', src: EX(exs[0].id).img[0], alt: '', 'aria-hidden': 'true' }),
+      h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? 'Casa' : 'Palestra'}${S.session.short ? ' · versione corta' : ''}` : 'Il tuo allenamento di oggi'),
+      h('h1', { class: 'hero-title soft' }, friendlyTitle(exs)),
+      h('p', { class: 'hero-sub' }, 'Ti guido io, un esercizio alla volta.'),
+      h('div', { class: 'meta' }, h('span', {}, tile('tempo', 14), estMin(exs) + ' min'), h('span', {}, tile('kcal', 14), kcalTxt(exs)), h('span', {}, tile('fatto', 14), livelloTxt(exs))),
+      startBtn,
+      !S.session && h('button', { class: 'linkbtn', onclick: () => {
+        const sh = shortList(exs);
+        if (!confirm(`Versione corta: ${sh.length} esercizi, circa ${estMin(sh)} minuti. Iniziamo?`)) return;
+        S.seen = { ...(S.seen || {}), start: true };
+        startSession(S.nextDay % S.plan.giorni.length, true); go('#/allenamento');
+      } }, 'Poco tempo? ', h('b', {}, 'Versione da 15 minuti'))),
     h('div', { class: 'card stack' },
       h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}${kcalWeek ? ' · ~' + kcalWeek + ' kcal' : ''}`)),
       weekDots(),
       h('p', { class: 'muted small' }, 'Ogni allenamento fatto colora un cerchio.')),
     nutritionCard(),
-    h('a', { class: 'card row between linkcard', href: '#/coach' },
-      h('div', {}, h('h3', {}, 'Hai un dubbio? Scrivi al coach'), h('p', { class: 'muted small' }, 'Come faresti con una persona')),
+    h('a', { class: 'card row linkcard', href: '#/coach', style: 'gap:14px' },
+      tile('salute', 20),
+      h('div', { class: 'grow' }, h('h3', {}, 'Ti fa male qualcosa?'), h('p', { class: 'muted small' }, 'Dillo al coach: cambia gli esercizi per te')),
       h('span', { class: 'arrow' }, '›')));
 }
 

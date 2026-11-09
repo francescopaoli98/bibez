@@ -398,3 +398,14 @@ svg .f { fill: currentColor; fill-opacity: .2; }
 .setrow2 .ic2 .tile svg.sp, .remind .ic .tile svg.sp { top: -4px; right: -4px; }
 .tip .tile { box-shadow: none; } .tip .tile svg.sp { display: none; }
 .meta span.tile { padding: 0; border: 0; gap: 0; font-size: 0; background-clip: border-box; border-radius: 30%; display: inline-grid; }
+
+/* ======== v34: Home più leggera (carta con foto sfumata) ======== */
+h1.hi { font-family: inherit; text-transform: none; font-size: 32px; letter-spacing: -.4px; line-height: 1.1; margin-top: 2px; }
+.hero.photo { overflow: hidden; }
+.hero-bg { position: absolute !important; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .6; z-index: 0 !important; pointer-events: none; filter: saturate(.85); -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 42%, transparent 88%); mask-image: linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 42%, transparent 88%); }
+.hero-title.soft { font-size: 42px; line-height: 1; }
+.hero-sub { margin: 4px 0 2px; color: rgba(238,242,250,.8); font-size: 16px; }
+.linkbtn { background: none; border: 0; color: rgba(238,242,250,.72); font-size: 15px; padding: 10px 0 2px; text-align: center; cursor: pointer; }
+.linkbtn b { color: var(--text); text-decoration: underline; text-decoration-color: rgba(var(--accent-rgb), .6); text-underline-offset: 3px; }
+.hero .meta span .tile { margin-right: 0; }
+.hero .meta { gap: 6px; flex-wrap: nowrap; } .hero .meta span { padding: 6px 9px 6px 6px; font-size: 13px; gap: 6px; white-space: nowrap; }

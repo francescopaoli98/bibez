@@ -81,12 +81,24 @@ export function estKcal(exs) {
   return Math.round(h * kg / 10) * 10;
 }
 
-export function startSession(dayIndex) {
+// Versione corta (~15 minuti): i primi esercizi del giorno, 2 serie ciascuno
+export function shortList(exs, minutes = 15) {
+  const out = [];
+  for (const t of exs) {
+    const s = { ...t, serie: Math.min(t.serie, 2) };
+    if (out.length >= 3 && estMin([...out, s]) > minutes) break;
+    out.push(s);
+  }
+  return out;
+}
+const pick = (day, luogo, short) => short ? shortList(adaptDay(day, luogo)) : adaptDay(day, luogo);
+
+export function startSession(dayIndex, short = false) {
   const day = S.plan.giorni[dayIndex];
   const luogo = S.luogo || 'palestra';
   S.session = {
-    dayIndex, dayName: day.nome, startedAt: Date.now(), cur: 0, luogo,
-    exercises: adaptDay(day, luogo).map(t => ({ id: t.id, target: t, sets: newSets(t) })),
+    dayIndex, dayName: day.nome, startedAt: Date.now(), cur: 0, luogo, short,
+    exercises: pick(day, luogo, short).map(t => ({ id: t.id, target: t, sets: newSets(t) })),
   };
   save();
 }
@@ -97,7 +109,7 @@ export function syncSession() {
   const day = s && S.plan.giorni[s.dayIndex];
   if (!day) return;
   const old = s.exercises;
-  const next = adaptDay(day, s.luogo).map(t => {
+  const next = pick(day, s.luogo, s.short).map(t => {
     const ex = old.find(x => x.id === t.id);
     if (!ex) return { id: t.id, target: t, sets: newSets(t) };
     if (ex.sets.some(x => x.done)) return ex;
