@@ -547,21 +547,38 @@ function viewAllenamento() {
   const segEls = s.exercises.map((_, i) => h('i', { class: 'seg' + (i === s.cur ? ' cur' : '') }, h('u')));
   const upd = () => s.exercises.forEach((e, i) => { segEls[i].firstChild.style.width = (e.sets.filter(x => x.done).length / e.sets.length * 100) + '%'; });
 
+  // − / + per cambiare i numeri senza tastiera; toccando il numero si può comunque scrivere
+  const stepKg = /bilanciere|macchina|cavi/.test(info.attrezzo || '') ? 2.5 : 1;
+  const stepper = (st, key) => {
+    const inp = h('input', { type: 'number', inputmode: key === 'kg' ? 'decimal' : 'numeric', step: key === 'kg' ? '0.5' : '1', min: '0', placeholder: key === 'kg' ? 'kg' : ex.target.ripetizioni, value: st[key], disabled: time, oninput: e => { st[key] = e.target.value; save(); } });
+    if (time) return inp;
+    const bump = (d) => {
+      const cur = parseFloat(String(inp.value).replace(',', '.')) || (key === 'kg' ? sg?.kg : 0) || 0;
+      const nv = Math.max(0, Math.round((cur + d) * 10) / 10);
+      inp.value = nv; st[key] = String(nv); save(); buzz(8);
+    };
+    const step = key === 'kg' ? stepKg : 1;
+    return h('div', { class: 'stp' },
+      h('button', { class: 'm', 'aria-label': key === 'kg' ? 'Meno peso' : 'Meno volte', 'data-nosound': '', onclick: () => bump(-step) }, icon('minus')), inp,
+      h('button', { class: 'm', 'aria-label': key === 'kg' ? 'Più peso' : 'Più volte', 'data-nosound': '', onclick: () => bump(step) }, icon('plus')));
+  };
+  const rowEls = [];
+  const paintRows = () => { const cur = ex.sets.findIndex(x => !x.done); rowEls.forEach((r, i) => { r.classList.toggle('done', ex.sets[i].done); r.classList.toggle('cur', i === cur); }); };
   const rows = ex.sets.map((st, si) => {
-    const kg = h('input', { type: 'number', inputmode: 'decimal', step: '0.5', min: '0', placeholder: 'kg', value: st.kg, disabled: time, oninput: e => { st.kg = e.target.value; save(); } });
-    const reps = h('input', { type: 'number', inputmode: 'numeric', min: '0', placeholder: ex.target.ripetizioni, value: st.reps, disabled: time, oninput: e => { st.reps = e.target.value; save(); } });
     const chk = h('button', { class: 'chk', 'aria-label': 'Serie fatta', 'data-nosound': '' }, icon('check'));
-    const cells = [h('div', { class: 'n' }, si + 1), kg, reps, chk];
-    const paint = () => cells.forEach(c => c.classList.toggle('set-done', st.done));
+    const row = h('div', { class: 'srow' }, h('div', { class: 'n' }, si + 1), stepper(st, 'kg'), stepper(st, 'reps'), chk);
+    rowEls.push(row);
+    const paint = () => chk.classList.toggle('set-done', st.done);
     chk.addEventListener('click', () => {
-      st.done = !st.done; paint(); save(); upd();
+      st.done = !st.done; paint(); paintRows(); save(); upd();
       if (st.done) { play('check'); buzz(28); }
       if (st.done && ex.target.recupero) startRest(ex.target.recupero);
       if (!st.done) stopRest();
     });
     paint();
-    return h('div', { style: 'display:contents' }, cells);
+    return row;
   });
+  paintRows();
 
   const goTo = (i) => { s.cur = i; save(); stopRest(); viewAllenamento(); window.scrollTo(0, 0); };
 
@@ -571,12 +588,14 @@ function viewAllenamento() {
       h('div', { class: 'row', style: 'gap:8px' }, helpBtn('allenamento'), h('button', { class: 'btn ghost small', onclick: exitMenu }, 'Fine'))),
     h('div', { class: 'segs' }, segEls),
     h('button', { class: 'anim-btn', onclick: () => showExercise(ex.id), 'aria-label': 'Come si fa' }, exAnim(info), h('span', { class: 'pill' }, 'Come si fa ›')),
-    h('div', {}, h('h1', { class: 'wk-title' }, info.nome), h('p', { class: 'muted' }, `${ex.target.serie} serie da ${ex.target.ripetizioni}${ex.target.recupero ? ' · riposo ' + ex.target.recupero + ' secondi' : ''}. Fai la serie, poi tocca ✓.`)),
-    sg && h('div', { class: 'hint' }, 'Ultima volta: ', sg.txt, sg.up ? h('span', {}, ' · ', h('b', {}, `prova ${sg.up} kg 🔥`)) : ''),
-    h('div', { id: 'rest-slot' }),
+    h('div', {}, h('h1', { class: 'wk-title' }, info.nome),
+      info.muscoli && h('div', { class: 'mchips' }, info.muscoli.split(',').map(m => h('span', {}, m.trim()))),
+      h('p', { class: 'muted' }, `${ex.target.serie} serie da ${ex.target.ripetizioni}${ex.target.recupero ? ' · riposo ' + ex.target.recupero + ' secondi' : ''}. Fai la serie, poi tocca ✓.`)),
+    sg && h('div', { class: 'hint lastt' }, tile('fatto', 14), h('span', {}, 'Ultima volta: ', sg.txt, sg.up ? h('span', {}, ' · ', h('b', {}, `prova ${sg.up} kg 🔥`)) : '')),
     h('div', { class: 'sets' },
-      h('div', { class: 'hd' }, ''), h('div', { class: 'hd' }, time ? '' : 'Peso (kg)'), h('div', { class: 'hd' }, time ? '' : 'Quante volte'), h('div', { class: 'hd' }, 'Fatto'), rows),
-    h('p', { class: 'muted small center' }, time ? 'Tocca ✓ quando hai finito.' : 'I numeri sono già scritti: cambiali solo se hai fatto diverso.'),
+      h('div', { class: 'shd' }, h('div', { class: 'hd' }, ''), h('div', { class: 'hd' }, time ? '' : 'Peso (kg)'), h('div', { class: 'hd' }, time ? '' : 'Quante volte'), h('div', { class: 'hd' }, 'Fatto')), rows),
+    h('div', { id: 'rest-slot' }),
+    h('p', { class: 'muted small center' }, time ? 'Tocca ✓ quando hai finito.' : 'I numeri sono già scritti: cambiali con − / + (o toccali per scrivere).'),
     h('button', { class: 'btn ghost block', onclick: () => swapExercise(s.cur) }, '↔ Sostituisci esercizio'),
     h('div', { class: 'bottom-bar' }, h('div', { class: 'in' },
       s.cur > 0 && h('button', { class: 'btn ghost', onclick: () => goTo(s.cur - 1), 'aria-label': 'Precedente' }, '‹'),

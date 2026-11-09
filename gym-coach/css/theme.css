@@ -460,3 +460,24 @@ h1.hi { font-family: inherit; text-transform: none; font-size: 32px; letter-spac
 .chg { flex-direction: column; align-items: flex-start; gap: 6px; }
 .chg .arr { transform: rotate(90deg); margin-left: 12px; line-height: 1; font-size: 20px; }
 .chg.txt { flex-direction: row; }
+
+/* ======== v36: Allenamento, nuova grafica ======== */
+.wk-title { font-family: inherit; text-transform: none; font-size: 28px; font-weight: 800; letter-spacing: -.4px; line-height: 1.1; }
+.mchips { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 6px; }
+.mchips span { background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 5px 13px; font-size: 14px; font-weight: 600; }
+.hint.lastt { display: flex; align-items: center; gap: 8px; background: rgba(var(--accent-rgb), .09); border: 1px solid rgba(var(--accent-rgb), .3); border-radius: 14px; padding: 8px 12px; color: var(--text); font-size: 14px; }
+.hint.lastt .tile { box-shadow: none; } .hint.lastt .tile svg.sp { display: none; }
+.sets { display: block; }
+.shd { display: grid; grid-template-columns: 26px 1fr 1fr 54px; gap: 8px; padding: 0 10px; margin-bottom: 6px; }
+.srow { display: grid; grid-template-columns: 26px 1fr 1fr 54px; gap: 8px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 8px 10px; margin-bottom: 8px; transition: opacity .2s, border-color .2s, box-shadow .2s; }
+.srow.cur { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .15); background: linear-gradient(160deg, rgba(var(--accent-rgb), .09), var(--card)); }
+.srow.done { opacity: .62; }
+.srow .n { font-family: var(--display); font-size: 24px; color: var(--muted); text-align: center; }
+.stp { display: flex; align-items: center; background: var(--bg); border-radius: 16px; padding: 3px; min-width: 0; }
+.stp input { flex: 1; min-width: 0; width: 100%; border: 0 !important; background: transparent !important; box-shadow: none !important; text-align: center; font-size: 26px; padding: 0; min-height: 44px; }
+.stp .m { width: 32px; height: 40px; flex: none; border-radius: 12px; background: var(--card2); color: var(--text); display: grid; place-items: center; }
+.stp .m:active { background: rgba(var(--accent-rgb), .3); }
+.stp .m svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.6; stroke-linecap: round; }
+.srow .chk { width: 54px; height: 54px; border-radius: 50%; }
+.srow input:only-child { background: var(--bg); border-radius: 16px; }
+.stp input::placeholder { font-size: 16px; font-family: inherit; font-weight: 600; opacity: .7; }
