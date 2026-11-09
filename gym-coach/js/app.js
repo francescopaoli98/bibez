@@ -16,7 +16,7 @@ import { viewProgressi } from './progress.js';
 import { remindersCard } from './reminders.js';
 import * as Chats from './chats.js';
 import { voiceMode, startVoice } from './voice.js';
-import { coachSystem, parseReply, normChanges, applyChanges, undoChanges } from './coach.js';
+import { coachSystem, parseReply, normChanges, applyChanges, undoChanges, addMemory } from './coach.js';
 
 let LIB = [];
 let needReload = false;
@@ -667,25 +667,39 @@ function relDate(t) {
   return dd === 0 ? 'Oggi' : dd === 1 ? 'Ieri' : d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
 }
 
+// Il volto del coach: pallino luminoso con il manubrio e il segno "online"
+function avatar(size = 46) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24');
+  s.innerHTML = '<path d="M7 12h10"/><rect x="3.8" y="7.5" width="3.4" height="9" rx="1.4"/><rect x="16.8" y="7.5" width="3.4" height="9" rx="1.4"/>';
+  s.setAttribute('width', Math.round(size * .5)); s.setAttribute('height', Math.round(size * .5));
+  return h('div', { class: 'av', style: `width:${size}px;height:${size}px` }, s, h('span', { class: 'on' }));
+}
+const CHAT_TILES = ['salute', 'tempo', 'fatto', 'kcal', 'palestra'];
+
 function viewCoach() {
   const list = h('div', { class: 'chat' });
   const input = h('textarea', { rows: 1, placeholder: 'Scrivi al coach…', enterkeyhint: 'send', 'data-nosound': '' });
   const grow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; };   // la casella cresce col testo
-  const sendBtn = h('button', { class: 'btn', 'data-nosound': '', onclick: () => send() }, 'Invia');
+  const sendBtn = h('button', { class: 'btn sendbtn', 'aria-label': 'Invia', 'data-nosound': '', onclick: () => send() }, icon('send'));
   const note = h('div', { class: 'dict-note' });
   const clearNote = () => { note.textContent = ''; sendBtn.classList.remove('glow'); };
   input.addEventListener('input', () => { grow(); if (!input.value.trim()) clearNote(); });
   let busy = false, animateFrom = Infinity;               // dal messaggio animateFrom in poi: comparsa animata
-  const titleEl = h('h1', {}), subEl = h('div', { class: 'eyebrow', style: 'text-transform:none' });
+  const titleEl = h('h1', {}), subEl = h('div', { class: 'cs' });
   const bottom = () => window.scrollTo({ top: document.body.scrollHeight, behavior: getTheme().anim ? 'smooth' : 'auto' });
-  const refreshHead = () => { const c = Chats.current(); titleEl.textContent = c?.title || 'Coach'; subEl.textContent = c ? `${c.messages.length} messaggi` : 'Scrivimi quello che vuoi'; };
+  const refreshHead = () => { const c = Chats.current(); titleEl.textContent = c?.title || 'Il tuo coach'; subEl.replaceChildren(h('i'), busy ? 'Sta scrivendo…' : (c?.title ? 'Il tuo coach' : 'Pronto ad aiutarti')); };
 
   function proposalCard(m, isNew) {
     const p = m.proposal;
     const setStatus = (st) => { p.status = st; save(); draw(); };
+    const nm = (id) => EX(id)?.nome || id;
+    const rows = p.changes.map(c => c.tipo === 'sostituisci'
+      ? h('div', { class: 'chg' }, h('span', { class: 'old' }, nm(c.da)), h('span', { class: 'arr' }, '→'), h('span', { class: 'new' }, nm(c.a)),
+          h('div', { class: 'note2' }, S.plan.giorni[c.giorno]?.nome || ''))
+      : h('div', { class: 'chg txt' }, c.desc));
     return h('div', { class: 'proposal' + (p.status === 'pending' ? ' pending' : '') + (isNew ? ' enter' : '') },
-      h('div', { class: 'kicker' }, STATUS[p.status]),
-      h('ul', {}, p.changes.map(c => h('li', {}, c.desc))),
+      h('div', { class: 'kicker pk' }, p.status === 'pending' ? [tile('idea', 14), 'Proposta del coach'] : STATUS[p.status]),
+      h('div', { class: 'chgs' }, rows),
       p.status === 'pending' && h('div', { class: 'row' },
         h('button', { class: 'btn grow', onclick: () => {
           const ok = normChanges(p.changes, LIB);        // ricontrolla: la scheda potrebbe essere cambiata
@@ -700,16 +714,41 @@ function viewCoach() {
         h('button', { class: 'btn ghost small', onclick: () => { if (undoChanges()) setStatus('undone'); } }, 'Annulla modifica'));
   }
 
+  // Schermata iniziale: il coach ti accoglie, 4 azioni rapide grandi
+  function welcome() {
+    const QA = [['Mi fa male qualcosa', 'Cambio gli esercizi', 'salute', 'Mi fa male una cosa'], ['Cambia un esercizio', 'Non mi piace', 'palestra', 'Vorrei cambiare un esercizio'],
+      ['Ho poco tempo', 'Scheda più corta', 'tempo', 'Ho poco tempo oggi'], ['È troppo facile', 'Più impegnativa', 'kcal', 'Mi sembra troppo facile']];
+    return h('div', { class: 'welcome' }, avatar(88),
+      h('div', { class: 'wt' }, utente() ? `Ciao ${utente()}!` : 'Ciao!'),
+      h('p', { class: 'ws' }, 'Dimmi come ti senti oggi. Posso cambiare la tua scheda, ma solo se me lo chiedi e dopo il tuo permesso.'),
+      h('div', { class: 'qgrid' }, QA.map(([t, s, ic, q]) => h('button', { class: 'qa', onclick: () => send(q) }, tile(ic, 22), h('b', {}, t), h('small', {}, s)))),
+      h('button', { class: 'how', onclick: () => { const [t, l] = HELP.coach; openSheet(h('div', { class: 'stack' }, h('h2', {}, t), h('ul', { class: 'helplist' }, l.map(x => h('li', {}, x))), h('button', { class: 'btn big block', onclick: closeSheet }, 'Ho capito'))); } }, tile('aiuto', 14), 'Come funziona'));
+  }
+
   function draw() {
     const c = Chats.current(); refreshHead();
-    const msgs = c?.messages.length ? c.messages : [{ role: 'model', text: 'Ciao! Sono il tuo coach. Dimmi se qualcosa ti dà fastidio, se hai poco tempo o se vuoi cambiare un esercizio: ti dico io cosa modificare, e prima di toccare la scheda ti chiedo il permesso. 💪' }];
-    list.replaceChildren(...msgs.flatMap((m, i) => {
-      const isNew = !!c && i >= animateFrom;
+    if (!c?.messages.length) { list.replaceChildren(welcome()); animateFrom = Infinity; return; }
+    list.replaceChildren(...c.messages.flatMap((m, i) => {
+      const isNew = i >= animateFrom;
       const b = h('div', { class: 'msg ' + (m.role === 'user' ? 'me' : 'ai') + (isNew ? ' enter' : '') });
       b.append(m.role === 'user' ? document.createTextNode(m.text) : mdLite(m.text, isNew));
-      return [b, m.proposal && proposalCard(m, isNew)];
+      return [m.role === 'user' ? b : h('div', { class: 'ai-row' }, avatar(34), b), m.proposal && proposalCard(m, isNew)];
     }).filter(Boolean));
     animateFrom = Infinity; bottom();
+  }
+
+  // Cosa ricorda il coach: poche righe che restano tra una chat e l'altra (si possono cancellare o aggiungere)
+  function memorySheet() {
+    const box = h('div', { class: 'stack' });
+    const redraw = () => box.replaceChildren(...((S.memoria || []).length
+      ? S.memoria.map((t, i) => h('div', { class: 'memrow' }, h('span', { class: 'grow' }, t),
+          h('button', { class: 'ic-d', 'aria-label': 'Dimentica', onclick: () => { S.memoria.splice(i, 1); save(); redraw(); } }, icon('trash'))))
+      : [h('p', { class: 'muted' }, 'Ancora niente: man mano che parliamo, il coach si segna le cose importanti (dolori, orari, attrezzatura).')]));
+    const inp = h('input', { type: 'text', placeholder: 'Aggiungi una cosa da ricordare…', maxlength: 90 });
+    openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Cosa ricorda il coach'),
+      h('p', { class: 'muted small' }, 'Sono le cose importanti su di te che il coach tiene presenti in ogni chat. Restano solo su questo telefono, e le puoi cancellare quando vuoi.'),
+      box, h('div', { class: 'row' }, inp, h('button', { class: 'btn small', onclick: () => { const v = inp.value.trim(); if (!v) return; addMemory([v]); inp.value = ''; redraw(); } }, 'Aggiungi'))));
+    redraw();
   }
 
   // Elenco di tutte le chat, con anteprima e cestino
@@ -718,12 +757,13 @@ function viewCoach() {
     openSheet(h('div', { class: 'stack' },
       h('div', { class: 'row between' }, h('h2', {}, 'Le tue chat'),
         h('button', { class: 'btn small', onclick: () => { Chats.startNew(); closeSheet(); viewCoach(); } }, '+ Nuova chat')),
-      h('p', { class: 'muted small' }, 'I titoli li scrive il coach. Il coach si ricorda di cosa avete parlato.'),
+      h('button', { class: 'mem', onclick: memorySheet }, tile('coach', 18),
+        h('div', { class: 'grow' }, h('b', {}, 'Cosa ricorda il coach'), h('span', {}, (S.memoria || []).length ? S.memoria.join(' · ') : 'Ancora niente: lo imparo parlando con te')), h('span', { class: 'arrow' }, '›')),
       items.length
-        ? items.map(c => {
+        ? items.map((c, n) => {
             const last = c.messages.at(-1)?.text || '';
             return h('div', { class: 'chat-item' + (c.id === S.activeChat ? ' on' : '') },
-              c.id === S.activeChat && h('span', { class: 'dot' }),
+              tile(CHAT_TILES[n % CHAT_TILES.length], 15),
               h('button', { class: 'chat-open grow', onclick: () => { Chats.open(c.id); closeSheet(); viewCoach(); } },
                 h('b', {}, c.title || 'Chat'), h('div', { class: 'muted small ellipsis' }, last.replace(/\*\*/g, ''))),
               h('span', { class: 't' }, relDate(c.updated)),
@@ -742,8 +782,8 @@ function viewCoach() {
     const chat = Chats.push({ role: 'user', text });
     animateFrom = chat.messages.length - 1; draw(); play('send'); buzz(10);
     const cnt = h('span', { class: 'muted small cnt' });
-    const typing = h('div', { class: 'msg ai enter' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span'), cnt));
-    list.append(typing); bottom();
+    const typing = h('div', { class: 'ai-row' }, avatar(34), h('div', { class: 'msg ai enter' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span'), cnt)));
+    list.append(typing); refreshHead(); bottom();
     const t0 = Date.now();
     const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); cnt.textContent = s < 4 ? '' : ` ${s} s` + (s >= 15 ? (expert() ? ' · Gemini è lento: prova un modello più veloce in Impostazioni' : ' · ci sta mettendo un po\', un attimo…') : ''); }, 500);
     try {
@@ -760,7 +800,8 @@ function viewCoach() {
         S.settings.model = m; save(); if (expert()) toast(`Il modello era lento: ne ho scelto uno più veloce (${m}).`, 5000);
         raw = await ask();
       }
-      const { text: reply, changes } = parseReply(raw);
+      const { text: reply, changes, memoria } = parseReply(raw);
+      addMemory(memoria);
       const ok = normChanges(changes, LIB);
       Chats.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : {}) });
       animateFrom = chat.messages.length - 1; play('receive'); buzz(12);
@@ -818,21 +859,19 @@ function viewCoach() {
   }
 
 
-  const sugg = ['Mi fa male una cosa', 'Cambia un esercizio', 'Ho poco tempo oggi', 'Mi sembra troppo facile'];
   render(
     h('div', { class: 'row between' },
-      h('div', { class: 'coach-head' }, h('div', { class: 'avatar' }, icon('dumbbell')),
-        h('button', { class: 'coach-title', onclick: chatsSheet, 'aria-label': 'Le tue chat' }, h('div', {}, titleEl, subEl), icon('chev'))),
+      h('div', { class: 'coach-head' }, avatar(52),
+        h('button', { class: 'coach-title', onclick: chatsSheet, 'aria-label': 'Le tue chat' }, h('div', {}, titleEl, subEl))),
       h('div', { class: 'row', style: 'gap:8px' },
+        h('button', { class: 'iconbtn', 'aria-label': 'Storico chat', onclick: chatsSheet }, icon('history')),
         h('button', { class: 'iconbtn', 'aria-label': 'Nuova chat', onclick: () => { Chats.startNew(); viewCoach(); } }, icon('plus')), gear())),
     !aiReady() && h('div', { class: 'card stack' }, h('p', {}, 'Per parlare col coach serve la chiave Gemini (gratuita).'),
       h('a', { class: 'btn small', href: '#/profilo' }, 'Aggiungila qui')),
     list,
-    !Chats.messages().length && h('div', { class: 'chips' }, sugg.map(q => h('button', { class: 'chip', onclick: () => send(q) }, q)),
-      h('button', { class: 'chip', onclick: () => { const [t, l] = HELP.coach; openSheet(h('div', { class: 'stack' }, h('h2', {}, t), h('ul', { class: 'helplist' }, l.map(x => h('li', {}, x))), h('button', { class: 'btn big block', onclick: closeSheet }, 'Ho capito'))); } }, '❓ Come funziona')),
     h('div', { style: 'height:64px' }),
-    h('div', { class: 'composer' }, note, h('div', { class: 'in' }, input,
-      voiceMode() && h('button', { class: 'micbtn', 'aria-label': 'Parla al coach', 'data-nosound': '', onclick: dictate }, icon('mic')), sendBtn)));
+    h('div', { class: 'composer' }, note, h('div', { class: 'in' }, h('div', { class: 'pill' }, input,
+      voiceMode() && h('button', { class: 'micbtn', 'aria-label': 'Parla al coach', 'data-nosound': '', onclick: dictate }, icon('mic'))), sendBtn)));
   draw();
 }
 

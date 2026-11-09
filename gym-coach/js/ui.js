@@ -33,6 +33,7 @@ export function icon(name) {
     idea: '<path class="f" d="M12 3a6 6 0 0 0-3.5 10.900c.6.5 1 1.2 1 2.100h5c0-.9.4-1.6 1-2.100A6 6 0 0 0 12 3z"/><path d="M9.5 18.5h5M10.5 21h3"/>',
     fatto: '<circle class="f" cx="12" cy="12" r="9"/><path d="M8 12.300l2.8 2.8 5.2-5.6"/>',
     aiuto: '<circle class="f" cx="12" cy="12" r="9"/><path d="M9.5 9.7a2.5 2.5 0 1 1 3.5 2.300c-.7.4-1 .9-1 1.7"/><path d="M12 17h.01"/>',
+    send: '<path d="M5 12h14M13 6l6 6-6 6"/>',
     mic: '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/>',
     home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
     list: '<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>',

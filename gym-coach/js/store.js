@@ -24,6 +24,7 @@ const DEFAULT = {
   security: { autoLockMin: -1, stay: true, stayDays: 90, v: 2 },   // blocco dopo N minuti in background (-1 = mai: la password solo all'apertura); resta connesso (giorni)
   session: null,            // allenamento in corso
   chat: [],                 // (vecchio formato, migrato in chats)
+  memoria: [],              // cose durevoli che il coach ricorda (poche righe, modificabili)
   chats: [],                // [{id, title, created, updated, messages:[{role, text, proposal?}]}]
   activeChat: null,         // id della chat aperta (null = nuova chat vuota)
   remind: { pesoDays: 7, salute: true },   // promemoria: peso ogni N giorni (0 = mai), rivedere la salute ogni 3 mesi

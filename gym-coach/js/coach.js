@@ -27,13 +27,15 @@ ${coachLine(p.salute)}
 ULTIMI ALLENAMENTI:
 ${rec}
 
+COSE CHE RICORDI DI QUESTA PERSONA (memoria): ${(S.memoria || []).join('; ') || 'ancora niente'}
+
 ARGOMENTI GIÀ DISCUSSI IN ALTRE CHAT (titoli, per continuità; richiamali solo se utile): ${topics().join('; ') || 'nessuno'}
 
 CATALOGO ESERCIZI USABILI (id|nome|gruppo|attrezzo[|ok a casa]):
 ${catalog}
 
 FORMATO DI RISPOSTA: solo JSON valido così:
-{"risposta":"testo per l'utente","modifiche":[]}
+{"risposta":"testo per l'utente","modifiche":[],"memoria":[]}
 
 REGOLE SULLE MODIFICHE:
 - Proponi modifiche alla scheda SOLO se l'utente lo chiede o descrive un problema (dolore, macchina occupata, troppo lungo, troppo facile/difficile). Altrimenti "modifiche":[] e rispondi e basta.
@@ -45,14 +47,27 @@ REGOLE SULLE MODIFICHE:
   {"tipo":"rimuovi","giorno":0,"id":"id"}
 - Per cambiare lo stesso esercizio in più giorni, una modifica per giorno. Massimo 6 modifiche.
 - Consigli su tecnica, carichi e alimentazione: pratici e prudenti. Se c'è dolore acuto o problema medico, consiglia di fermarsi e sentire un medico.
+- "memoria": SOLO se l'utente ti dice qualcosa di durevole su di sé (dolori o infortuni, preferenze, orari, attrezzatura, vincoli) e non è già nella memoria, scrivi 1-2 frasi brevissime (max 8 parole, in terza persona, es. "Spalla destra delicata"). Altrimenti "memoria":[]. Non ripetere ciò che è già ricordato.
 - Non inventare dati che non hai.`;
+}
+
+// Memoria del coach: poche righe durevoli (max 12), senza doppioni
+export function addMemory(items) {
+  S.memoria = S.memoria || [];
+  for (const t of items || []) {
+    const v = String(t || '').trim().slice(0, 90);
+    if (v.length < 4 || S.memoria.some(x => x.toLowerCase() === v.toLowerCase())) continue;
+    S.memoria.push(v);
+  }
+  if (S.memoria.length > 12) S.memoria = S.memoria.slice(-12);
+  save();
 }
 
 export function parseReply(raw) {
   try {
     const o = JSON.parse(String(raw).replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ''));
-    return { text: String(o.risposta ?? o.text ?? '').trim() || '…', changes: Array.isArray(o.modifiche) ? o.modifiche : [] };
-  } catch { return { text: String(raw).trim(), changes: [] }; }
+    return { text: String(o.risposta ?? o.text ?? '').trim() || '…', changes: Array.isArray(o.modifiche) ? o.modifiche : [], memoria: Array.isArray(o.memoria) ? o.memoria : [] };
+  } catch { return { text: String(raw).trim(), changes: [], memoria: [] }; }
 }
 
 const clamp = (v, min, max, def) => Math.min(max, Math.max(min, parseInt(v) || def));
