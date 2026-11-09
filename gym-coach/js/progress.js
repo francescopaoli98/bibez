@@ -1,6 +1,6 @@
 // Pagina Progressi: peso corporeo, forza per esercizio, record e storico. Grafici in SVG, senza librerie.
 import { S, save } from './store.js';
-import { h, toast, icon } from './ui.js';
+import { h, toast, icon, tile as ttile } from './ui.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const sv = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
@@ -24,6 +24,10 @@ function lineChart(points, { unit = '', title = '' } = {}) {
   const Y = (v) => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
 
   const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': title });
+  const gid = 'ga' + Math.random().toString(36).slice(2, 7);
+  const defs = sv('defs'); const lg = sv('linearGradient', { id: gid, x1: 0, x2: 0, y1: 0, y2: 1 });
+  lg.append(sv('stop', { offset: 0, 'stop-color': 'var(--accent)', 'stop-opacity': .35 }), sv('stop', { offset: 1, 'stop-color': 'var(--accent)', 'stop-opacity': 0 }));
+  defs.append(lg); svg.append(defs);
   [0, 0.5, 1].forEach(t => {
     const v = lo + (hi - lo) * t, yy = Y(v);
     svg.append(sv('line', { x1: L, x2: W - R, y1: yy, y2: yy, class: 'grid' }));
@@ -31,7 +35,11 @@ function lineChart(points, { unit = '', title = '' } = {}) {
   });
   const lab = (i, anchor) => { const t = sv('text', { x: X(i), y: H - 6, class: 'axis', 'text-anchor': anchor }); t.textContent = short(points[i].iso); svg.append(t); };
   if (n === 1) lab(0, 'middle'); else { lab(0, 'start'); lab(n - 1, 'end'); }
-  if (n > 1) svg.append(sv('path', { class: 'line', d: points.map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(' ') }));
+  if (n > 1) {                                           // curva morbida + area sfumata sotto
+    let d = `M${X(0).toFixed(1)} ${Y(points[0].y).toFixed(1)}`;
+    for (let i = 1; i < n; i++) { const mx = (X(i - 1) + X(i)) / 2; d += ` C${mx.toFixed(1)} ${Y(points[i - 1].y).toFixed(1)} ${mx.toFixed(1)} ${Y(points[i].y).toFixed(1)} ${X(i).toFixed(1)} ${Y(points[i].y).toFixed(1)}`; }
+    svg.append(sv('path', { class: 'area', d: `${d} L${X(n - 1).toFixed(1)} ${H - B} L${X(0).toFixed(1)} ${H - B}Z`, fill: `url(#${gid})` }), sv('path', { class: 'line', d }));
+  }
   points.forEach((p, i) => svg.append(sv('circle', { class: 'dot', cx: X(i), cy: Y(p.y), r: 4 })));
   const last = points[n - 1];
   const below = n > 1 && points[n - 2].y > last.y;      // la linea arriva dall'alto: etichetta sotto il punto
@@ -123,24 +131,44 @@ export function viewProgressi({ render, LIB, go }) {
     h('summary', {}, h('div', {}, h('b', {}, w.dayName), h('div', { class: 'muted small' }, `${fmtDay(w.date)} · ${w.sets} serie · ${w.durata} min${w.kcal ? ' · ~' + w.kcal + ' kcal' : ''}${w.luogo === 'casa' ? ' · 🏠' : ''}`))),
     h('div', { class: 'stack small', style: 'padding:8px 0 4px' }, w.exercises.map(e => h('div', {}, h('b', {}, name(e.id)), h('div', { class: 'muted' }, e.sets.map(s => s.kg ? `${s.kg}×${s.reps}` : `${s.reps} rip.`).join('  ·  ')))))));
 
+  // serie di settimane, allenamenti della settimana, record appena battuto
+  const streak = weekStreak(), target = S.profile.giorni || 3;
+  const mon = new Date(); mon.setHours(0, 0, 0, 0); mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+  const wkDone = S.history.filter(w => new Date(w.date) >= mon).length, left = Math.max(0, target - wkDone);
+  const ore = S.history.reduce((a, w) => a + (w.durata || 0), 0), oreTxt = ore >= 60 ? `${Math.floor(ore / 60)} h ${String(ore % 60).padStart(2, '0')}` : `${ore} min`;
+  const tonsTxt = String(tons).replace('.', ',') + ' t';
+  const lastDate = S.history.at(-1)?.date;
+  const newRec = ids.map(id => { const s = per.get(id); const l = s.at(-1); return s.length > 1 && l.iso === lastDate && strength(l.best) > Math.max(...s.slice(0, -1).map(x => strength(x.best))) ? { id, best: l.best } : null; }).find(Boolean);
+  const loseGoal = S.profile.obiettivo !== 'massa';
+  const dGood = delta != null && delta !== 0 && (loseGoal ? delta < 0 : delta > 0);
+
   render(
-    h('div', { class: 'row between' }, h('h1', {}, 'Progressi'), h('a', { class: 'iconbtn', href: '#/profilo', 'aria-label': 'Impostazioni' }, icon('gear'))),
-    h('div', { class: 'stats' }, tile(S.history.length, 'Allenamenti'), tile(weekStreak(), 'Settimane di fila'), tile(tons, 'Tonn. sollevate')),
+    h('div', { class: 'row between' }, h('div', {}, h('div', { class: 'eyebrow', style: 'text-transform:none' }, streak ? `Settimana ${streak} di fila` : 'Si comincia!'), h('h1', { class: 'hi' }, 'I tuoi progressi')),
+      h('a', { class: 'iconbtn', href: '#/profilo', 'aria-label': 'Impostazioni' }, icon('gear'))),
+    h('div', { class: 'streak' }, ttile('kcal', 24),
+      h('div', {}, h('b', {}, streak ? `${streak} ${streak === 1 ? 'settimana' : 'settimane'} di fila!` : 'Il primo allenamento è il più bello'),
+        h('span', {}, !S.history.length ? 'Fai il primo e iniziamo a contare.' : left ? `Ancora ${left} ${left === 1 ? 'allenamento' : 'allenamenti'} e chiudi questa settimana` : 'Settimana completata, bravo! 🎉'))),
+    h('div', { class: 'stats3' },
+      h('div', { class: 'st' }, ttile('oggi', 16), h('b', {}, S.history.length), h('small', {}, 'Allenamenti')),
+      h('div', { class: 'st' }, ttile('tempo', 16), h('b', {}, oreTxt), h('small', {}, 'Tempo')),
+      h('div', { class: 'st' }, ttile('palestra', 16), h('b', {}, tonsTxt), h('small', {}, 'Sollevate'))),
+    newRec && h('div', { class: 'cardp rec' }, ttile('trophy', 22), h('div', {}, h('b', {}, 'Nuovo record!'), h('span', {}, `${name(newRec.id)} · ${newRec.best.kg ? newRec.best.kg + ' kg × ' + newRec.best.reps : newRec.best.reps + ' ripetizioni'}`))),
 
     h('div', { class: 'card stack' },
-      h('div', { class: 'row between' }, h('h2', {}, 'Peso corporeo'),
-        pesi.length ? h('span', { class: 'muted small' }, `${num(pesi[pesi.length - 1].kg)} kg${delta != null ? ` (${delta > 0 ? '+' : ''}${num(delta)})` : ''}`) : null),
+      h('div', { class: 'row between' }, h('h2', { class: 'h2s' }, 'Peso'),
+        delta != null && delta !== 0 ? h('span', { class: 'pillg' + (dGood ? '' : ' neutral') }, `${delta > 0 ? '+' : '−'}${num(Math.abs(delta))} kg`) : null),
+      pesi.length ? h('div', { class: 'big' }, num(pesi[pesi.length - 1].kg), h('small', {}, ' kg')) : null,
       lineChart(pesi.map(p => ({ iso: p.date, y: p.kg })), { unit: 'kg', title: 'Peso corporeo nel tempo' }),
       h('div', { class: 'row' }, h('div', { class: 'grow' }, inp), h('button', { class: 'btn', onclick: addPeso }, 'Registra')),
       h('p', { class: 'muted small' }, 'Pesati 1 volta a settimana, sempre alla stessa ora. Il peso aggiorna anche calorie e proteine.')),
 
-    h('div', { class: 'card stack' }, h('h2', {}, 'Forza'),
+    h('div', { class: 'card stack' }, h('h2', { class: 'h2s' }, 'Forza'),
       ids.length ? [exChips,
         lineChart(series.map(s => ({ iso: s.iso, y: strength(s.best), note: s.best.kg ? `Miglior serie: ${s.best.kg} kg × ${s.best.reps}` : `Miglior serie: ${s.best.reps} ripetizioni` })),
           { unit: bw ? 'rip.' : 'kg', title: 'Andamento ' + name(sel) }),
         h('p', { class: 'muted small' }, bw ? 'Ripetizioni migliori per allenamento.' : 'Forza stimata dalla tua miglior serie (peso e ripetizioni insieme): se sale, stai progredendo.')]
         : h('p', { class: 'muted' }, 'Completa il primo allenamento per vedere i grafici.')),
 
-    records.length > 0 && h('div', { class: 'card stack' }, h('h2', {}, 'Record personali'), records),
-    hist.length > 0 && h('div', { class: 'card stack' }, h('h2', {}, 'Ultimi allenamenti'), hist));
+    records.length > 0 && h('div', { class: 'card stack' }, h('div', { class: 'row', style: 'gap:10px' }, ttile('trophy', 12), h('h2', { class: 'h2s' }, 'Record personali')), records),
+    hist.length > 0 && h('div', { class: 'card stack' }, h('h2', { class: 'h2s' }, 'Ultimi allenamenti'), hist));
 }

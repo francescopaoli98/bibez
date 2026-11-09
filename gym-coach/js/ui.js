@@ -18,6 +18,18 @@ export function h(tag, attrs, ...kids) {
 
 export function icon(name) {
   const paths = {
+    gambe: '<path d="M9 3v7l-2 11M15 3v7l2 11M9 10h6"/>',
+    petto: '<path d="M3 9c3-3 6-3 9 0 3-3 6-3 9 0v4c-3 3-6 3-9 0-3 3-6 3-9 0z"/>',
+    schiena: '<path d="M12 3v18M5 6c3 2 4 5 4 9M19 6c-3 2-4 5-4 9"/>',
+    spalle: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3-7 8-7s8 3 8 7"/>',
+    braccia: '<path d="M5 19l5-5M14 10l5-5M3 17l4 4M17 3l4 4M8 16l8-8"/>',
+    core: '<rect x="8" y="3.5" width="8" height="17" rx="3"/><path d="M8 9.5h8M8 14.5h8M12 3.5v17"/>',
+    cardio: '<path d="M3 12h4l2-5 4 10 2-5h6"/>',
+    trophy: '<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8"/>',
+    aspetto: '<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="15.5" cy="10" r="1"/>',
+    promemoria: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
+    sicurezza: '<rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    avanzate: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
     // --- set "tessere": linea + riempimento morbido (.f) ---
     oggi: '<rect class="f" x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M9 15.2l2.2 2.2 4.3-4.4"/>',
     scheda: '<rect class="f" x="5" y="4" width="14" height="17" rx="3"/><rect x="9" y="2.5" width="6" height="3.5" rx="1.2"/><path d="M9 11h6M9 15h4"/>',
@@ -59,7 +71,7 @@ export function icon(name) {
 }
 
 // Tessera colorata con la scintilla del logo: ogni funzione ha il suo colore
-const TILES = {casa:['#2dd4bf','#0f766e'],palestra:['#818cf8','#4338ca'],tempo:['#38bdf8','#0369a1'],kcal:['#ff9a3c','#e0431f'],peso:['#f472b6','#be185d'],salute:['#ff6b6b','#b91c1c'],pillola:['#a78bfa','#6d28d9'],idea:['#fde047','#ca8a04'],fatto:['#4ade80','#15803d'],aiuto:['#60a5fa','#1d4ed8'],oggi:['#a6ff2e','#4d9a0a'],scheda:['#60a5fa','#1d4ed8'],coach:['#c084fc','#7e22ce'],prog:['#ff9a3c','#e0431f']};
+const TILES = {aspetto:['#a6ff2e','#4d9a0a'],promemoria:['#ff9a3c','#e0431f'],sicurezza:['#2dd4bf','#0f766e'],avanzate:['#8d99b0','#3a4658'],trophy:['#fde047','#ca8a04'],gambe:['#2dd4bf','#0f766e'],petto:['#f472b6','#be185d'],schiena:['#60a5fa','#1d4ed8'],spalle:['#fde047','#ca8a04'],braccia:['#a78bfa','#6d28d9'],core:['#ff9a3c','#e0431f'],cardio:['#ff6b6b','#b91c1c'],casa:['#2dd4bf','#0f766e'],palestra:['#818cf8','#4338ca'],tempo:['#38bdf8','#0369a1'],kcal:['#ff9a3c','#e0431f'],peso:['#f472b6','#be185d'],salute:['#ff6b6b','#b91c1c'],pillola:['#a78bfa','#6d28d9'],idea:['#fde047','#ca8a04'],fatto:['#4ade80','#15803d'],aiuto:['#60a5fa','#1d4ed8'],oggi:['#a6ff2e','#4d9a0a'],scheda:['#60a5fa','#1d4ed8'],coach:['#c084fc','#7e22ce'],prog:['#ff9a3c','#e0431f']};
 export function tile(name, size = 20) {
   const [a, b] = TILES[name] || TILES.oggi, s = Math.round(size * 1.7);
   const g = icon(name); g.setAttribute('class', 'glyph'); g.style.setProperty('--g', size + 'px');

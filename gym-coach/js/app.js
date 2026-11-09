@@ -126,7 +126,7 @@ const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'progressi', scheda: 
 
 function route() {
   closeSheet();
-  let name = location.hash.replace(/^#\/?/, '') || 'oggi';
+  let [name, sub] = (location.hash.replace(/^#\/?/, '') || 'oggi').split('/');
   if ((!S.profile || !S.plan) && name !== 'benvenuto') return go('#/benvenuto');
   if (!ROUTES[name]) name = 'oggi';
   const tab = TAB_OF[name];
@@ -136,7 +136,7 @@ function route() {
   renderTabs(tab);
   if (needReload && !S.session && (name === 'oggi' || name === 'scheda' || name === 'coach' || name === 'progressi')) { needReload = false; location.reload(); return; }
   window.scrollTo(0, 0);
-  ROUTES[name]();
+  ROUTES[name](sub || null);
   countUps(view);                                 // i numeri salgono da 0
 }
 
@@ -154,7 +154,7 @@ function luogoSwitch(redraw) {
     h('button', { class: 'seg-b' + ((S.luogo || 'palestra') === v ? ' on' : ''), onclick: () => { S.luogo = v; save(); redraw(); } }, tile(v, 16), t)));
 }
 const homeHint = () => (S.luogo === 'casa' && (S.profile.casa || 'libero') === 'libero')
-  ? h('p', { class: 'muted small' }, 'A casa uso esercizi a corpo libero. Hai dei manubri? ', h('a', { href: '#/profilo' }, 'Dillo qui'))
+  ? h('p', { class: 'muted small' }, 'A casa uso esercizi a corpo libero. Hai dei manubri? ', h('a', { href: '#/profilo/obiettivo' }, 'Dillo qui'))
   : null;
 const kcalTxt = (exs) => `~${estKcal(exs)} kcal`;
 
@@ -416,7 +416,7 @@ function reminderCards() {
     out.push(h('div', { class: 'remind' }, h('div', { class: 'ic' }, tile('salute', 26)), h('div', { class: 'grow' }, h('h3', {}, 'Rivedi la tua salute'), h('p', { class: 'muted small' }, 'Sono passati 3 mesi. È cambiato qualcosa? (nuove cure, infortuni, gravidanza…)'),
       h('div', { class: 'row', style: 'gap:8px;margin-top:10px' },
         h('button', { class: 'btn small', onclick: () => { S.profile.salute.aggiornata = new Date().toISOString(); save(); viewOggi(); } }, 'Tutto uguale'),
-        h('button', { class: 'btn ghost small', onclick: () => go('#/profilo') }, 'Aggiorna')))));
+        h('button', { class: 'btn ghost small', onclick: () => go('#/profilo/peso') }, 'Aggiorna')))));
   }
   return out;
 }
@@ -479,7 +479,7 @@ function viewOggi() {
 
 function nutritionCard() {
   const t = targets(S.profile);
-  if (!t) return h('a', { class: 'card row between linkcard', href: '#/profilo' },
+  if (!t) return h('a', { class: 'card row between linkcard', href: '#/profilo/peso' },
     h('div', {}, h('h3', {}, 'Calcola calorie e proteine'), h('p', { class: 'muted small' }, 'Servono altezza, età e sesso')), h('span', { class: 'arrow' }, '›'));
   return h('div', { class: 'card stack' },
     h('div', { class: 'row between' }, h('h3', {}, 'Alimentazione di oggi'), h('span', { class: 'muted small' }, 'stima')),
@@ -490,19 +490,34 @@ function nutritionCard() {
 }
 
 /* ---------------------------- Scheda ---------------------------- */
+let schedaDay = null;                       // giorno aperto nella Scheda
 function viewScheda() {
+  const n = S.plan.giorni.length;
+  if (schedaDay == null || schedaDay >= n) schedaDay = S.nextDay % n;
+  const titles = S.plan.giorni.map(d => friendlyTitle(adaptDay(d, S.luogo)));
+  const dup = (i) => titles.filter(t => t === titles[i]).length > 1;            // più giorni con lo stesso titolo: in grande "Giorno N"
+
+  const d = S.plan.giorni[schedaDay], exs = adaptDay(d, S.luogo);
   render(
-    h('div', { class: 'row between' }, h('div', {}, h('h1', {}, S.plan.nome), h('p', { class: 'muted' }, 'Tocca un esercizio per vedere come si fa.')), h('div', { class: 'row', style: 'gap:8px' }, helpBtn('scheda'), gear())),
+    h('div', { class: 'row between' }, h('div', {}, h('div', { class: 'eyebrow', style: 'text-transform:none' }, `${n} giorni a settimana`), h('h1', { class: 'hi' }, 'La tua scheda')),
+      h('div', { class: 'row', style: 'gap:8px' }, helpBtn('scheda'), gear())),
     luogoSwitch(viewScheda), homeHint(),
-    ...S.plan.giorni.map((d, i) => h('details', { class: 'card day', open: i === S.nextDay % S.plan.giorni.length },
-      h('summary', {}, h('div', {}, h('h3', {}, d.nome), h('div', { class: 'muted small' }, `${adaptDay(d, S.luogo).length} esercizi · ${kcalTxt(adaptDay(d, S.luogo))}`)),
-        h('button', { class: 'btn small', onclick: (e) => {
-          e.preventDefault();
-          if (S.session && !confirm('Hai un allenamento in corso. Vuoi iniziarne un altro?')) return;
-          startSession(i); go('#/allenamento'); } }, 'Inizia')),
-      h('div', { class: 'list' }, adaptDay(d, S.luogo).map(e => exRow(e.id, `${e.serie} × ${e.ripetizioni}${e.recupero ? ' · rec. ' + e.recupero + 's' : ''}`))))),
-    h('a', { class: 'btn block', href: '#/coach' }, 'Chiedi al coach di cambiarla'),
-    h('a', { class: 'btn ghost block', href: '#/esercizi' }, 'Tutti gli esercizi'));
+    h('div', { class: 'daytabs' }, S.plan.giorni.map((_, i) => h('button', { class: 'dtab' + (i === schedaDay ? ' on' : ''), onclick: () => { schedaDay = i; viewScheda(); } },
+      h('small', {}, dup(i) ? titles[i] : `Giorno ${i + 1}`), h('b', {}, dup(i) ? `Giorno ${i + 1}` : titles[i])))),
+    h('div', { class: 'dmeta' }, h('span', {}, tile('tempo', 12), estMin(exs) + ' min'), h('span', {}, tile('kcal', 12), kcalTxt(exs)), h('span', {}, exs.length + ' esercizi')),
+    h('div', { class: 'exlist' }, exs.map(e => {
+      const ex = EX(e.id);
+      return h('button', { class: 'exr', onclick: () => showExercise(e.id) },
+        h('img', { src: ex.img[0], alt: '', loading: 'lazy' }),
+        h('div', { class: 'em' }, h('b', {}, ex.nome), h('span', {}, `${e.serie} × ${e.ripetizioni}${e.recupero ? ' · riposo ' + e.recupero + ' s' : ''}`)),
+        tile(ex.gruppo, 14));
+    })),
+    h('a', { class: 'coachrow', href: '#/coach' }, tile('coach', 16), h('div', { class: 'grow' }, h('b', {}, 'Vuoi cambiare qualcosa?'), h('span', {}, 'Chiedilo al coach')), h('i', {}, '›')),
+    h('a', { class: 'btn ghost block', href: '#/esercizi' }, 'Tutti gli esercizi'),
+    h('div', { style: 'height:72px' }),
+    h('div', { class: 'startday' }, h('button', { class: 'btn big block', onclick: () => {
+      if (S.session && !confirm('Hai un allenamento in corso. Vuoi iniziarne un altro?')) return;
+      startSession(schedaDay); go('#/allenamento'); } }, '▶ Inizia questo giorno')));
 }
 
 /* ---------------------------- libreria esercizi ---------------------------- */
@@ -886,7 +901,7 @@ function viewCoach() {
         h('button', { class: 'iconbtn', 'aria-label': 'Storico chat', onclick: chatsSheet }, icon('history')),
         h('button', { class: 'iconbtn', 'aria-label': 'Nuova chat', onclick: () => { Chats.startNew(); viewCoach(); } }, icon('plus')), gear())),
     !aiReady() && h('div', { class: 'card stack' }, h('p', {}, 'Per parlare col coach serve la chiave Gemini (gratuita).'),
-      h('a', { class: 'btn small', href: '#/profilo' }, 'Aggiungila qui')),
+      h('a', { class: 'btn small', href: '#/profilo/ia' }, 'Aggiungila qui')),
     list,
     h('div', { style: 'height:64px' }),
     h('div', { class: 'composer' }, note, h('div', { class: 'in' }, h('div', { class: 'pill' }, input,
@@ -1131,8 +1146,10 @@ function helpCard() {
 }
 
 /* ---------------------------- impostazioni ---------------------------- */
-let taps = 0, lastTap = 0;
-function viewProfilo() {
+let taps = 0, lastTap = 0, profiloSection = null;
+const footBox = () => h('p', { class: 'muted small center' }, 'Immagini esercizi: free-exercise-db (pubblico dominio).');
+function viewProfilo(sec) {
+  if (sec !== undefined) profiloSection = sec;
   const p = { obiettivo: S.profile.obiettivo, livello: S.profile.livello, giorni: S.profile.giorni };
   const sel = (label, key, opts) => h('div', { class: 'stack' }, h('h3', {}, label),
     h('div', { class: 'chips' }, opts.map(([v, t]) => h('button', { class: 'chip lg' + (p[key] === v ? ' on' : ''), onclick: (e) => {
@@ -1142,23 +1159,12 @@ function viewProfilo() {
   const note = h('textarea', { placeholder: 'Dolori, infortuni…', value: p.note || '' });
   const saveKeys = () => { if (!proxyAvailable() || S.settings.ownKey) S.settings.apiKey = keyIn.value.trim(); S.settings.model = modelIn.value.trim() || 'gemini-flash-latest'; save(); };
 
-  render(
-    h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', { onclick: () => {      // 5 tocchi: opzioni da esperto (scelta di modello e chiave)
-      taps = (Date.now() - lastTap > 1500 ? 0 : taps) + 1; lastTap = Date.now();
-      if (taps >= 5) { taps = 0; S.settings.expert = !S.settings.expert; save(); toast(S.settings.expert ? 'Opzioni da esperto attivate' : 'Opzioni da esperto nascoste'); viewProfilo(); } } }, 'Impostazioni')),
-    securityCard(),
-    appearanceCard(),
-    healthCard(),
-    healthRemindersCard(),
-    bodyCard(),
-    remindersCard(),
-    helpCard(),
-    h('div', { class: 'card stack' }, h('h2', {}, 'Casa'),
+  const casaCard = h('div', { class: 'card stack' }, h('h2', {}, 'Casa'),
       h('div', { class: 'stack' }, h('h3', {}, 'Attrezzatura a casa'),
         h('div', { class: 'chips' }, CASA_OPT.map(([v, t]) => h('button', { class: 'chip lg' + ((S.profile.casa || 'libero') === v ? ' on' : ''), onclick: (e) => {
           S.profile.casa = v; save(); e.target.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); e.target.classList.add('on'); toast('Salvato'); } }, t)))),
-    ),
-    expert() && h('div', { class: 'card stack' }, h('h2', {}, 'Coach IA (Gemini)'),
+    );
+  const aiCard = expert() && h('div', { class: 'card stack' }, h('h2', {}, 'Coach IA (Gemini)'),
       proxyAvailable() && h('div', { class: 'stack' },
         h('div', { class: 'chips' }, [[false, 'Coach condiviso'], [true, 'La mia chiave']].map(([v, t]) =>
           h('button', { class: 'chip lg' + (!!S.settings.ownKey === v ? ' on' : ''), onclick: () => { S.settings.ownKey = v; save(); viewProfilo(); } }, t))),
@@ -1173,14 +1179,14 @@ function viewProfilo() {
           catch (err) { showError(err); }
           e.target.disabled = false; e.target.textContent = 'Prova collegamento'; } }, 'Prova collegamento'),
         h('button', { class: 'btn grow', onclick: () => { saveKeys(); toast('Salvato'); } }, 'Salva')),
-      h('p', { class: 'muted small' }, 'La chiave resta su questo telefono e viene inviata solo a Google.')),
-    h('div', { class: 'card stack' }, h('h2', {}, 'Rifai la scheda da zero'),
+      h('p', { class: 'muted small' }, 'La chiave resta su questo telefono e viene inviata solo a Google.'));
+  const rifaiCard = h('div', { class: 'card stack' }, h('h2', {}, 'Rifai la scheda da zero'),
       sel('Obiettivo', 'obiettivo', OBIETTIVI), sel('Esperienza', 'livello', LIVELLI), sel('Giorni a settimana', 'giorni', [[2, '2'], [3, '3'], [4, '4'], [5, '5']]),
       h('label', { class: 'field' }, 'Limiti / infortuni', note),
       h('button', { class: 'btn block', onclick: async () => {
         if (S.session && !confirm('Hai un allenamento in corso: verrà annullato. Continuare?')) return;
-        saveKeys(); S.profile = { ...S.profile, ...p, note: note.value }; save(); await buildPlan(); } }, 'Rigenera la scheda')),
-    h('details', { class: 'card' }, h('summary', { class: 'muted' }, 'Avanzate'),
+        saveKeys(); S.profile = { ...S.profile, ...p, note: note.value }; save(); await buildPlan(); } }, 'Rigenera la scheda'));
+  const avCard = h('details', { class: 'card', open: true }, h('summary', { class: 'muted' }, 'Avanzate'),
       h('div', { class: 'stack', style: 'margin-top:12px' },
         S.lastError && h('button', { class: 'btn ghost block', onclick: async () => toast((await copyText(S.lastError)) ? 'Errore copiato: incollalo nella chat con me' : 'Copia non riuscita', 4000) }, 'Copia ultimo errore'),
         ...(!expert() ? [] : [h('label', { class: 'field' }, 'Modello Gemini', modelIn),
@@ -1222,8 +1228,57 @@ function viewProfilo() {
             if (!confirm('Sostituire i dati attuali con quelli del backup?')) return;
             try { importJSON(await f.text()); toast('Backup importato'); setTimeout(() => { location.hash = '#/oggi'; location.reload(); }, 600); } catch (err) { toast(err.message); }
           } })),
-        h('button', { class: 'btn danger block', onclick: () => { if (confirm('Cancellare TUTTI i dati (scheda, storico, chiave)?')) { resetAll(); location.hash = ''; location.reload(); } } }, 'Cancella tutto'))),
-    h('p', { class: 'muted small center' }, 'Immagini esercizi: free-exercise-db (pubblico dominio).'));
+        h('button', { class: 'btn danger block', onclick: () => { if (confirm('Cancellare TUTTI i dati (scheda, storico, chiave)?')) { resetAll(); location.hash = ''; location.reload(); } } }, 'Cancella tutto')));
+  const SECTIONS = {
+    sicurezza: ['Sicurezza', () => [securityCard()]],
+    aspetto: ['Aspetto', () => [appearanceCard()]],
+    salute: ['Salute', () => [healthCard(), healthRemindersCard()]],
+    peso: ['Peso e misure', () => [bodyCard()]],
+    promemoria: ['Promemoria', () => [remindersCard()]],
+    guida: ['Aiuto', () => [helpCard()]],
+    obiettivo: ['Obiettivo e scheda', () => [rifaiCard, casaCard]],
+    ia: ['Coach IA', () => [aiCard]],
+    avanzate: ['Avanzate', () => [avCard]],
+  };
+  const titleTap = () => {      // 5 tocchi: opzioni da esperto (scelta di modello e chiave)
+    taps = (Date.now() - lastTap > 1500 ? 0 : taps) + 1; lastTap = Date.now();
+    if (taps >= 5) { taps = 0; S.settings.expert = !S.settings.expert; save(); toast(S.settings.expert ? 'Opzioni da esperto attivate' : 'Opzioni da esperto nascoste'); viewProfilo(); }
+  };
+
+  // ----- una sezione aperta: titolo con freccia + le sue carte -----
+  if (profiloSection && SECTIONS[profiloSection]) {
+    const [title, build] = SECTIONS[profiloSection];
+    return render(
+      h('div', { class: 'row' }, h('button', { class: 'iconbtn', 'aria-label': 'Indietro', onclick: () => viewProfilo(null) }, '‹'), h('h1', { class: 'hi', onclick: titleTap }, title)),
+      ...build(), footBox());
+  }
+
+  // ----- il menu -----
+  const P = S.profile, sal = P.salute || {};
+  const nCond = (sal.condizioni || []).length + (sal.altro ? 1 : 0);
+  const row = (key, ic, t, sub) => h('button', { class: 'mrow', onclick: () => viewProfilo(key) }, tile(ic, 14), h('div', { class: 'mt2' }, h('b', {}, t), h('span', {}, sub)), h('i', {}, '›'));
+  const nome = S.account?.name || P.nome || '';
+  const goal = (OBIETTIVI.find(o => o[0] === P.obiettivo) || [, ''])[1];
+  render(
+    h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/oggi', 'aria-label': 'Indietro' }, '‹'), h('h1', { class: 'hi', onclick: titleTap }, 'Impostazioni')),
+    h('div', { class: 'me' }, h('div', { class: 'ava' }, (nome || '?').slice(0, 1).toUpperCase()),
+      h('div', {}, h('b', {}, nome || 'Il tuo profilo'), h('span', {}, (S.account?.user ? '@' + S.account.user + ' · ' : '') + 'dati cifrati sul telefono'))),
+    h('div', { class: 'grp' }, 'IO'),
+    h('div', { class: 'grpbox' },
+      row('peso', 'peso', 'Peso e misure', P.peso ? `${P.peso} kg · ${P.altezza || '?'} cm` : 'Da inserire'),
+      row('salute', 'salute', 'Salute', nCond ? `${nCond} ${nCond === 1 ? 'problema indicato' : 'problemi indicati'}` : 'Nessun problema'),
+      row('obiettivo', 'palestra', 'Obiettivo e scheda', `${goal} · ${P.giorni || 3} giorni`)),
+    h('div', { class: 'grp' }, 'APP'),
+    h('div', { class: 'grpbox' },
+      row('aspetto', 'aspetto', 'Aspetto e suoni', 'Colore, sfondo, suoni'),
+      row('promemoria', 'promemoria', 'Promemoria', 'Allenamenti e peso'),
+      row('sicurezza', 'sicurezza', accountsMode() ? 'Account e accesso' : 'Sicurezza', lockEnabled() ? 'Password attiva' : (accountsMode() ? 'Resta connesso, impronta' : 'Password non attiva'))),
+    h('div', { class: 'grp' }, 'AIUTO'),
+    h('div', { class: 'grpbox' },
+      row('guida', 'aiuto', 'Aiuto e guida', 'Rivedi le 4 schermate'),
+      expert() && row('ia', 'coach', 'Coach IA (Gemini)', S.settings.ownKey || !proxyAvailable() ? 'La mia chiave' : 'Coach condiviso'),
+      row('avanzate', 'avanzate', 'Avanzate', 'Backup, importa, cancella dati')),
+    footBox());
 }
 
 boot();
