@@ -528,3 +528,5 @@ h1.hi { margin-bottom: 4px; } .row.between h1.hi { font-size: 28px; }
 .mrow .tile { box-shadow: none; } .mrow .tile svg.sp { display: none; }
 .mrow:active { background: rgba(255,255,255,.04); }
 .card h2 { font-family: inherit; text-transform: none; font-size: 18px; font-weight: 800; letter-spacing: -.2px; }
+.stp input { font-size: 23px; letter-spacing: -.3px; }
+.stp .m { width: 30px; }
