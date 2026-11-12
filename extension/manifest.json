@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Pulizia Privacy (MVP)",
+  "version": "0.1.0",
+  "description": "Mostra chi ti traccia, cancella i cookie e prepara le richieste GDPR. Tutto in locale.",
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Pulizia Privacy"
+  },
+  "permissions": ["cookies", "history", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'none'"
+  }
+}

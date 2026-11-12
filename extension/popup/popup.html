@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <title>Pulizia Privacy</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>Pulizia Privacy</h1>
+    <p class="sub">Tutto resta nel tuo browser. Nessun dato viene inviato.</p>
+  </header>
+
+  <section id="view-list">
+    <div class="actions">
+      <button id="btn-scan" class="primary">Scansiona</button>
+      <button id="btn-clean-trackers" disabled>Cancella cookie dei tracker</button>
+    </div>
+    <p id="summary" class="summary" hidden></p>
+    <p id="status" class="status" role="status"></p>
+    <ul id="list" class="list"></ul>
+  </section>
+
+  <section id="view-request" hidden>
+    <button id="btn-back" class="link">&larr; Torna alla lista</button>
+    <h2 id="req-title"></h2>
+
+    <div class="grid">
+      <label for="in-name">Nome e cognome</label>
+      <input id="in-name" autocomplete="name">
+      <label for="in-email">Tua email</label>
+      <input id="in-email" type="email" autocomplete="email">
+      <label for="in-lang">Lingua</label>
+      <select id="in-lang">
+        <option value="it">Italiano</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+
+    <fieldset>
+      <legend>Cosa chiedere</legend>
+      <label><input type="checkbox" value="withdraw" checked> Revoca consenso</label>
+      <label><input type="checkbox" value="object" checked> Opposizione profilazione</label>
+      <label><input type="checkbox" value="erase" checked> Cancellazione dati</label>
+      <label><input type="checkbox" value="access"> Accesso ai dati</label>
+    </fieldset>
+
+    <textarea id="req-body" rows="14" spellcheck="false"></textarea>
+    <p class="hint">Trova l'email privacy/DPO dell'azienda nella sua informativa privacy e incollala come destinatario.</p>
+    <div class="actions">
+      <button id="btn-copy" class="primary">Copia testo</button>
+      <a id="btn-mail" class="btn" href="#">Apri nel client email</a>
+    </div>
+  </section>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
