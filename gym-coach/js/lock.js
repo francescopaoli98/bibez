@@ -1,6 +1,6 @@
 // Schermate di accesso: login con account (primo accesso) e blocco con password (aperture successive).
 import { S, unlock, verifyPassword, lockEnabled, resetAll, deviceInfo, unlockWithDevice } from './store.js';
-import { h, icon } from './ui.js';
+import { h, icon, tile } from './ui.js';
 import { bioVerify } from './bio.js';
 import { apiLogin } from './account.js';
 
@@ -114,7 +114,7 @@ export function loginScreen({ known = [] } = {}) {
       h('div', { class: 'chips', style: 'justify-content:center' }, known.map(k => h('button', { class: 'chip lg', onclick: () => { close(); resolve({ pick: k.u }); } }, k.name))));
 
     root().replaceChildren(h('div', { class: 'lock' }, logo(), h('h1', {}, 'Gym Coach'),
-      h('p', { class: 'muted center' }, 'Accedi con il tuo account.'), user, pw, msg, btn, people,
+      h('p', { class: 'muted center' }, 'Accedi con il tuo account.'), h('div', { class: 'fldw' }, tile('utente', 14), user), h('div', { class: 'fldw' }, tile('sicurezza', 14), pw), msg, btn, people,
       h('p', { class: 'muted small center' }, 'Gli account li crea chi gestisce l\'app.')));
     setTimeout(() => user.focus(), 50);
   });

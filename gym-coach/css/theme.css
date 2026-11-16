@@ -667,3 +667,20 @@ body.alba .sticky-head { background: rgba(26,14,6,.8); }
 .wkc-in .pill { flex: 1; display: flex; background: var(--card); border: 1px solid var(--line); border-radius: 27px; padding: 5px 8px; }
 .wkc-in .pill input { flex: 1; border: 0 !important; background: transparent !important; min-height: 42px; padding: 0 12px; }
 .wkc-in .btn.sendbtn { flex: none; width: 54px; height: 54px; padding: 0; border-radius: 50%; display: grid; place-items: center; }
+
+/* ======== v46: accesso, primi passi e guida ======== */
+.lock .fldw { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 8px 12px; }
+.lock .fldw input { flex: 1; border: 0 !important; background: transparent !important; min-height: 46px; padding: 0; }
+.lock .fldw .tile { box-shadow: none; } .lock .fldw .tile svg.sp { display: none; }
+.wizard .wsay { display: flex; gap: 12px; align-items: flex-end; margin: 4px 0 6px; }
+.wizard .bub { background: var(--card); border: 1px solid var(--line); border-radius: 22px 22px 22px 6px; padding: 13px 16px; font-size: 16px; line-height: 1.45; } .wizard .bub b { color: var(--accent); }
+.wizard .sexr { display: flex; gap: 10px; } .wizard .sexr .chip { flex: 1; justify-content: center; }
+.wizard .fr { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 10px 12px 10px 18px; }
+.wizard .fr small { font-size: 16px; color: var(--muted); font-weight: 600; }
+.wizard .stpx { display: flex; align-items: center; gap: 6px; }
+.wizard .stpx .m { width: 38px; height: 44px; border-radius: 13px; background: var(--card2); color: var(--text); display: grid; place-items: center; flex: none; }
+.wizard .stpx .m svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2.6; stroke-linecap: round; }
+.wizard .stpx input.bigin { width: 82px; min-height: 48px; border: 0 !important; background: transparent !important; text-align: center; font-family: var(--display); font-size: 32px; padding: 0; box-shadow: none !important; }
+.wizard .stpx .un { color: var(--muted); font-size: 14px; min-width: 34px; }
+.wizard .cond { display: flex; align-items: center; gap: 12px; } .wizard .cond .tile { box-shadow: none; } .wizard .cond .tile svg.sp { display: none; }
+.guida .gart { display: grid; place-items: center; margin: 24px 0 6px; } .guida .gart .tile { box-shadow: 0 10px 36px rgba(var(--accent-rgb), .25), inset 0 1px 0 rgba(255,255,255,.35); }

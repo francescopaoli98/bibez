@@ -205,7 +205,17 @@ function exRow(id, subtitle, onclick) {
 
 /* ---------------------------- primo avvio: "Prima di iniziare" ---------------------------- */
 const inp = (props) => h('input', { class: 'bigin', type: 'number', inputmode: 'decimal', ...props });
-const condBtn = (txt, on, onclick) => h('button', { class: 'cond' + (on ? ' on' : ''), role: 'checkbox', 'aria-checked': String(on), onclick }, h('i', {}, on ? '✓' : ''), txt);
+const COND_ICON = { pressione: 'tempo', cuore: 'salute', diabete: 'kcal', schiena: 'schiena', articolazioni: 'gambe', asma: 'aiuto', gravidanza: 'peso', altro: 'avanzate' };
+const condBtn = (txt, on, onclick, key) => h('button', { class: 'cond' + (on ? ' on' : ''), role: 'checkbox', 'aria-checked': String(on), onclick }, key && tile(COND_ICON[key] || 'aiuto', 14), h('i', {}, on ? '✓' : ''), txt);
+// Riga con − / +: si può anche toccare il numero e scrivere
+function stepRow(label, ph, unit, get, set, { step = 1, min = 0, max = 999 } = {}) {
+  const input = inp({ placeholder: ph, value: get(), oninput: e => set(e.target.value) });
+  const bump = (dv) => { const cur = parseFloat(String(input.value).replace(',', '.')) || parseFloat(ph) || 0; const nv = Math.min(max, Math.max(min, Math.round((cur + dv) * 10) / 10)); input.value = nv; set(String(nv)); };
+  return h('div', { class: 'fr' }, h('small', {}, label), h('div', { class: 'stpx' },
+    h('button', { class: 'm', type: 'button', 'aria-label': 'Meno ' + label.toLowerCase(), 'data-nosound': '', onclick: () => bump(-step) }, icon('minus')), input, h('span', { class: 'un' }, unit),
+    h('button', { class: 'm', type: 'button', 'aria-label': 'Più ' + label.toLowerCase(), 'data-nosound': '', onclick: () => bump(step) }, icon('plus'))));
+}
+const sayBubble = (...kids) => h('div', { class: 'wsay' }, avatar(46), h('div', { class: 'bub' }, ...kids));
 const privacyBox = (txt) => h('div', { class: 'privacy' }, icon('heart'), h('span', {}, txt));
 
 function viewOnboarding() {
@@ -238,15 +248,17 @@ function viewOnboarding() {
     const names = order(), name = names[step], last = step === names.length - 1;
     const body = [];
     if (name === 'dati') body.push(
-      h('div', {}, h('h1', {}, 'I tuoi dati'), h('p', { class: 'lead' }, 'Servono per calcolare le calorie e per consigliarti bene. Puoi cambiarli quando vuoi.')),
-      h('label', { class: 'field2' }, 'Quanto pesi?', h('small', {}, 'Scrivi il peso in chili'), h('div', { class: 'inpbox' }, inp({ placeholder: '70', value: d.peso, oninput: e => d.peso = e.target.value }), h('span', {}, 'kg'))),
-      h('label', { class: 'field2' }, 'Quanto sei alto/a?', h('div', { class: 'inpbox' }, inp({ placeholder: '170', value: d.altezza, oninput: e => d.altezza = e.target.value }), h('span', {}, 'cm'))),
-      h('div', { class: 'row', style: 'gap:12px;align-items:flex-end' },
-        h('label', { class: 'field2 grow' }, 'Anni', h('div', { class: 'inpbox' }, inp({ placeholder: '30', value: d.eta, oninput: e => d.eta = e.target.value }))),
-        h('div', { class: 'field2 grow' }, 'Sesso', (() => { const bx = h('div', { class: 'chips' }); const dr = () => bx.replaceChildren(...[['uomo', 'Uomo'], ['donna', 'Donna']].map(([v, t]) => h('button', { class: 'chip lg' + (d.sesso === v ? ' on' : ''), onclick: () => { d.sesso = v; dr(); } }, t))); dr(); return bx; })())));
+      h('div', {}, h('div', { class: 'muted small' }, `Passo ${step + 1} di ${names.length}`), h('h1', {}, 'I tuoi dati')),
+      sayBubble(...(utente() ? ['Ciao ', h('b', {}, utente()), '! '] : ['Ciao! ']), 'Servono per calcolare le calorie e per consigliarti bene. Puoi cambiarli quando vuoi.'),
+      h('div', { class: 'field2' }, h('div', { class: 'sexr' }, [['donna', 'Donna', '#f472b6', '#be185d'], ['uomo', 'Uomo', '#60a5fa', '#1d4ed8']].map(([v, t]) =>
+        h('button', { class: 'chip lg sx' + (d.sesso === v ? ' on' : ''), onclick: () => { d.sesso = v; err = ''; draw(); } }, t)))),
+      stepRow('Peso', '70', 'kg', () => d.peso, v => d.peso = v, { step: 0.5, min: 30, max: 300 }),
+      stepRow('Altezza', '170', 'cm', () => d.altezza, v => d.altezza = v, { step: 1, min: 120, max: 230 }),
+      stepRow('Età', '30', 'anni', () => d.eta, v => d.eta = v, { step: 1, min: 14, max: 100 }));
     if (name === 'salute') body.push(
-      h('div', {}, h('h1', {}, 'La tua salute'), h('p', { class: 'lead' }, 'Tocca quello che hai. Se non hai niente, vai avanti.')),
-      h('div', { class: 'stack', style: 'gap:10px' }, Sal.CONDIZIONI.map(([k, t]) => condBtn(t, d.cond.has(k), () => { d.cond.has(k) ? d.cond.delete(k) : d.cond.add(k); err = ''; draw(); }))),
+      h('div', {}, h('div', { class: 'muted small' }, `Passo ${step + 1} di ${names.length}`), h('h1', {}, 'La tua salute')),
+      sayBubble('Hai qualcosa che devo sapere? Così scelgo esercizi sicuri per te. Tocca quello che hai: se non hai niente, vai avanti.'),
+      h('div', { class: 'stack', style: 'gap:10px' }, Sal.CONDIZIONI.map(([k, t]) => condBtn(t, d.cond.has(k), () => { d.cond.has(k) ? d.cond.delete(k) : d.cond.add(k); err = ''; draw(); }, k))),
       d.cond.has('altro') && h('input', { type: 'text', class: 'bigtext', placeholder: 'Cosa? (anche solo una parola)', value: d.altro, oninput: e => d.altro = e.target.value }),
       h('div', { class: 'field2' }, 'Prendi dei farmaci?', h('div', { class: 'row', style: 'gap:10px' }, [[true, 'Sì'], [false, 'No']].map(([v, t]) => h('button', { class: 'chip lg' + (d.farmaci === v ? ' on' : ''), onclick: () => { d.farmaci = v; err = ''; draw(); } }, t)))),
       d.farmaci === true && h('input', { type: 'text', class: 'bigtext', placeholder: 'Quali? (anche solo il nome)', value: d.farmaciNote, oninput: e => d.farmaciNote = e.target.value }),
@@ -260,7 +272,8 @@ function viewOnboarding() {
         condBtn('Ho capito: parlerò con il mio medico.', d.ack, () => { d.ack = !d.ack; err = ''; draw(); }));
     }
     if (name === 'obiettivi') body.push(
-      h('div', {}, h('h1', {}, 'Il tuo obiettivo'), h('p', { class: 'lead' }, 'Ho già scelto le opzioni più comuni. Cambia solo se serve.')),
+      h('div', {}, h('div', { class: 'muted small' }, `Passo ${step + 1} di ${names.length}`), h('h1', {}, 'Il tuo obiettivo')),
+      sayBubble('Ultima cosa! Ho già scelto le opzioni più comuni: cambia solo se serve.'),
       pick('Obiettivo', 'obiettivo', OBIETTIVI), pick('Esperienza', 'livello', LIVELLI), pick('Giorni a settimana', 'giorni', [[2, '2'], [3, '3'], [4, '4'], [5, '5']]), pick('A casa che attrezzatura hai?', 'casa', CASA_OPT),
       useProxy()
         ? h('div', { class: 'card stack' }, h('h3', {}, 'Coach IA ✅'), h('p', { class: 'muted small' }, 'Il coach è già collegato: non devi inserire nessuna chiave. I tuoi messaggi al coach passano dal Gemini di chi gestisce l\'app.'))
@@ -411,10 +424,10 @@ let coachDraft = '';
 function viewGuida() {
   const nome = utente();
   const SL = [
-    ['👋', `Ciao${nome ? ' ' + nome : ''}!`, 'Ti spiego come funziona in 4 passi. Ci vuole meno di un minuto.'],
-    ['▶', 'Ogni giorno: apri "Oggi"', 'Tocca il grande pulsante verde INIZIA. L\'app ti dice cosa fare, un esercizio alla volta.'],
-    ['✓', 'Dopo ogni serie, tocca ✓', 'Il tempo di riposo parte da solo. Quando finisce, senti un suono. Poi passi al prossimo esercizio.'],
-    ['💬', 'Hai un dubbio? Scrivi al coach', 'Scrivi come parleresti a una persona: "mi fa male la spalla", "ho poco tempo". Il coach ti risponde.'],
+    ['aiuto', `Ciao${nome ? ' ' + nome : ''}!`, 'Ti spiego come funziona in 4 passi. Ci vuole meno di un minuto.'],
+    ['oggi', 'Ogni giorno: apri "Oggi"', 'Tocca il grande pulsante verde INIZIA. L\'app ti dice cosa fare, un esercizio alla volta.'],
+    ['fatto', 'Dopo ogni serie, tocca ✓', 'Il tempo di riposo parte da solo. Quando finisce, senti un suono. Poi passi al prossimo esercizio.'],
+    ['coach', 'Hai un dubbio? Scrivi al coach', 'Scrivi come parleresti a una persona: "mi fa male la spalla", "ho poco tempo". Il coach ti risponde.'],
   ];
   let n = 0;
   const finish = () => { S.seen = { ...(S.seen || {}), guida: true }; save(); go('#/oggi'); };
@@ -422,7 +435,7 @@ function viewGuida() {
     const [e, t, p] = SL[n], last = n === SL.length - 1;
     view.className = 'no-tabs'; renderTabs(null);
     render(h('div', { class: 'guida' },
-      h('div', { class: 'stack', style: 'gap:30px;margin-top:40px' }, h('div', { class: 'big-ic' }, e),
+      h('div', { class: 'stack', style: 'gap:30px;margin-top:40px' }, h('div', { class: 'gart' }, tile(e, 56)),
         h('div', { class: 'stack center' }, h('h1', {}, t), h('p', { class: 'lead' }, p))),
       h('div', { class: 'stack', style: 'gap:18px' },
         h('div', { class: 'dots' }, SL.map((_, i) => h('i', { class: i === n ? 'on' : '' }))),
