@@ -14,7 +14,8 @@
    "img": [
     "img/ex/Cat_Stretch/0.jpg",
     "img/ex/Cat_Stretch/1.jpg"
-   ]
+   ],
+   "zona": "schiena"
   },
   {
    "id": "Hug_Knees_To_Chest",
@@ -30,7 +31,8 @@
    "img": [
     "img/ex/Hug_Knees_To_Chest/0.jpg",
     "img/ex/Hug_Knees_To_Chest/1.jpg"
-   ]
+   ],
+   "zona": "anche"
   },
   {
    "id": "Standing_Hip_Circles",
@@ -46,7 +48,8 @@
    "img": [
     "img/ex/Standing_Hip_Circles/0.jpg",
     "img/ex/Standing_Hip_Circles/1.jpg"
-   ]
+   ],
+   "zona": "anche"
   },
   {
    "id": "Shoulder_Circles",
@@ -62,7 +65,8 @@
    "img": [
     "img/ex/Shoulder_Circles/0.jpg",
     "img/ex/Shoulder_Circles/1.jpg"
-   ]
+   ],
+   "zona": "spalle"
   },
   {
    "id": "Standing_Lateral_Stretch",
@@ -78,7 +82,8 @@
    "img": [
     "img/ex/Standing_Lateral_Stretch/0.jpg",
     "img/ex/Standing_Lateral_Stretch/1.jpg"
-   ]
+   ],
+   "zona": "schiena"
   },
   {
    "id": "Standing_Toe_Touches",
@@ -94,7 +99,8 @@
    "img": [
     "img/ex/Standing_Toe_Touches/0.jpg",
     "img/ex/Standing_Toe_Touches/1.jpg"
-   ]
+   ],
+   "zona": "gambe"
   },
   {
    "id": "Worlds_Greatest_Stretch",
@@ -110,7 +116,8 @@
    "img": [
     "img/ex/Worlds_Greatest_Stretch/0.jpg",
     "img/ex/Worlds_Greatest_Stretch/1.jpg"
-   ]
+   ],
+   "zona": "anche"
   },
   {
    "id": "Ankle_Circles",
@@ -126,7 +133,8 @@
    "img": [
     "img/ex/Ankle_Circles/0.jpg",
     "img/ex/Ankle_Circles/1.jpg"
-   ]
+   ],
+   "zona": "caviglie"
   },
   {
    "id": "Knee_Circles",
@@ -142,7 +150,8 @@
    "img": [
     "img/ex/Knee_Circles/0.jpg",
     "img/ex/Knee_Circles/1.jpg"
-   ]
+   ],
+   "zona": "gambe"
   },
   {
    "id": "Kneeling_Hip_Flexor",
@@ -158,7 +167,8 @@
    "img": [
     "img/ex/Kneeling_Hip_Flexor/0.jpg",
     "img/ex/Kneeling_Hip_Flexor/1.jpg"
-   ]
+   ],
+   "zona": "anche"
   },
   {
    "id": "Knee_Across_The_Body",
@@ -174,7 +184,8 @@
    "img": [
     "img/ex/Knee_Across_The_Body/0.jpg",
     "img/ex/Knee_Across_The_Body/1.jpg"
-   ]
+   ],
+   "zona": "anche"
   },
   {
    "id": "Standing_Gastrocnemius_Calf_Stretch",
@@ -190,7 +201,8 @@
    "img": [
     "img/ex/Standing_Gastrocnemius_Calf_Stretch/0.jpg",
     "img/ex/Standing_Gastrocnemius_Calf_Stretch/1.jpg"
-   ]
+   ],
+   "zona": "gambe"
   },
   {
    "id": "Arm_Circles",
@@ -206,7 +218,8 @@
    "img": [
     "img/ex/Arm_Circles/0.jpg",
     "img/ex/Arm_Circles/1.jpg"
-   ]
+   ],
+   "zona": "spalle"
   },
   {
    "id": "Dynamic_Chest_Stretch",
@@ -222,7 +235,8 @@
    "img": [
     "img/ex/Dynamic_Chest_Stretch/0.jpg",
     "img/ex/Dynamic_Chest_Stretch/1.jpg"
-   ]
+   ],
+   "zona": "petto"
   },
   {
    "id": "Upper_Back_Stretch",
@@ -238,7 +252,8 @@
    "img": [
     "img/ex/Upper_Back_Stretch/0.jpg",
     "img/ex/Upper_Back_Stretch/1.jpg"
-   ]
+   ],
+   "zona": "schiena"
   },
   {
    "id": "Triceps_Stretch",
@@ -254,7 +269,8 @@
    "img": [
     "img/ex/Triceps_Stretch/0.jpg",
     "img/ex/Triceps_Stretch/1.jpg"
-   ]
+   ],
+   "zona": "braccia"
   },
   {
    "id": "Side_Neck_Stretch",
@@ -270,7 +286,8 @@
    "img": [
     "img/ex/Side_Neck_Stretch/0.jpg",
     "img/ex/Side_Neck_Stretch/1.jpg"
-   ]
+   ],
+   "zona": "collo"
   }
  ],
  "presets": [

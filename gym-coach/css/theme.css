@@ -565,3 +565,50 @@ h1.hi { margin-bottom: 4px; } .row.between h1.hi { font-size: 28px; }
 .cb2:disabled { opacity: .35; } .cb2 svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .rvnext { flex: 1; padding: 17px 8px; font-size: 16px; font-weight: 800; background: linear-gradient(180deg, #fde68a, #fbbf24); color: #2a1a00; border-radius: 20px; }
 .rvend { text-align: center; padding-top: 80px; } .rvend .rvsun { display: inline-block; margin-bottom: 14px; } .rvend .rvgo { margin-top: 26px; }
+
+/* ======== v42: Risveglio, identità "alba" (sole dipinto) ======== */
+.rv.sunrise { position: relative; overflow: hidden; background: linear-gradient(160deg, rgba(253,186,60,.28), rgba(244,114,60,.14) 55%, rgba(20,14,12,.9)); border: 1px solid rgba(253,186,60,.55); box-shadow: 0 18px 50px rgba(245,158,11,.16); padding: 20px; }
+.rvsun { position: absolute; right: -70px; top: -80px; width: 270px; height: 270px; object-fit: contain; pointer-events: none; opacity: .95; }
+.rv.sunrise > *:not(.rvsun) { position: relative; }
+.rv.sunrise .rvh small { display: block; font-size: 12px; letter-spacing: .14em; color: #fde047; font-weight: 800; }
+.rv.sunrise .rvh b { font-size: 28px; letter-spacing: -.4px; }
+.rvp { color: rgba(255,244,230,.85); font-size: 16px; line-height: 1.45; margin: 12px 0; max-width: 250px; }
+.rvchips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.rvchips span { display: inline-flex; align-items: center; gap: 7px; background: rgba(0,0,0,.3); border-radius: 14px; padding: 5px 12px 5px 6px; font-size: 13px; font-weight: 600; }
+.rvchips span .tile { box-shadow: none; } .rvchips span .tile svg.sp { display: none; }
+.rv.sunrise .rvb { background: linear-gradient(180deg, #fde68a, #f59e0b); box-shadow: 0 10px 28px rgba(245,158,11,.35); margin-top: 0; }
+.rvweek { margin-top: 14px; } .rvweek .wl { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: rgba(255,244,230,.7); margin-bottom: 8px; }
+.rvlinks { display: flex; gap: 6px; } .rvlinks .linkbtn { padding: 0 4px; font-size: 13px; }
+.wd, .dots3 { display: flex; gap: 7px; }
+.wd i { flex: 1; height: 32px; border-radius: 10px; background: rgba(255,255,255,.08); font-style: normal; font-size: 12px; color: rgba(255,244,230,.55); display: grid; place-items: center; }
+.wd i.on { background: #fbbf24; color: #2a1400; font-weight: 800; }
+/* tema alba nelle schermate del Risveglio */
+body.alba { --accent: #fbbf24; --accent-rgb: 251,191,36; --accent-hi: #fde68a; --accent-lo: #f59e0b; --accent-ink: #2a1400; --bg: #0d0b10;
+  background: radial-gradient(520px 380px at 50% -40px, rgba(253,186,60,.5), rgba(244,114,60,.16) 55%, transparent 72%), linear-gradient(180deg, #2a1608 0%, #0d0b10 55%) fixed !important; }
+body.alba .sticky-head { background: rgba(26,14,6,.8); }
+.zonebox { position: absolute; right: 12px; top: 12px; display: flex; gap: 8px; align-items: center; background: rgba(20,12,6,.8); backdrop-filter: blur(8px); border: 1px solid rgba(251,191,36,.5); border-radius: 20px; padding: 6px 12px 6px 6px; z-index: 2; }
+.zonebox .bodymap { height: 84px; width: auto; } .zonebox .zon { filter: drop-shadow(0 0 8px #f59e0b); }
+.zonebox span { font-size: 12px; color: rgba(255,244,230,.7); line-height: 1.2; } .zonebox b { display: block; font-size: 16px; color: #fde047; }
+.rvex { position: relative; box-shadow: 0 0 0 2px rgba(251,191,36,.6), 0 18px 40px rgba(0,0,0,.5); }
+.whyhero { position: relative; overflow: hidden; margin: 14px 0 6px; border-radius: 26px; padding: 20px; background: linear-gradient(160deg, rgba(253,186,60,.22), rgba(20,14,12,.9)); border: 1px solid rgba(253,186,60,.45); }
+.whyhero p { position: relative; margin: 0; font-size: 17px; line-height: 1.5; color: rgba(255,244,230,.92); }
+.whysun { position: absolute; right: -60px; top: -70px; width: 220px; opacity: .85; pointer-events: none; }
+.ben { display: flex; gap: 14px; align-items: center; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 22px; padding: 12px 16px; margin-top: 10px; }
+.ben b { display: block; font-size: 17px; } .ben span { color: rgba(255,244,230,.65); font-size: 14px; line-height: 1.35; } .ben .tile { box-shadow: none; } .ben .tile svg.sp { display: none; }
+.how { display: flex; gap: 12px; align-items: center; margin-top: 14px; color: rgba(255,244,230,.8); font-size: 14px; line-height: 1.4; } .how .tile { box-shadow: none; } .how .tile svg.sp { display: none; }
+.alba-cta { text-align: center; } .rvbtn { background: linear-gradient(180deg, #fde68a, #f59e0b) !important; color: #2a1400 !important; }
+.disc { margin: 8px 0 0; font-size: 12px; color: rgba(255,244,230,.5); }
+.rvend { text-align: center; padding-top: 30px; } .sunbig { width: 280px; height: 280px; margin: 0 auto 6px; } .sunbig img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 50px rgba(251,191,36,.55)); }
+.tt3 { font-family: inherit !important; text-transform: none !important; font-size: 40px; font-weight: 800; letter-spacing: -.6px; margin: 0; }
+.sub3 { color: rgba(255,244,230,.78); font-size: 18px; margin: 8px 24px 16px; line-height: 1.4; }
+.chips3 { display: flex; gap: 10px; justify-content: center; } .chips3 span { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,.3); border-radius: 99px; padding: 6px 14px 6px 7px; font-size: 15px; font-weight: 700; }
+.chips3 .tile { box-shadow: none; } .chips3 .tile svg.sp { display: none; }
+.dots3 { justify-content: center; margin-top: 18px; } .dots3 i { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.08); font-style: normal; font-size: 13px; color: rgba(255,244,230,.55); display: grid; place-items: center; } .dots3 i.on { background: #fbbf24; color: #2a1400; font-weight: 800; }
+.next3 { margin: 22px 8px 0; border-radius: 22px; padding: 14px; background: rgba(166,255,46,.1); border: 1px solid rgba(166,255,46,.35); } .next3 b { display: block; font-size: 18px; } .next3 span { color: var(--muted); font-size: 14px; }
+.rvend .rvgo { margin-top: 22px; background: linear-gradient(180deg, #fde68a, #f59e0b); color: #2a1400; } .rvend .rvgo.green { background: linear-gradient(180deg, #c6ff5c, #9fe820); color: #0b0f17; }
+.whysun { position: static !important; display: block; width: 190px !important; margin: -14px auto 6px; }
+.whyhero { padding-top: 10px; } .whyhero p { text-align: center; }
+.row.between .btn.small { white-space: nowrap; }
+.rvsun { width: 230px !important; height: 230px !important; right: -62px !important; top: -66px !important; }
+.rv.sunrise .rvh .grow { max-width: 58%; } .rv.sunrise .rvh b { font-size: 26px; line-height: 1.1; }
+.rvp { max-width: 64%; }

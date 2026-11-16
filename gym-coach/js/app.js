@@ -14,7 +14,7 @@ import { initInstall } from './install.js';
 import * as Sal from './salute.js';
 import { viewProgressi } from './progress.js';
 import { remindersCard } from './reminders.js';
-import { loadRisveglio, viewRisveglio, risvegliPresets, routine, routineMin, autoPreset, presetName, defaultPreset, doneToday } from './risveglio.js';
+import { loadRisveglio, viewRisveglio, viewRisveglioInfo, risvegliPresets, routine, routineMin, autoPreset, presetName, defaultPreset, doneToday, weekMornings, SOLE } from './risveglio.js';
 import * as Chats from './chats.js';
 import { voiceMode, startVoice } from './voice.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges, addMemory } from './coach.js';
@@ -124,11 +124,11 @@ function rememberDevice0(r) { if (r?.password) keepSignedIn().catch(() => {}); }
 
 const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach, progressi: () => viewProgressi({ render, LIB, go }),
                  profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding, guida: viewGuida,
-                 risveglio: (preset, day) => viewRisveglio({ render, go, keepAwake, presetId: preset || defaultPreset(), dayIdx: day }) };
+                 risveglio: (preset, day) => preset === 'perche' ? viewRisveglioInfo({ render, go, presetId: day || defaultPreset() }) : viewRisveglio({ render, go, keepAwake, presetId: preset || defaultPreset(), dayIdx: day }) };
 const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'progressi', scheda: 'scheda', esercizi: 'scheda', coach: 'coach' };
 
 function route() {
-  closeSheet();
+  closeSheet(); document.body.classList.remove('alba');
   let [name, sub, sub2] = (location.hash.replace(/^#\/?/, '') || 'oggi').split('/');
   if ((!S.profile || !S.plan) && name !== 'benvenuto') return go('#/benvenuto');
   if (!ROUTES[name]) name = 'oggi';
@@ -453,15 +453,19 @@ function livelloTxt(exs) {
   return ['Facile', 'Medio', 'Impegnativo'][Math.min(2, base + big)];
 }
 
-// Carta "Risveglio muscolare" in Oggi (facoltativa, separata dall'allenamento)
+// Carta "Risveglio muscolare" in Oggi: l'alba (facoltativa, separata dall'allenamento)
 function risvegliCard() {
   if (S.session || S.settings.risveglio === false || !routine(defaultPreset()).length) return null;
   const id = defaultPreset(), done = doneToday();
-  return h('div', { class: 'rv' + (done ? ' done' : '') },
-    h('div', { class: 'rvh' }, tile('risveglio', 20), h('div', { class: 'grow' }, h('b', {}, 'Risveglio muscolare'),
-      h('span', {}, done ? 'Fatto oggi ✓' : `${presetName(id)} · ${routine(id).length} esercizi · ${routineMin(id)} min`)),
-      h('button', { class: 'linkbtn rvchg', onclick: () => presetSheet() }, 'Cambia')),
-    h('button', { class: 'rvb', onclick: () => go(`#/risveglio/${id}`) }, done ? 'Rifai il risveglio' : 'Inizia il risveglio'));
+  return h('div', { class: 'rv sunrise' + (done ? ' done' : '') },
+    h('img', { class: 'rvsun', src: SOLE, alt: '', 'aria-hidden': 'true' }),
+    h('div', { class: 'rvh' }, tile('risveglio', 20), h('div', { class: 'grow' }, h('small', {}, 'RISVEGLIO MUSCOLARE'), h('b', {}, 'Sveglia i muscoli'))),
+    h('p', { class: 'rvp' }, done ? 'Fatto oggi ✓ Ottimo inizio di giornata.' : 'Pochi minuti di movimenti dolci per partire bene la giornata.'),
+    h('div', { class: 'rvchips' }, h('span', {}, tile('tempo', 12), routineMin(id) + ' min'), h('span', {}, 'Senza attrezzi'), h('span', {}, routine(id).length + ' esercizi')),
+    h('button', { class: 'rvb', onclick: () => go(S.seen?.risveglio ? `#/risveglio/${id}` : `#/risveglio/perche/${id}`) }, done ? '☀ Rifai il risveglio' : '☀ Inizia il risveglio'),
+    h('div', { class: 'rvweek' }, h('div', { class: 'wl' }, h('span', {}, 'Le tue mattine'),
+      h('span', { class: 'rvlinks' }, h('button', { class: 'linkbtn', onclick: () => go(`#/risveglio/perche/${id}`) }, 'Perché farlo'), h('button', { class: 'linkbtn', onclick: () => presetSheet() }, 'Cambia'))),
+      h('div', { class: 'wd' }, weekMornings().map((on, k) => h('i', { class: on ? 'on' : '' }, 'LMMGVSD'[k])))));
 }
 // Scelta del tipo di risveglio (da solo)
 function presetSheet() {
