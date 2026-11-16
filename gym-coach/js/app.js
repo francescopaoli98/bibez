@@ -1,4 +1,5 @@
-import { S, save, resetAll, exportJSON, importJSON, initStore, lockEnabled, enableLock, disableLock, changePassword, unlock, setUser, hasUserData, deviceInfo, rememberDevice, forgetDevice, unlockWithDevice } from './store.js';
+import { ensureSchede, cur as curScheda, activeSchede, selectScheda, addScheda, removeScheda, TIPI, tipoTxt, tipoIcon } from './schede.js';
+import { S, save, curLuogo, luogoFor, resetAll, exportJSON, importJSON, initStore, lockEnabled, enableLock, disableLock, changePassword, unlock, setUser, hasUserData, deviceInfo, rememberDevice, forgetDevice, unlockWithDevice } from './store.js';
 import { bioAvailable, bioRegister } from './bio.js';
 import { lockScreen, loginScreen, initAutoLock, softLock, setUnlockHook } from './lock.js';
 import { accountsMode, knownUsers, rememberUser, lastUser, forgetLast, getSession, setSession, refreshSession, changeAccountPassword } from './account.js';
@@ -123,12 +124,12 @@ async function accessFlow() {
 function rememberDevice0(r) { if (r?.password) keepSignedIn().catch(() => {}); }
 
 const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach, progressi: () => viewProgressi({ render, LIB, go }),
-                 profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding, guida: viewGuida,
+                 schede: viewSchede, profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding, guida: viewGuida,
                  risveglio: (preset, day) => preset === 'perche' ? viewRisveglioInfo({ render, go, presetId: day || defaultPreset() }) : viewRisveglio({ render, go, keepAwake, presetId: preset || defaultPreset(), dayIdx: day }) };
-const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'progressi', scheda: 'scheda', esercizi: 'scheda', coach: 'coach' };
+const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'progressi', scheda: 'scheda', schede: 'scheda', esercizi: 'scheda', coach: 'coach' };
 
 function route() {
-  closeSheet(); document.body.classList.remove('alba');
+  closeSheet(); document.body.classList.remove('alba'); if (S.plan) ensureSchede();
   let [name, sub, sub2] = (location.hash.replace(/^#\/?/, '') || 'oggi').split('/');
   if ((!S.profile || !S.plan) && name !== 'benvenuto') return go('#/benvenuto');
   if (!ROUTES[name]) name = 'oggi';
@@ -153,10 +154,13 @@ function renderTabs(active) {
 
 // Interruttore Palestra / Casa
 function luogoSwitch(redraw) {
+  const t = curScheda()?.tipo;
+  if (t === 'casa') return h('div', { class: 'muted small center' }, tile('casa', 12), ' Scheda solo per casa');     // la scheda decide dove ti alleni
+  if (t === 'palestra') return null;
   return h('div', { class: 'seg' }, [['palestra', 'Palestra'], ['casa', 'Casa']].map(([v, t]) =>
     h('button', { class: 'seg-b' + ((S.luogo || 'palestra') === v ? ' on' : ''), onclick: () => { S.luogo = v; save(); redraw(); } }, tile(v, 16), t)));
 }
-const homeHint = () => (S.luogo === 'casa' && (S.profile.casa || 'libero') === 'libero')
+const homeHint = () => (curLuogo() === 'casa' && (S.profile.casa || 'libero') === 'libero')
   ? h('p', { class: 'muted small' }, 'A casa uso esercizi a corpo libero. Hai dei manubri? ', h('a', { href: '#/profilo/obiettivo' }, 'Dillo qui'))
   : null;
 const kcalTxt = (exs) => `~${estKcal(exs)} kcal`;
@@ -330,25 +334,31 @@ function loadingScreen() {
   }, stop() { done = true; clearInterval(timer); } };
 }
 
-async function buildPlan() {
-  const load = loadingScreen();
+// Crea una scheda (con l'IA se c'è, altrimenti una scheda pronta) per un certo profilo
+async function generatePlan(profile) {
   let plan, note = '';
   if (aiReady()) {
-    try { plan = await aiPlan(S.profile, LIB); }
+    try { plan = await aiPlan(profile, LIB); }
     catch (e) {
       let last = e;
       if (/troppo/i.test(e.message)) {                       // il modello è lento: provo uno più veloce prima di arrendermi
         const m = await pickFastModel();
         if (m) {
           const old = S.settings.model; S.settings.model = m;
-          try { plan = await aiPlan(S.profile, LIB); note = expert() ? `Il modello era lento: ne ho scelto uno più veloce (${m}).` : 'Scheda pronta! 🎉'; }
+          try { plan = await aiPlan(profile, LIB); note = expert() ? `Il modello era lento: ne ho scelto uno più veloce (${m}).` : 'Scheda pronta! 🎉'; }
           catch (e2) { S.settings.model = old; last = e2; }
         }
       }
       if (!plan) { S.lastError = errorText(last); note = expert() ? 'IA non disponibile: ho usato una scheda pronta. Vedi Impostazioni → Avanzate → Copia ultimo errore.' : 'Il coach è occupato: ti ho preparato una scheda pronta. Più tardi puoi rifarla da Impostazioni → Rifai la scheda.'; }
     }
   }
-  S.plan = Sal.adjustPlan(plan || templatePlan(S.profile), S.profile.salute);        // con schiena o articolazioni delicate: esercizi più dolci
+  return { plan: Sal.adjustPlan(plan || templatePlan(profile), profile.salute), note };       // con schiena o articolazioni delicate: esercizi più dolci
+}
+
+async function buildPlan() {
+  const load = loadingScreen();
+  const { plan, note } = await generatePlan(S.profile);
+  S.plan = plan;
   S.nextDay = 0; S.session = null; S.planBackup = null;
   save();
   await load.finish();
@@ -356,6 +366,46 @@ async function buildPlan() {
   if (location.hash === dest) route(); else go(dest);
   setTimeout(() => toast(note || 'Scheda pronta! 🎉'), 300);
 }
+
+// ---- più schede in parallelo ----
+async function createScheda(f) {
+  const load = loadingScreen();
+  const { plan, note } = await generatePlan({ ...S.profile, giorni: f.giorni, obiettivo: f.obiettivo });
+  plan.nome = f.nome;
+  const id = addScheda({ nome: f.nome, tipo: f.tipo, plan });
+  selectScheda(id); schedaDay = null;
+  await load.finish();
+  go('#/scheda'); setTimeout(() => toast(note && note !== 'Scheda pronta! 🎉' ? note : `Scheda “${f.nome}” pronta! 🎉`), 300);
+}
+function newSchedaSheet(preset = {}) {
+  const f = { nome: preset.nome || `Scheda ${S.schede.length + 1}`, tipo: preset.tipo || 'misto', giorni: preset.giorni || 3, obiettivo: preset.obiettivo || S.profile.obiettivo };
+  const nome = h('input', { type: 'text', value: f.nome, maxlength: 30, oninput: e => { f.nome = e.target.value; } });
+  const chips = (label, key, opts) => h('div', { class: 'stack' }, h('h3', {}, label), h('div', { class: 'chips' }, opts.map(([v, t]) =>
+    h('button', { class: 'chip lg' + (f[key] === v ? ' on' : ''), onclick: (e) => { f[key] = v; e.target.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); e.target.classList.add('on'); } }, t))));
+  openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Nuova scheda'), h('label', { class: 'field' }, 'Nome', nome),
+    chips('Dove ti alleni', 'tipo', TIPI), chips('Giorni a settimana', 'giorni', [[2, '2'], [3, '3'], [4, '4'], [5, '5']]), chips('Obiettivo', 'obiettivo', OBIETTIVI),
+    h('button', { class: 'btn big block', onclick: () => { closeSheet(); createScheda({ ...f, nome: (f.nome || '').trim() || 'Nuova scheda' }); } }, 'Crea la scheda')));
+}
+function viewSchede() {
+  const act = S.schede.filter(x => x.on).length;
+  const card = (e) => h('div', { class: 'sch' + (e.on ? ' on' : '') }, tile(tipoIcon(e.tipo), 16),
+    h('button', { class: 'sm', onclick: () => { selectScheda(e.id); schedaDay = null; go('#/scheda'); } }, h('b', {}, e.nome), h('span', {}, `${e.plan.giorni.length} giorni · ${tipoTxt(e.tipo)}`)),
+    h('button', { class: 'sw2' + (e.on ? ' on' : ''), role: 'switch', 'aria-checked': String(e.on), 'aria-label': `${e.nome}: attiva in Oggi`, onclick: () => {
+      if (e.on && S.schede.filter(x => x.on).length === 1) return toast('Almeno una scheda deve restare attiva');
+      e.on = !e.on; save(); viewSchede(); } }),
+    h('button', { class: 'ic-d', 'aria-label': 'Rinomina', onclick: () => { const n = (prompt('Nome della scheda', e.nome) || '').trim(); if (n) { e.nome = n.slice(0, 30); save(); viewSchede(); } } }, icon('gear')),
+    S.schede.length > 1 && h('button', { class: 'ic-d', 'aria-label': 'Elimina la scheda', onclick: () => { if (confirm(`Eliminare “${e.nome}”?`)) { removeScheda(e.id); schedaDay = null; viewSchede(); } } }, icon('trash')));
+  render(
+    h('div', { class: 'row' }, h('a', { class: 'iconbtn', href: '#/scheda', 'aria-label': 'Indietro' }, '‹'), h('div', {}, h('div', { class: 'eyebrow', style: 'text-transform:none' }, `Attive in Oggi: ${act}`), h('h1', { class: 'hi' }, 'Le tue schede'))),
+    ...S.schede.map(card),
+    h('button', { class: 'newb', onclick: () => newSchedaSheet() }, '+ Nuova scheda'),
+    h('div', { class: 'opts' },
+      h('button', { onclick: () => newSchedaSheet() }, tile('fatto', 14), h('b', {}, 'Da zero'), h('small', {}, 'Scelgo io obiettivo e giorni')),
+      h('button', { onclick: () => { coachDraft = 'Fammi una nuova scheda per casa da 2 giorni'; go('#/coach'); } }, tile('coach', 14), h('b', {}, 'Con il coach'), h('small', {}, '"Fammi una scheda per casa"')),
+      h('button', { onclick: () => go('#/profilo/obiettivo') }, tile('risveglio', 14), h('b', {}, 'Risveglio'), h('small', {}, 'Stretching del mattino'))),
+    h('p', { class: 'note3' }, 'Puoi tenerne più di una attiva insieme: in Oggi vedi la prima in grande e le altre sotto. Quelle spente restano salvate.'));
+}
+let coachDraft = '';
 
 /* ---------------------------- guida di benvenuto ---------------------------- */
 function viewGuida() {
@@ -429,7 +479,7 @@ function dayRisveglio(i) {
   const d = S.plan.giorni[i], v = d?.risveglio;
   if (!v) return null;
   if (v !== 'auto') return v;
-  return autoPreset([...new Set(adaptDay(d, S.luogo).map(e => EX(e.id)?.gruppo))].filter(Boolean));
+  return autoPreset([...new Set(adaptDay(d, curLuogo()).map(e => EX(e.id)?.gruppo))].filter(Boolean));
 }
 // Avvia il giorno: con il risveglio prima, se è acceso
 function startDay(i, short = false) {
@@ -451,6 +501,16 @@ function friendlyTitle(exs) {
 function livelloTxt(exs) {
   const base = S.profile?.livello === 'intermedio' ? 1 : 0, big = exs.length > 6 ? 1 : 0;
   return ['Facile', 'Medio', 'Impegnativo'][Math.min(2, base + big)];
+}
+
+// Le altre schede attive (in parallelo): una riga con il prossimo giorno e "Inizia"
+function otherSchedeCards() {
+  return activeSchede().filter(e => e.id !== S.sel).map(e => {
+    const n = e.plan.giorni.length, i = (e.next || 0) % n, d = e.plan.giorni[i], exs = adaptDay(d, luogoFor(e));
+    return h('div', { class: 'osc' }, tile(tipoIcon(e.tipo), 16),
+      h('div', { class: 'grow' }, h('b', {}, e.nome), h('span', {}, `Giorno ${i + 1} · ${friendlyTitle(exs)} · ${estMin(exs)} min`)),
+      h('button', { class: 'btn small', onclick: () => { selectScheda(e.id); startDay(S.nextDay % S.plan.giorni.length); } }, 'Inizia'));
+  });
 }
 
 // Carta "Risveglio muscolare" in Oggi: l'alba (facoltativa, separata dall'allenamento)
@@ -476,9 +536,11 @@ function presetSheet() {
 }
 
 function viewOggi() {
+  const act = activeSchede();
+  if (!S.session && act.length && S.sel !== act[0].id) selectScheda(act[0].id);     // in Oggi la prima scheda attiva è quella principale
   const day = S.plan.giorni[S.nextDay % S.plan.giorni.length];
   const wk = weekCount(), target = S.profile.giorni;
-  const exs = adaptDay(day, S.luogo);
+  const exs = adaptDay(day, curLuogo());
   const kcalWeek = Math.round(thisWeek().reduce((a, w) => a + (w.kcal || 0), 0) / 10) * 10;
   const first = !S.seen?.start && !S.history.length && !S.session;      // la prima volta: invito a toccare il pulsante giusto
   const startBtn = h('button', { class: 'btn big block start' + (first ? ' pulse' : ''), onclick: () => startDay(S.nextDay % S.plan.giorni.length) }, S.session ? '▶ RIPRENDI L\'ALLENAMENTO' : '▶ INIZIA L\'ALLENAMENTO');
@@ -503,6 +565,7 @@ function viewOggi() {
         if (!confirm(`Versione corta: ${sh.length} esercizi, circa ${estMin(sh)} minuti. Iniziamo?`)) return;
         startDay(S.nextDay % S.plan.giorni.length, true);
       } }, 'Poco tempo? ', h('b', {}, 'Versione da 15 minuti'))),
+    ...(!S.session ? otherSchedeCards() : []),
     new Date().getHours() >= 12 && risvegliCard(),
     h('div', { class: 'card stack' },
       h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}${kcalWeek ? ' · ~' + kcalWeek + ' kcal' : ''}`)),
@@ -530,15 +593,17 @@ function nutritionCard() {
 /* ---------------------------- Scheda ---------------------------- */
 let schedaDay = null;                       // giorno aperto nella Scheda
 function viewScheda() {
-  const n = S.plan.giorni.length;
+  const n = S.plan.giorni.length, sc = curScheda();
   if (schedaDay == null || schedaDay >= n) schedaDay = S.nextDay % n;
-  const titles = S.plan.giorni.map(d => friendlyTitle(adaptDay(d, S.luogo)));
+  const titles = S.plan.giorni.map(d => friendlyTitle(adaptDay(d, curLuogo())));
   const dup = (i) => titles.filter(t => t === titles[i]).length > 1;            // più giorni con lo stesso titolo: in grande "Giorno N"
 
-  const d = S.plan.giorni[schedaDay], exs = adaptDay(d, S.luogo), rvId = dayRisveglio(schedaDay);
+  const d = S.plan.giorni[schedaDay], exs = adaptDay(d, curLuogo()), rvId = dayRisveglio(schedaDay);
   render(
-    h('div', { class: 'row between' }, h('div', {}, h('div', { class: 'eyebrow', style: 'text-transform:none' }, `${n} giorni a settimana`), h('h1', { class: 'hi' }, 'La tua scheda')),
+    h('div', { class: 'row between' }, h('div', {}, h('div', { class: 'eyebrow', style: 'text-transform:none' }, `${n} giorni a settimana · ${tipoTxt(sc?.tipo)}`), h('h1', { class: 'hi' }, sc?.nome || 'La tua scheda')),
       h('div', { class: 'row', style: 'gap:8px' }, helpBtn('scheda'), gear())),
+    h('div', { class: 'schpills' }, S.schede.map(e => h('button', { class: 'spl' + (e.id === S.sel ? ' on' : ''), onclick: () => { selectScheda(e.id); schedaDay = null; viewScheda(); } }, e.nome)),
+      h('a', { class: 'spl more', href: '#/schede' }, 'Gestisci')),
     luogoSwitch(viewScheda), homeHint(),
     h('div', { class: 'daytabs' }, S.plan.giorni.map((_, i) => h('button', { class: 'dtab' + (i === schedaDay ? ' on' : ''), onclick: () => { schedaDay = i; viewScheda(); } },
       h('small', {}, dup(i) ? titles[i] : `Giorno ${i + 1}`), h('b', {}, dup(i) ? `Giorno ${i + 1}` : titles[i])))),
@@ -770,7 +835,9 @@ const CHAT_TILES = ['salute', 'tempo', 'fatto', 'kcal', 'palestra'];
 function viewCoach() {
   const list = h('div', { class: 'chat' });
   const input = h('textarea', { rows: 1, placeholder: 'Scrivi al coach…', enterkeyhint: 'send', 'data-nosound': '' });
+  if (coachDraft) { input.value = coachDraft; coachDraft = ''; }
   const grow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; };   // la casella cresce col testo
+  setTimeout(grow, 0);
   const sendBtn = h('button', { class: 'btn sendbtn', 'aria-label': 'Invia', 'data-nosound': '', onclick: () => send() }, icon('send'));
   const note = h('div', { class: 'dict-note' });
   const clearNote = () => { note.textContent = ''; sendBtn.classList.remove('glow'); };
@@ -784,7 +851,7 @@ function viewCoach() {
     const p = m.proposal;
     const setStatus = (st) => { p.status = st; save(); draw(); };
     const nm = (id) => EX(id)?.nome || id;
-    const rows = p.changes.map(c => c.tipo === 'sostituisci'
+    const rows = p.nuova ? [h('div', { class: 'chg txt' }, `Nuova scheda “${p.nuova.nome}” · ${p.nuova.giorni} giorni · ${tipoTxt(p.nuova.tipo)}`)] : p.changes.map(c => c.tipo === 'sostituisci'
       ? h('div', { class: 'chg' }, h('span', { class: 'old' }, nm(c.da)), h('span', { class: 'arr' }, '→'), h('span', { class: 'new' }, nm(c.a)),
           h('div', { class: 'note2' }, S.plan.giorni[c.giorno]?.nome || ''))
       : h('div', { class: 'chg txt' }, c.desc));
@@ -793,6 +860,7 @@ function viewCoach() {
       h('div', { class: 'chgs' }, rows),
       p.status === 'pending' && h('div', { class: 'row' },
         h('button', { class: 'btn grow', onclick: () => {
+          if (p.nuova) { p.status = 'applied'; p.undoable = false; save(); draw(); return createScheda(p.nuova); }
           const ok = normChanges(p.changes, LIB);        // ricontrolla: la scheda potrebbe essere cambiata
           if (!ok.length) { toast('Queste modifiche non sono più applicabili'); return setStatus('rejected'); }
           applyChanges(ok);
@@ -891,10 +959,10 @@ function viewCoach() {
         S.settings.model = m; save(); if (expert()) toast(`Il modello era lento: ne ho scelto uno più veloce (${m}).`, 5000);
         raw = await ask();
       }
-      const { text: reply, changes, memoria } = parseReply(raw);
+      const { text: reply, changes, memoria, nuova } = parseReply(raw);
       addMemory(memoria);
       const ok = normChanges(changes, LIB);
-      Chats.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : {}) });
+      Chats.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : nuova ? { proposal: { status: 'pending', changes: [], nuova } } : {}) });
       animateFrom = chat.messages.length - 1; play('receive'); buzz(12);
       if (!chat.aiTitled && chat.messages.length >= 2) Chats.aiTitle(chat).then(refreshHead).catch(() => {});   // titolo scritto dal coach
     } catch (e) { Chats.popLast(); input.value = text; play('error'); showError(e); }

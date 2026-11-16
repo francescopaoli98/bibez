@@ -31,6 +31,8 @@ const DEFAULT = {
   seen: {},                 // cose già viste (guida, primo avvio…)
   luogo: 'palestra',        // 'palestra' | 'casa' (dove ti alleni oggi)
   nextDay: 0,               // indice del prossimo giorno in scheda
+  schede: [],               // tutte le schede [{id, nome, tipo:'palestra'|'casa'|'misto', on, plan, next}]
+  sel: null,                // id della scheda caricata in S.plan
   planBackup: null,         // scheda prima dell'ultima modifica del coach (per annullare)
 };
 
@@ -148,8 +150,14 @@ export async function changePassword(oldPw, newPw) {
   return true;
 }
 
+// Dove ti alleni con una certa scheda: solo casa, solo palestra, oppure quello che scegli oggi (Adattabile)
+export const luogoFor = (e) => (e?.tipo === 'casa' ? 'casa' : e?.tipo === 'palestra' ? 'palestra' : (S.luogo || 'palestra'));
+export const curLuogo = () => luogoFor((S.schede || []).find(x => x.id === S.sel));
+
 export function save() {
   try {
+    const e = (S.schede || []).find(x => x.id === S.sel);          // tiene allineata la scheda corrente
+    if (e && S.plan) { e.plan = S.plan; e.next = S.nextDay; }
     if (lockEnabled() || aesKey) {
       const snap = JSON.stringify(S);
       chain = chain.then(() => writeEnc(snap)).catch(e => console.warn('save failed', e));

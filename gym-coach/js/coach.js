@@ -19,7 +19,7 @@ export function coachSystem(lib) {
 Profilo: obiettivo ${p.obiettivo}, livello ${p.livello}, ${p.giorni} giorni/settimana, peso ${p.peso || 'non indicato'} kg. Note: ${p.note || 'nessuna'}.
 Altezza ${p.altezza || 'n.d.'} cm, età ${p.eta || 'n.d.'}. Obiettivo calorico indicativo: ${nt ? nt.kcal + ' kcal/giorno, ' + nt.prot + ' g proteine (mantenimento ~' + nt.mantenimento + ')' : 'non calcolato'}. Per l'alimentazione dai consigli generali e prudenti, mai diete estreme.\nLa scheda è pensata per la palestra. Oggi l'utente si allena: ${S.luogo === 'casa' ? 'A CASA (attrezzatura: ' + (p.casa === 'manubri' ? 'manubri' : 'solo corpo libero') + ')' : 'in palestra'}. L'app ha un interruttore Palestra/Casa nella schermata Oggi che adatta da solo gli esercizi: se l'utente dice che si allena a casa, suggeriscigli di usarlo invece di modificare la scheda base.
 
-SCHEDA ATTUALE (giorno = numero a partire da 0):
+SCHEDA ATTUALE "${(S.schede || []).find(x => x.id === S.sel)?.nome || 'Scheda'}" (${(S.schede || []).find(x => x.id === S.sel)?.tipo || 'misto'}). Altre schede dell'utente: ${(S.schede || []).filter(x => x.id !== S.sel).map(x => x.nome + ' (' + x.tipo + ')').join(', ') || 'nessuna'}.\n(giorno = numero a partire da 0):
 ${plan}
 
 ${coachLine(p.salute)}
@@ -35,7 +35,7 @@ CATALOGO ESERCIZI USABILI (id|nome|gruppo|attrezzo[|ok a casa]):
 ${catalog}
 
 FORMATO DI RISPOSTA: solo JSON valido così:
-{"risposta":"testo per l'utente","modifiche":[],"memoria":[]}
+{"risposta":"testo per l'utente","modifiche":[],"memoria":[],"nuovaScheda":null}
 
 REGOLE SULLE MODIFICHE:
 - Proponi modifiche alla scheda SOLO se l'utente lo chiede o descrive un problema (dolore, macchina occupata, troppo lungo, troppo facile/difficile). Altrimenti "modifiche":[] e rispondi e basta.
@@ -48,7 +48,7 @@ REGOLE SULLE MODIFICHE:
 - Per cambiare lo stesso esercizio in più giorni, una modifica per giorno. Massimo 6 modifiche.
 - Consigli su tecnica, carichi e alimentazione: pratici e prudenti. Se c'è dolore acuto o problema medico, consiglia di fermarsi e sentire un medico.
 - "memoria": SOLO se l'utente ti dice qualcosa di durevole su di sé (dolori o infortuni, preferenze, orari, attrezzatura, vincoli) e non è già nella memoria, scrivi 1-2 frasi brevissime (max 8 parole, in terza persona, es. "Spalla destra delicata"). Altrimenti "memoria":[]. Non ripetere ciò che è già ricordato.
-- Non inventare dati che non hai.`;
+- "nuovaScheda": se l'utente vuole UNA SCHEDA NUOVA in più (es. "una scheda per casa", "un'altra da 2 giorni"), NON modificare quella attuale: rispondi con "nuovaScheda":{"nome":"...","tipo":"palestra|casa|misto","giorni":2-5,"obiettivo":"misto|massa|dimagrire|tonificare"} e chiedi conferma. Altrimenti null.\n- Non inventare dati che non hai.`;
 }
 
 // Memoria del coach: poche righe durevoli (max 12), senza doppioni
@@ -63,11 +63,17 @@ export function addMemory(items) {
   save();
 }
 
+const TIPI_OK = ['palestra', 'casa', 'misto'], OBI_OK = ['misto', 'massa', 'dimagrire', 'tonificare'];
+function normNuova(n) {
+  if (!n || typeof n !== 'object') return null;
+  const giorni = Math.max(2, Math.min(5, parseInt(n.giorni) || 3));
+  return { nome: String(n.nome || 'Nuova scheda').slice(0, 30), tipo: TIPI_OK.includes(n.tipo) ? n.tipo : 'misto', giorni, obiettivo: OBI_OK.includes(n.obiettivo) ? n.obiettivo : (S.profile?.obiettivo || 'misto') };
+}
 export function parseReply(raw) {
   try {
     const o = JSON.parse(String(raw).replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ''));
-    return { text: String(o.risposta ?? o.text ?? '').trim() || '…', changes: Array.isArray(o.modifiche) ? o.modifiche : [], memoria: Array.isArray(o.memoria) ? o.memoria : [] };
-  } catch { return { text: String(raw).trim(), changes: [], memoria: [] }; }
+    return { text: String(o.risposta ?? o.text ?? '').trim() || '…', changes: Array.isArray(o.modifiche) ? o.modifiche : [], memoria: Array.isArray(o.memoria) ? o.memoria : [], nuova: normNuova(o.nuovaScheda) };
+  } catch { return { text: String(raw).trim(), changes: [], memoria: [], nuova: null }; }
 }
 
 const clamp = (v, min, max, def) => Math.min(max, Math.max(min, parseInt(v) || def));

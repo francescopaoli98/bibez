@@ -1,5 +1,5 @@
 // Logica allenamento condivisa: progressione, serie, sessione in corso.
-import { S, save } from './store.js';
+import { S, save, curLuogo } from './store.js';
 
 let LIB = [];
 export const setLib = (l) => { LIB = l; };
@@ -95,7 +95,7 @@ const pick = (day, luogo, short) => short ? shortList(adaptDay(day, luogo)) : ad
 
 export function startSession(dayIndex, short = false) {
   const day = S.plan.giorni[dayIndex];
-  const luogo = S.luogo || 'palestra';
+  const luogo = curLuogo();
   S.session = {
     dayIndex, dayName: day.nome, startedAt: Date.now(), cur: 0, luogo, short,
     exercises: pick(day, luogo, short).map(t => ({ id: t.id, target: t, sets: newSets(t) })),
