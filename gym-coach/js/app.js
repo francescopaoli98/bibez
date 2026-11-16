@@ -6,7 +6,7 @@ import { accountsMode, knownUsers, rememberUser, lastUser, forgetLast, getSessio
 import { h, icon, tile, toast, openSheet, closeSheet, mdLite } from './ui.js';
 import { gemini, listModels, benchModel, aiReady, useProxy, proxyAvailable, lastTiming, expert } from './ai.js';
 import { templatePlan, aiPlan } from './plans.js';
-import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib, shortList } from './training.js';
+import { isTime, topReps, suggestion, startSession, adaptDay, estKcal, estMin, setLib, shortList, newSets } from './training.js';
 import { targets } from './nutrition.js';
 import { applyTheme, setTheme, getTheme, PRESETS, BACKGROUNDS } from './theme.js';
 import { initSound, play, buzz } from './sound.js';
@@ -734,10 +734,72 @@ function viewAllenamento(startDay) {
     h('div', { id: 'rest-slot' }),
     h('p', { class: 'muted small center' }, time ? 'Tocca ✓ quando hai finito.' : 'I numeri sono già scritti: cambiali con − / + (o toccali per scrivere).'),
     h('button', { class: 'btn ghost block', onclick: () => swapExercise(s.cur) }, '↔ Sostituisci esercizio'),
+    aiReady() && h('button', { class: 'fab', 'data-nosound': '', onclick: () => workoutCoach(s.cur) }, avatar(46), h('span', {}, 'Chiedi al coach')),
     h('div', { class: 'bottom-bar' }, h('div', { class: 'in' },
       s.cur > 0 && h('button', { class: 'btn ghost', onclick: () => goTo(s.cur - 1), 'aria-label': 'Precedente' }, '‹'),
       h('button', { class: 'btn grow big', onclick: () => last ? finishSession() : goTo(s.cur + 1) }, last ? 'Termina allenamento' : 'Prossimo esercizio ›'))));
   upd();
+}
+
+// Il coach durante l'allenamento: una chat piccola sopra l'esercizio, che sa cosa stai facendo
+function workoutCoach(exIdx) {
+  const s = S.session; if (!s) return;
+  const ex = s.exercises[exIdx], info = EX(ex.id); if (!info) return;
+  const done = ex.sets.filter(x => x.done).length;
+  const ctx = `\n\nSTAI SEGUENDO UN ALLENAMENTO IN CORSO ("${s.dayName}", giorno ${s.dayIndex}). Esercizio attuale: ${info.nome} (id ${ex.id}), serie fatte ${done} di ${ex.sets.length}, pesi: ${ex.sets.map(x => (x.kg || '0') + 'kg×' + (x.reps || '?')).join(', ')}. La persona è in palestra con le mani occupate: risposte BREVISSIME (max 3 righe). Se serve cambiare l'esercizio o i parametri, proponi la modifica per il giorno ${s.dayIndex}.`;
+  const msgs = h('div', { class: 'wkc-msgs' });
+  const input = h('input', { type: 'text', placeholder: 'Scrivi al coach…', enterkeyhint: 'send', 'data-nosound': '' });
+  let busy = false;
+  const chat = () => { if (s.chatId && S.chats.some(c => c.id === s.chatId)) Chats.open(s.chatId); else Chats.startNew(); return Chats.current(); };
+  const draw = (pend) => {
+    const c = Chats.current();
+    msgs.replaceChildren(...(c?.messages || []).flatMap(m => {
+      const b = h('div', { class: 'msg ' + (m.role === 'user' ? 'me' : 'ai') }); b.append(m.role === 'user' ? document.createTextNode(m.text) : mdLite(m.text, false));
+      return [b, m.proposal?.status === 'pending' && proposal(m)];
+    }).filter(Boolean), ...(pend ? [h('div', { class: 'msg ai' }, h('div', { class: 'dots-anim' }, h('span'), h('span'), h('span')))] : []));
+    msgs.scrollTop = msgs.scrollHeight;
+  };
+  const apply = (p) => {
+    const ok = normChanges(p.changes, LIB); if (!ok.length) { toast('Queste modifiche non sono più applicabili'); p.status = 'rejected'; save(); return draw(); }
+    for (const c of ok) {                                   // vale solo per l'allenamento di oggi: la scheda resta com'era
+      if (c.tipo === 'sostituisci' && c.da === ex.id) { const t = { ...ex.target, id: c.a }; s.exercises[exIdx] = { id: c.a, target: t, sets: newSets(t) }; }
+      else if (c.tipo === 'parametri' && c.id === ex.id) { Object.assign(ex.target, { serie: c.serie, ripetizioni: c.ripetizioni, recupero: c.recupero }); ex.sets = Array.from({ length: c.serie }, (_, i) => ex.sets[i] || newSets(ex.target)[0]); }
+      else applyChanges([c]);                               // aggiungi/togli: cambia la scheda
+    }
+    p.status = 'applied'; save(); closeSheet(); viewAllenamento(); play('check'); toast('Fatto! Esercizio cambiato per oggi');
+  };
+  const proposal = (m) => {
+    const p = m.proposal, nm = (id) => EX(id)?.nome || id;
+    return h('div', { class: 'proposal pending' }, h('div', { class: 'kicker pk' }, tile('idea', 14), 'Proposta del coach'),
+      h('div', { class: 'chgs' }, p.changes.map(c => c.tipo === 'sostituisci'
+        ? h('div', { class: 'chg' }, h('span', { class: 'old' }, nm(c.da)), h('span', { class: 'arr' }, '→'), h('span', { class: 'new' }, nm(c.a)), h('div', { class: 'note2' }, 'Solo per questo allenamento'))
+        : h('div', { class: 'chg txt' }, c.desc))),
+      h('div', { class: 'row' }, h('button', { class: 'btn grow', onclick: () => apply(p) }, 'Sì, applica'), h('button', { class: 'btn ghost grow', onclick: () => { p.status = 'rejected'; save(); draw(); } }, 'No, lascia così')));
+  };
+  async function send(text) {
+    text = (text || input.value).trim(); if (!text || busy) return;
+    busy = true; input.value = ''; chat();
+    const c = Chats.push({ role: 'user', text }); s.chatId = c.id; save(); draw(true); play('send');
+    try {
+      const hist = c.messages.slice(-14).map(m => ({ role: m.role, parts: [{ text: m.text }] }));
+      while (hist.length && hist[0].role !== 'user') hist.shift();
+      const raw = await gemini({ system: coachSystem(LIB) + ctx, contents: hist, json: true, temperature: 0.4 });
+      const { text: reply, changes, memoria } = parseReply(raw); addMemory(memoria);
+      const ok = normChanges(changes, LIB);
+      Chats.push({ role: 'model', text: reply, ...(ok.length ? { proposal: { status: 'pending', changes: ok } } : {}) }); play('receive');
+      if (!c.aiTitled && c.messages.length >= 2) Chats.aiTitle(c).catch(() => {});
+    } catch (e) { Chats.popLast(); input.value = text; play('error'); closeSheet(); showError(e); busy = false; return; }
+    busy = false; draw();
+  }
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+  const QA = [['Mi fa male', 'Mi fa male durante questo esercizio'], ['Troppo pesante', 'Questo peso è troppo pesante: cosa faccio?'], ['Cambia esercizio', 'Cambiami questo esercizio, mi dà fastidio'], ['Quanto riposo?', 'Quanto devo riposare tra le serie di questo esercizio?']];
+  if (s.chatId && S.chats.some(c => c.id === s.chatId)) Chats.open(s.chatId); else Chats.startNew();
+  openSheet(h('div', { class: 'stack wkc' },
+    h('div', { class: 'chd2' }, avatar(40), h('div', { class: 'grow' }, h('b', {}, 'Coach'), h('span', {}, `${info.nome} · serie ${Math.min(done + 1, ex.sets.length)} di ${ex.sets.length}`)), h('button', { class: 'iconbtn', 'aria-label': 'Chiudi', onclick: closeSheet }, '✕')),
+    h('div', { class: 'qchips' }, QA.map(([t, q]) => h('button', { class: 'chip', onclick: () => send(q) }, t))),
+    msgs,
+    h('div', { class: 'wkc-in' }, h('div', { class: 'pill' }, input), h('button', { class: 'btn sendbtn', 'aria-label': 'Invia', 'data-nosound': '', onclick: () => send() }, icon('send')))));
+  draw();
 }
 
 function exitMenu() {

@@ -655,3 +655,15 @@ body.alba .sticky-head { background: rgba(26,14,6,.8); }
 .opts { display: flex; gap: 10px; margin-top: 12px; } .opts > button { flex: 1; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 12px; display: flex; flex-direction: column; gap: 6px; color: inherit; }
 .opts b { font-size: 15px; margin-top: 4px; } .opts small { color: var(--muted); font-size: 12px; line-height: 1.3; } .opts .tile { box-shadow: none; } .opts .tile svg.sp { display: none; }
 .note3 { margin-top: 14px; color: var(--muted); font-size: 14px; line-height: 1.4; }
+
+/* ======== v45: il coach dentro l'allenamento ======== */
+.fab { position: fixed; right: 14px; bottom: calc(env(safe-area-inset-bottom) + 104px); z-index: 29; display: flex; align-items: center; gap: 10px; background: rgba(20,27,41,.96); border: 1px solid rgba(192,132,252,.6); border-radius: 99px; padding: 5px 18px 5px 5px; font-weight: 700; color: var(--text); box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 0 3px rgba(192,132,252,.15); }
+.fab .av .on { display: none; }
+.wkc .chd2 { display: flex; align-items: center; gap: 12px; } .wkc .chd2 b { display: block; font-size: 19px; } .wkc .chd2 span { color: var(--muted); font-size: 13px; }
+.wkc .qchips { display: flex; gap: 8px; flex-wrap: wrap; }
+.wkc-msgs { display: flex; flex-direction: column; gap: 10px; max-height: 40vh; overflow-y: auto; }
+.wkc-msgs .msg { max-width: 92%; } .wkc-msgs .proposal { margin: 0; }
+.wkc-in { display: flex; gap: 10px; align-items: center; }
+.wkc-in .pill { flex: 1; display: flex; background: var(--card); border: 1px solid var(--line); border-radius: 27px; padding: 5px 8px; }
+.wkc-in .pill input { flex: 1; border: 0 !important; background: transparent !important; min-height: 42px; padding: 0 12px; }
+.wkc-in .btn.sendbtn { flex: none; width: 54px; height: 54px; padding: 0; border-radius: 50%; display: grid; place-items: center; }
