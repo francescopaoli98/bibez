@@ -612,3 +612,31 @@ body.alba .sticky-head { background: rgba(26,14,6,.8); }
 .rvsun { width: 230px !important; height: 230px !important; right: -62px !important; top: -66px !important; }
 .rv.sunrise .rvh .grow { max-width: 58%; } .rv.sunrise .rvh b { font-size: 26px; line-height: 1.1; }
 .rvp { max-width: 64%; }
+
+/* ======== v43: "Tutto il corpo" animata ======== */
+/* la foto passa da una posizione all'altra dell'esercizio (come il movimento), con un lento zoom */
+.hero-bg.f0, .hero-bg.f1 { animation: kb 18s ease-in-out infinite alternate; }
+.hero-bg.f0 { animation: kb 18s ease-in-out infinite alternate, xf0 4.4s ease-in-out infinite; }
+.hero-bg.f1 { opacity: 0; animation: kb 18s ease-in-out infinite alternate, xf1 4.4s ease-in-out infinite; }
+@keyframes xf0 { 0%, 30% { opacity: .66; } 48%, 82% { opacity: 0; } 100% { opacity: .66; } }
+@keyframes xf1 { 0%, 30% { opacity: 0; } 48%, 82% { opacity: .66; } 100% { opacity: 0; } }
+@keyframes kb { from { transform: scale(1.02) translate(0, 0); } to { transform: scale(1.13) translate(-2.5%, -1.5%); } }
+/* un riflesso di luce attraversa la carta ogni tanto */
+.hero.photo::before { content: ''; position: absolute; inset: -20% -45%; z-index: 1; pointer-events: none; background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.14) 49%, transparent 60%); transform: translateX(-85%); animation: sweep 7.5s ease-in-out infinite; }
+@keyframes sweep { 0%, 50% { transform: translateX(-85%); } 88%, 100% { transform: translateX(85%); } }
+/* entrata a scalini: titolo, frase, numeri */
+.hero.photo .kicker { animation: rise .6s both .05s; }
+.hero.photo .hero-title { animation: titleIn .85s cubic-bezier(.2,.8,.2,1) both .15s; }
+.hero.photo .hero-sub { animation: rise .7s both .32s; }
+.hero.photo .meta span { animation: popin .55s cubic-bezier(.3,1.5,.5,1) both; }
+.hero.photo .meta span:nth-child(1) { animation-delay: .5s; } .hero.photo .meta span:nth-child(2) { animation-delay: .6s; } .hero.photo .meta span:nth-child(3) { animation-delay: .7s; }
+.hero.photo .linkbtn { animation: rise .7s both .95s; }
+@keyframes titleIn { from { opacity: 0; transform: translateY(20px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.hero .kicker::before { animation: dotp 2.2s ease-out infinite; }
+@keyframes dotp { 0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), .55); } 100% { box-shadow: 0 0 0 10px rgba(var(--accent-rgb), 0); } }
+/* puntini di energia che salgono piano */
+.hero > .hero-fx { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.hero-fx i { position: absolute; bottom: -8px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); opacity: 0; animation: energy 7s linear infinite; }
+.hero-fx i:nth-child(1) { left: 12%; animation-delay: 0s; } .hero-fx i:nth-child(2) { left: 28%; animation-delay: 2.2s; width: 4px; height: 4px; } .hero-fx i:nth-child(3) { left: 44%; animation-delay: 4.1s; }
+.hero-fx i:nth-child(4) { left: 61%; animation-delay: 1.1s; width: 4px; height: 4px; } .hero-fx i:nth-child(5) { left: 76%; animation-delay: 3.3s; } .hero-fx i:nth-child(6) { left: 89%; animation-delay: 5.2s; width: 6px; height: 6px; } .hero-fx i:nth-child(7) { left: 52%; animation-delay: 6s; width: 3px; height: 3px; }
+@keyframes energy { 0% { transform: translateY(0); opacity: 0; } 14% { opacity: .75; } 100% { transform: translateY(-340px); opacity: 0; } }

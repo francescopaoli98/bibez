@@ -491,7 +491,8 @@ function viewOggi() {
     !S.session && luogoSwitch(viewOggi),
     !S.session && homeHint(),
     h('div', { class: 'hero photo' },
-      exs[0] && EX(exs[0].id)?.img?.[0] && h('img', { class: 'hero-bg', src: EX(exs[0].id).img[0], alt: '', 'aria-hidden': 'true' }),
+      ...((exs[0] && EX(exs[0].id)?.img || []).slice(0, 2).map((src, k) => h('img', { class: 'hero-bg f' + k, src, alt: '', 'aria-hidden': 'true' }))),   // le due pose dell'esercizio: si alternano
+      h('div', { class: 'hero-fx', 'aria-hidden': 'true' }, [0, 1, 2, 3, 4, 5, 6].map(() => h('i'))),
       h('div', { class: 'kicker' }, S.session ? `Allenamento in corso · ${S.session.luogo === 'casa' ? 'Casa' : 'Palestra'}${S.session.short ? ' · versione corta' : ''}` : 'Il tuo allenamento di oggi'),
       h('h1', { class: 'hero-title soft' }, friendlyTitle(exs)),
       h('p', { class: 'hero-sub' }, 'Ti guido io, un esercizio alla volta.'),
