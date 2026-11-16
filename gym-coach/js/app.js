@@ -185,14 +185,38 @@ function helpBtn(topic) {
 /* ---------------------------- dettaglio esercizio ---------------------------- */
 const exAnim = (ex) => h('div', { class: 'anim' }, ex.img.map(src => h('img', { src, alt: ex.nome })));
 
+// Il gesto in pochi secondi: un solo video breve (YouTube senza cookie), in loop e senza audio, con la moviola
+function videoSheet(id) {
+  const ex = EX(id); if (!ex?.yt) return;
+  const y = ex.yt;
+  const q = new URLSearchParams({ autoplay: '1', mute: '1', controls: '0', loop: '1', playlist: y.id, modestbranding: '1', playsinline: '1', rel: '0', iv_load_policy: '3', disablekb: '1', fs: '0', enablejsapi: '1', origin: location.origin });
+  if (y.start != null) q.set('start', y.start); if (y.end != null) q.set('end', y.end);
+  const frame = navigator.onLine === false ? null : h('iframe', { class: 'vframe', src: `https://www.youtube-nocookie.com/embed/${y.id}?${q}`, allow: 'autoplay; encrypted-media', title: 'Come si fa: ' + ex.nome, referrerpolicy: 'strict-origin-when-cross-origin' });
+  const speeds = [['🐢 ½×', .5], ['1×', 1], ['⚡ 1,5×', 1.5]];
+  const bar = h('div', { class: 'vspeed' });
+  const drawSpeed = (cur) => bar.replaceChildren(...speeds.map(([t, r]) => h('button', { class: r === cur ? 'on' : '', 'data-nosound': '', onclick: () => {
+    frame?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'setPlaybackRate', args: [r] }), '*'); drawSpeed(r); } }, t)));
+  drawSpeed(1);
+  openSheet(h('div', { class: 'stack vsheet' },
+    h('div', { class: 'row between' }, h('h2', {}, ex.nome), h('button', { class: 'iconbtn', 'aria-label': 'Chiudi', onclick: closeSheet }, '✕')),
+    frame ? h('div', { class: 'vwrap' }, frame, h('span', { class: 'vtag a' }, h('i'), 'In loop'), h('span', { class: 'vtag b' }, '🔇 Senza audio'))
+          : h('div', { class: 'vwrap off' }, h('p', {}, 'Serve internet per vedere il video. Intanto guarda la foto e i passi.')),
+    frame && bar,
+    ex.consiglio && h('div', { class: 'cue' }, tile('idea', 16), h('div', {}, h('small', {}, 'GUARDA QUESTO'), h('b', {}, ex.consiglio))),
+    h('ol', { class: 'steps' }, ex.passi.slice(0, 3).map(p => h('li', {}, p))),
+    h('button', { class: 'btn big block', onclick: closeSheet }, 'Ho capito'),
+    h('button', { class: 'linkbtn', onclick: async () => toast((await copyText(`Video sbagliato per "${ex.nome}" (${ex.id}): https://youtu.be/${y.id}`)) ? 'Copiato: mandalo a chi gestisce l\'app' : 'Copia non riuscita', 4000) }, 'Il video non è quello giusto? Segnalalo'),
+    h('p', { class: 'muted small center' }, `Video di ${y.ch} su YouTube`)));
+}
+
 function showExercise(id) {
   const ex = EX(id); if (!ex) return;
   openSheet(h('div', { class: 'stack' },
-    exAnim(ex),
+    h('div', { class: 'exhero' }, exAnim(ex), ex.yt && h('button', { class: 'vplay', 'aria-label': 'Guarda il gesto', onclick: () => videoSheet(id) }, h('span', { class: 'pl' }, icon('play')), h('b', {}, 'Guarda il gesto'), h('small', {}, `${ex.yt.sec} secondi · senza audio`))),
     h('div', {}, h('h2', {}, ex.nome), h('p', { class: 'muted small' }, `${ex.muscoli} · ${ex.attrezzo}`)),
     h('ol', { class: 'steps' }, ex.passi.map(p => h('li', {}, p))),
     h('div', { class: 'tip row', style: 'gap:10px;align-items:flex-start' }, tile('idea', 16), h('span', {}, ex.consiglio)),
-    h('a', { class: 'btn ghost block', href: ex.video, target: '_blank', rel: 'noopener' }, '▶ Guarda il video su YouTube'),
+    h('a', { class: 'btn ghost block', href: ex.video, target: '_blank', rel: 'noopener' }, ex.yt ? 'Altri video su YouTube' : '▶ Guarda il video su YouTube'),
     h('button', { class: 'btn block', onclick: closeSheet }, 'Chiudi')));
 }
 
@@ -737,7 +761,9 @@ function viewAllenamento(startDay) {
       h('div', {}, h('div', { class: 'muted small' }, s.dayName + (s.luogo === 'casa' ? ' · Casa' : '')), h('h3', {}, `Esercizio ${s.cur + 1} di ${n}`)),
       h('div', { class: 'row', style: 'gap:8px' }, helpBtn('allenamento'), h('button', { class: 'btn ghost small', onclick: exitMenu }, 'Fine'))),
     h('div', { class: 'segs' }, segEls),
-    h('button', { class: 'anim-btn', onclick: () => showExercise(ex.id), 'aria-label': 'Come si fa' }, exAnim(info), h('span', { class: 'pill' }, 'Come si fa ›')),
+    h('div', { class: 'anim-wrap' },
+      h('button', { class: 'anim-btn', onclick: () => showExercise(ex.id), 'aria-label': 'Come si fa' }, exAnim(info), h('span', { class: 'pill' }, 'Come si fa ›')),
+      info.yt && h('button', { class: 'pipv', 'aria-label': 'Guarda il gesto', onclick: () => videoSheet(ex.id) }, icon('play'), h('span', {}, `Gesto · ${info.yt.sec} s`))),
     h('div', {}, h('h1', { class: 'wk-title' }, info.nome),
       info.muscoli && h('div', { class: 'mchips' }, info.muscoli.split(',').map(m => h('span', {}, m.trim()))),
       h('p', { class: 'muted' }, `${ex.target.serie} serie da ${ex.target.ripetizioni}${ex.target.recupero ? ' · riposo ' + ex.target.recupero + ' secondi' : ''}. Fai la serie, poi tocca ✓.`)),

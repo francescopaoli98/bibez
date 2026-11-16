@@ -17,7 +17,13 @@
    "img/ex/Barbell_Squat/0.jpg",
    "img/ex/Barbell_Squat/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20con%20bilanciere%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20con%20bilanciere%20tecnica%20corretta",
+  "yt": {
+   "id": "rrJIyZGlK8c",
+   "t": "How To Do A Barbell Back Squat",
+   "ch": "PureGym",
+   "sec": 24
+  }
  },
  {
   "id": "Leg_Press",
@@ -37,7 +43,13 @@
    "img/ex/Leg_Press/0.jpg",
    "img/ex/Leg_Press/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20press%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20press%20tecnica%20corretta",
+  "yt": {
+   "id": "qCR9bN3G1t4",
+   "t": "How To Do A Seated Leg Press",
+   "ch": "PureGym",
+   "sec": 16
+  }
  },
  {
   "id": "Romanian_Deadlift",
@@ -57,7 +69,13 @@
    "img/ex/Romanian_Deadlift/0.jpg",
    "img/ex/Romanian_Deadlift/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20rumeno%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20rumeno%20tecnica%20corretta",
+  "yt": {
+   "id": "7j-2w4-P14I",
+   "t": "Romanian Deadlift | Nuffield Health",
+   "ch": "Nuffield Health",
+   "sec": 42
+  }
  },
  {
   "id": "Goblet_Squat",
@@ -77,7 +95,13 @@
    "img/ex/Goblet_Squat/0.jpg",
    "img/ex/Goblet_Squat/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Goblet%20squat%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Goblet%20squat%20tecnica%20corretta",
+  "yt": {
+   "id": "YSnMWxs7wss",
+   "t": "How to perform a GOBLET SQUAT with key points",
+   "ch": "ArielYu_Fit",
+   "sec": 14
+  }
  },
  {
   "id": "Dumbbell_Lunges",
@@ -97,7 +121,15 @@
    "img/ex/Dumbbell_Lunges/0.jpg",
    "img/ex/Dumbbell_Lunges/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "RZKXLMxPF_I",
+   "t": "Dumbbell Reverse Lunges | How To | Proper Form & Technique",
+   "ch": "FITTR",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Leg_Extensions",
@@ -117,7 +149,15 @@
    "img/ex/Leg_Extensions/0.jpg",
    "img/ex/Leg_Extensions/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20extension%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20extension%20tecnica%20corretta",
+  "yt": {
+   "id": "KtgdO4QEdHk",
+   "t": "Leg extensions | Jeet Selal",
+   "ch": "Himalayan Stallion Academy",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Lying_Leg_Curls",
@@ -137,7 +177,15 @@
    "img/ex/Lying_Leg_Curls/0.jpg",
    "img/ex/Lying_Leg_Curls/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20curl%20sdraiato%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20curl%20sdraiato%20tecnica%20corretta",
+  "yt": {
+   "id": "jxctD6fL_FQ",
+   "t": "Lying Leg Curls - Leg Exercise - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Seated_Leg_Curl",
@@ -157,7 +205,13 @@
    "img/ex/Seated_Leg_Curl/0.jpg",
    "img/ex/Seated_Leg_Curl/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20curl%20seduto%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Leg%20curl%20seduto%20tecnica%20corretta",
+  "yt": {
+   "id": "Orxowest56U",
+   "t": "Seated Leg Curl",
+   "ch": "Renaissance Periodization",
+   "sec": 11
+  }
  },
  {
   "id": "Standing_Calf_Raises",
@@ -177,7 +231,13 @@
    "img/ex/Standing_Calf_Raises/0.jpg",
    "img/ex/Standing_Calf_Raises/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Calf%20in%20piedi%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Calf%20in%20piedi%20tecnica%20corretta",
+  "yt": {
+   "id": "Km0QS46bTEA",
+   "t": "Standing calf raises",
+   "ch": "Balance In Motion",
+   "sec": 12
+  }
  },
  {
   "id": "Seated_Calf_Raise",
@@ -197,7 +257,13 @@
    "img/ex/Seated_Calf_Raise/0.jpg",
    "img/ex/Seated_Calf_Raise/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Calf%20seduto%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Calf%20seduto%20tecnica%20corretta",
+  "yt": {
+   "id": "ORY-ke6vcgk",
+   "t": "Seated Calf Raise Tutorial - Proper Form and Technique",
+   "ch": "Runna",
+   "sec": 40
+  }
  },
  {
   "id": "Barbell_Hip_Thrust",
@@ -217,7 +283,13 @@
    "img/ex/Barbell_Hip_Thrust/0.jpg",
    "img/ex/Barbell_Hip_Thrust/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Hip%20thrust%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Hip%20thrust%20tecnica%20corretta",
+  "yt": {
+   "id": "EF7jXP17DPE",
+   "t": "Barbell Hip Thrust",
+   "ch": "Renaissance Periodization",
+   "sec": 11
+  }
  },
  {
   "id": "Hack_Squat",
@@ -237,7 +309,13 @@
    "img/ex/Hack_Squat/0.jpg",
    "img/ex/Hack_Squat/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Hack%20squat%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Hack%20squat%20tecnica%20corretta",
+  "yt": {
+   "id": "rYgNArpwE7E",
+   "t": "Hack Squat",
+   "ch": "Renaissance Periodization",
+   "sec": 14
+  }
  },
  {
   "id": "Barbell_Bench_Press_-_Medium_Grip",
@@ -257,7 +335,15 @@
    "img/ex/Barbell_Bench_Press_-_Medium_Grip/0.jpg",
    "img/ex/Barbell_Bench_Press_-_Medium_Grip/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20piana%20con%20bilanciere%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20piana%20con%20bilanciere%20tecnica%20corretta",
+  "yt": {
+   "id": "RsobeWfbBcY",
+   "t": "Barbell Bench Press Medium Grip - Chest Exercise - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Dumbbell_Bench_Press",
@@ -277,7 +363,13 @@
    "img/ex/Dumbbell_Bench_Press/0.jpg",
    "img/ex/Dumbbell_Bench_Press/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20piana%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20piana%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "O7ECGhZj_Hc",
+   "t": "How to do flat dumbbell bench press",
+   "ch": "Jay ",
+   "sec": 34
+  }
  },
  {
   "id": "Incline_Dumbbell_Press",
@@ -297,7 +389,15 @@
    "img/ex/Incline_Dumbbell_Press/0.jpg",
    "img/ex/Incline_Dumbbell_Press/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20inclinata%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20inclinata%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "LUxWvGRpwrk",
+   "t": "Incline Dumbbell Bench Press - Chest Exercise",
+   "ch": "MyTraining App",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Butterfly",
@@ -317,7 +417,13 @@
    "img/ex/Butterfly/0.jpg",
    "img/ex/Butterfly/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pec%20deck%20%28butterfly%29%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pec%20deck%20%28butterfly%29%20tecnica%20corretta",
+  "yt": {
+   "id": "eGjt4lk6g34",
+   "t": "How To Use The Chest Fly Machine",
+   "ch": "PureGym",
+   "sec": 16
+  }
  },
  {
   "id": "Cable_Crossover",
@@ -337,7 +443,15 @@
    "img/ex/Cable_Crossover/0.jpg",
    "img/ex/Cable_Crossover/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Croci%20ai%20cavi%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Croci%20ai%20cavi%20tecnica%20corretta",
+  "yt": {
+   "id": "V5mlG3N-weQ",
+   "t": "How to perform Cable Fly | Jeet Selal",
+   "ch": "Himalayan Stallion Academy",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Pushups",
@@ -357,7 +471,13 @@
    "img/ex/Pushups/0.jpg",
    "img/ex/Pushups/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flessioni%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flessioni%20tecnica%20corretta",
+  "yt": {
+   "id": "WDIpL0pjun0",
+   "t": "How to do a Push-Up | Proper Form & Technique | NASM",
+   "ch": "National Academy of Sports Medicine (NAS",
+   "sec": 14
+  }
  },
  {
   "id": "Dumbbell_Flyes",
@@ -377,7 +497,15 @@
    "img/ex/Dumbbell_Flyes/0.jpg",
    "img/ex/Dumbbell_Flyes/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Croci%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Croci%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "QwuUZ5wgQOk",
+   "t": "Dumbbell Flyes - Chest Exercise - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Wide-Grip_Lat_Pulldown",
@@ -397,7 +525,13 @@
    "img/ex/Wide-Grip_Lat_Pulldown/0.jpg",
    "img/ex/Wide-Grip_Lat_Pulldown/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Lat%20machine%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Lat%20machine%20tecnica%20corretta",
+  "yt": {
+   "id": "7JnP8dFbS14",
+   "t": "How To Do A Wide Grip Lat Pulldown",
+   "ch": "PureGym",
+   "sec": 16
+  }
  },
  {
   "id": "Close-Grip_Front_Lat_Pulldown",
@@ -417,7 +551,15 @@
    "img/ex/Close-Grip_Front_Lat_Pulldown/0.jpg",
    "img/ex/Close-Grip_Front_Lat_Pulldown/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Lat%20machine%20presa%20stretta%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Lat%20machine%20presa%20stretta%20tecnica%20corretta",
+  "yt": {
+   "id": "8hzVLzu-RJk",
+   "t": "Close Grip Lat Pulldown Form | 6 Quick Tips",
+   "ch": "nutritioneering",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Seated_Cable_Rows",
@@ -437,7 +579,13 @@
    "img/ex/Seated_Cable_Rows/0.jpg",
    "img/ex/Seated_Cable_Rows/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pulley%20%28rematore%20ai%20cavi%29%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pulley%20%28rematore%20ai%20cavi%29%20tecnica%20corretta",
+  "yt": {
+   "id": "lJoozxC0Rns",
+   "t": "How To Do A Seated Cable Row",
+   "ch": "PureGym",
+   "sec": 16
+  }
  },
  {
   "id": "Bent_Over_Barbell_Row",
@@ -457,7 +605,13 @@
    "img/ex/Bent_Over_Barbell_Row/0.jpg",
    "img/ex/Bent_Over_Barbell_Row/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20con%20bilanciere%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20con%20bilanciere%20tecnica%20corretta",
+  "yt": {
+   "id": "bm0_q9bR_HA",
+   "t": "How to do a Barbell Bent Over Row Pronated",
+   "ch": "National Academy of Sports Medicine (NAS",
+   "sec": 19
+  }
  },
  {
   "id": "One-Arm_Dumbbell_Row",
@@ -477,7 +631,13 @@
    "img/ex/One-Arm_Dumbbell_Row/0.jpg",
    "img/ex/One-Arm_Dumbbell_Row/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20a%20un%20braccio%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20a%20un%20braccio%20tecnica%20corretta",
+  "yt": {
+   "id": "ZRSGpBUVcNw",
+   "t": "How To Do Single Arm Dumbbell Rows",
+   "ch": "PureGym",
+   "sec": 11
+  }
  },
  {
   "id": "Pullups",
@@ -497,7 +657,15 @@
    "img/ex/Pullups/0.jpg",
    "img/ex/Pullups/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Trazioni%20alla%20sbarra%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Trazioni%20alla%20sbarra%20tecnica%20corretta",
+  "yt": {
+   "id": "ZPG8OsHKXLw",
+   "t": "The PERFECT Pull-Up (5 Steps)",
+   "ch": "Jeremy Ethier Shorts",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Chin-Up",
@@ -517,7 +685,15 @@
    "img/ex/Chin-Up/0.jpg",
    "img/ex/Chin-Up/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Trazioni%20presa%20supina%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Trazioni%20presa%20supina%20tecnica%20corretta",
+  "yt": {
+   "id": "mRy9m2Q9_1I",
+   "t": "Proper Chin-Up Form",
+   "ch": "KILO Strength Society Education",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Hyperextensions_Back_Extensions",
@@ -537,7 +713,13 @@
    "img/ex/Hyperextensions_Back_Extensions/0.jpg",
    "img/ex/Hyperextensions_Back_Extensions/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Iperestensioni%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Iperestensioni%20tecnica%20corretta",
+  "yt": {
+   "id": "qtjJUWCnDyE",
+   "t": "Hyperextensions (Back Extensions) - Core / Back Exercise - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 45
+  }
  },
  {
   "id": "Barbell_Deadlift",
@@ -557,7 +739,13 @@
    "img/ex/Barbell_Deadlift/0.jpg",
    "img/ex/Barbell_Deadlift/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20da%20terra%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20da%20terra%20tecnica%20corretta",
+  "yt": {
+   "id": "yPqv3ejnZvc",
+   "t": "How to do a Barbell Deadlift",
+   "ch": "National Academy of Sports Medicine (NAS",
+   "sec": 16
+  }
  },
  {
   "id": "Dumbbell_Shoulder_Press",
@@ -577,7 +765,15 @@
    "img/ex/Dumbbell_Shoulder_Press/0.jpg",
    "img/ex/Dumbbell_Shoulder_Press/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Shoulder%20press%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Shoulder%20press%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "1jYq9QQEWqE",
+   "t": "How to Perform Seated Dumbbell Shoulder Press | Shoulders Exercise Tutorial",
+   "ch": "Buff Dudes Workouts",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Machine_Shoulder_Military_Press",
@@ -597,7 +793,15 @@
    "img/ex/Machine_Shoulder_Military_Press/0.jpg",
    "img/ex/Machine_Shoulder_Military_Press/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Shoulder%20press%20alla%20macchina%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Shoulder%20press%20alla%20macchina%20tecnica%20corretta",
+  "yt": {
+   "id": "evtRb6cPF-Q",
+   "t": "Smith Machine Shoulder Press Tutorial",
+   "ch": "Prep Coach UK",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Side_Lateral_Raise",
@@ -617,7 +821,13 @@
    "img/ex/Side_Lateral_Raise/0.jpg",
    "img/ex/Side_Lateral_Raise/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20laterali%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20laterali%20tecnica%20corretta",
+  "yt": {
+   "id": "XPPfnSEATJA",
+   "t": "How to do a Dumbbell Lateral Raise",
+   "ch": "National Academy of Sports Medicine (NAS",
+   "sec": 19
+  }
  },
  {
   "id": "Face_Pull",
@@ -637,7 +847,13 @@
    "img/ex/Face_Pull/0.jpg",
    "img/ex/Face_Pull/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Face%20pull%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Face%20pull%20tecnica%20corretta",
+  "yt": {
+   "id": "0Po47vvj9g4",
+   "t": "How To Do Cable Face Pulls",
+   "ch": "PureGym",
+   "sec": 15
+  }
  },
  {
   "id": "Reverse_Machine_Flyes",
@@ -657,7 +873,13 @@
    "img/ex/Reverse_Machine_Flyes/0.jpg",
    "img/ex/Reverse_Machine_Flyes/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pec%20deck%20inverso%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Pec%20deck%20inverso%20tecnica%20corretta",
+  "yt": {
+   "id": "v0rJuhEa59c",
+   "t": "Reverse Pec Deck Fly | Proper Form Tutorial for Rear Delts",
+   "ch": "FIT.nl",
+   "sec": 20
+  }
  },
  {
   "id": "Front_Dumbbell_Raise",
@@ -677,7 +899,13 @@
    "img/ex/Front_Dumbbell_Raise/0.jpg",
    "img/ex/Front_Dumbbell_Raise/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20frontali%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20frontali%20tecnica%20corretta",
+  "yt": {
+   "id": "ugPIPY7j-GM",
+   "t": "Dumbbell Front Raise - Shoulders Exercise",
+   "ch": "MyTraining App",
+   "sec": 45
+  }
  },
  {
   "id": "Dumbbell_Bicep_Curl",
@@ -697,7 +925,13 @@
    "img/ex/Dumbbell_Bicep_Curl/0.jpg",
    "img/ex/Dumbbell_Bicep_Curl/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "6DeLZ6cbgWQ",
+   "t": "How to Perform Standing Dumbbell Bicep Curls",
+   "ch": "Chris McCarthy",
+   "sec": 28
+  }
  },
  {
   "id": "Barbell_Curl",
@@ -717,7 +951,13 @@
    "img/ex/Barbell_Curl/0.jpg",
    "img/ex/Barbell_Curl/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20con%20bilanciere%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20con%20bilanciere%20tecnica%20corretta",
+  "yt": {
+   "id": "dDI8ClxRS04",
+   "t": "Barbell Curl - Biceps Exercise - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 45
+  }
  },
  {
   "id": "Hammer_Curls",
@@ -737,7 +977,15 @@
    "img/ex/Hammer_Curls/0.jpg",
    "img/ex/Hammer_Curls/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20a%20martello%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20a%20martello%20tecnica%20corretta",
+  "yt": {
+   "id": "OPqe0kCxmR8",
+   "t": "Dumbbell Hammer Curls Tutorial | CORRECT TECHNIQUE (!)",
+   "ch": "One Minute Tutorial",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Machine_Bicep_Curl",
@@ -757,7 +1005,15 @@
    "img/ex/Machine_Bicep_Curl/0.jpg",
    "img/ex/Machine_Bicep_Curl/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20alla%20macchina%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Curl%20alla%20macchina%20tecnica%20corretta",
+  "yt": {
+   "id": "kfE9Plm8Hks",
+   "t": "Biceps Curl Machine Tutorial",
+   "ch": "Anytime Fitness Bright's Grove",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Triceps_Pushdown",
@@ -777,7 +1033,13 @@
    "img/ex/Triceps_Pushdown/0.jpg",
    "img/ex/Triceps_Pushdown/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Push%20down%20ai%20cavi%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Push%20down%20ai%20cavi%20tecnica%20corretta",
+  "yt": {
+   "id": "LXkCrxn3caQ",
+   "t": "How To Do A Tricep Pushdown",
+   "ch": "PureGym",
+   "sec": 16
+  }
  },
  {
   "id": "Triceps_Pushdown_-_Rope_Attachment",
@@ -797,7 +1059,13 @@
    "img/ex/Triceps_Pushdown_-_Rope_Attachment/0.jpg",
    "img/ex/Triceps_Pushdown_-_Rope_Attachment/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Push%20down%20con%20corda%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Push%20down%20con%20corda%20tecnica%20corretta",
+  "yt": {
+   "id": "LXkCrxn3caQ",
+   "t": "How To Do A Tricep Pushdown",
+   "ch": "PureGym",
+   "sec": 16
+  }
  },
  {
   "id": "Standing_Dumbbell_Triceps_Extension",
@@ -817,7 +1085,15 @@
    "img/ex/Standing_Dumbbell_Triceps_Extension/0.jpg",
    "img/ex/Standing_Dumbbell_Triceps_Extension/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Estensioni%20sopra%20la%20testa%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Estensioni%20sopra%20la%20testa%20tecnica%20corretta",
+  "yt": {
+   "id": "dsRbS_em7D8",
+   "t": "How To: Standing Overhead Dumbbell Triceps Extension With Two Dumbbells",
+   "ch": "Live Lean TV Daily Exercises",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Plank",
@@ -837,7 +1113,13 @@
    "img/ex/Plank/0.jpg",
    "img/ex/Plank/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Plank%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Plank%20tecnica%20corretta",
+  "yt": {
+   "id": "mwlp75MS6Rg",
+   "t": "How to do a Plank | Proper Form & Technique | NASM",
+   "ch": "National Academy of Sports Medicine (NAS",
+   "sec": 15
+  }
  },
  {
   "id": "Crunches",
@@ -857,7 +1139,13 @@
    "img/ex/Crunches/0.jpg",
    "img/ex/Crunches/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20tecnica%20corretta",
+  "yt": {
+   "id": "9T4WQGlKCRk",
+   "t": "How to Do Crunches Properly for Stronger Abs | Workout for Beginners | Abs Workout @cult.o",
+   "ch": "wearecult",
+   "sec": 40
+  }
  },
  {
   "id": "Cable_Crunch",
@@ -877,7 +1165,13 @@
    "img/ex/Cable_Crunch/0.jpg",
    "img/ex/Cable_Crunch/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20ai%20cavi%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20ai%20cavi%20tecnica%20corretta",
+  "yt": {
+   "id": "3qjoXDTuyOE",
+   "t": "Cable Crunch - Abs / Core Exercise - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 45
+  }
  },
  {
   "id": "Hanging_Leg_Raise",
@@ -897,7 +1191,13 @@
    "img/ex/Hanging_Leg_Raise/0.jpg",
    "img/ex/Hanging_Leg_Raise/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Sollevamento%20gambe%20alla%20sbarra%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Sollevamento%20gambe%20alla%20sbarra%20tecnica%20corretta",
+  "yt": {
+   "id": "_jLskVdzS4o",
+   "t": "Hanging leg raise tutorial",
+   "ch": "The Movement Collective ",
+   "sec": 45
+  }
  },
  {
   "id": "Russian_Twist",
@@ -917,7 +1217,13 @@
    "img/ex/Russian_Twist/0.jpg",
    "img/ex/Russian_Twist/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Russian%20twist%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Russian%20twist%20tecnica%20corretta",
+  "yt": {
+   "id": "99T1EfpMwPA",
+   "t": "How To Do A Russian Twist",
+   "ch": "PureGym",
+   "sec": 20
+  }
  },
  {
   "id": "Elliptical_Trainer",
@@ -937,7 +1243,15 @@
    "img/ex/Elliptical_Trainer/0.jpg",
    "img/ex/Elliptical_Trainer/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Ellittica%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Ellittica%20tecnica%20corretta",
+  "yt": {
+   "id": "yISC2qwdh9I",
+   "t": "How To Use The Cross Trainer",
+   "ch": "PureGym",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Bodyweight_Squat",
@@ -957,7 +1271,13 @@
    "img/ex/Bodyweight_Squat/0.jpg",
    "img/ex/Bodyweight_Squat/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20a%20corpo%20libero%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20a%20corpo%20libero%20tecnica%20corretta",
+  "yt": {
+   "id": "l83R5PblSMA",
+   "t": "Leg exercise - How to bodyweight squat",
+   "ch": "PureGym",
+   "sec": 17
+  }
  },
  {
   "id": "Butt_Lift_Bridge",
@@ -977,7 +1297,13 @@
    "img/ex/Butt_Lift_Bridge/0.jpg",
    "img/ex/Butt_Lift_Bridge/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Ponte%20glutei%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Ponte%20glutei%20tecnica%20corretta",
+  "yt": {
+   "id": "MqQlfjQOmHA",
+   "t": "Butt Lift Bridge - Legs / Glutes Exercise - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 42
+  }
  },
  {
   "id": "Bodyweight_Walking_Lunge",
@@ -997,7 +1323,13 @@
    "img/ex/Bodyweight_Walking_Lunge/0.jpg",
    "img/ex/Bodyweight_Walking_Lunge/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20a%20corpo%20libero%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20a%20corpo%20libero%20tecnica%20corretta",
+  "yt": {
+   "id": "mAgbXQdd4LM",
+   "t": "How To Do Walking Lunges",
+   "ch": "PureGym",
+   "sec": 15
+  }
  },
  {
   "id": "Step-up_with_Knee_Raise",
@@ -1017,7 +1349,13 @@
    "img/ex/Step-up_with_Knee_Raise/0.jpg",
    "img/ex/Step-up_with_Knee_Raise/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Step-up%20su%20sedia%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Step-up%20su%20sedia%20tecnica%20corretta",
+  "yt": {
+   "id": "e-Q4dGBUJUg",
+   "t": "Step Up with Knee Raise - Exercise Tutorial - Fitness Experts",
+   "ch": "Moonee Valley Health and Fitness",
+   "sec": 20
+  }
  },
  {
   "id": "Stiff-Legged_Dumbbell_Deadlift",
@@ -1037,7 +1375,13 @@
    "img/ex/Stiff-Legged_Dumbbell_Deadlift/0.jpg",
    "img/ex/Stiff-Legged_Dumbbell_Deadlift/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20gambe%20tese%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Stacco%20gambe%20tese%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "iXbGzZE84aI",
+   "t": "Stiff Legged Dumbbell Deadlift with Hunter Labrada | Exercise Guide",
+   "ch": "Bodybuilding.com",
+   "sec": 19
+  }
  },
  {
   "id": "Dumbbell_Rear_Lunge",
@@ -1057,7 +1401,13 @@
    "img/ex/Dumbbell_Rear_Lunge/0.jpg",
    "img/ex/Dumbbell_Rear_Lunge/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20indietro%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Affondi%20indietro%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "Q2k3kYbtOcI",
+   "t": "Dumbbell Reverse Lunge",
+   "ch": "OPEX Fitness",
+   "sec": 12
+  }
  },
  {
   "id": "Incline_Push-Up",
@@ -1077,7 +1427,13 @@
    "img/ex/Incline_Push-Up/0.jpg",
    "img/ex/Incline_Push-Up/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flessioni%20sulla%20sedia%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flessioni%20sulla%20sedia%20tecnica%20corretta",
+  "yt": {
+   "id": "0JUrOH--Kdk",
+   "t": "How to do an Incline Push-Up | Proper Form & Technique | NASM",
+   "ch": "National Academy of Sports Medicine (NAS",
+   "sec": 17
+  }
  },
  {
   "id": "Dumbbell_Floor_Press",
@@ -1097,7 +1453,13 @@
    "img/ex/Dumbbell_Floor_Press/0.jpg",
    "img/ex/Dumbbell_Floor_Press/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20a%20terra%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Panca%20a%20terra%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "T0Y3OBF1bNI",
+   "t": "How To Do A Dumbbell Floor Press",
+   "ch": "PureGym",
+   "sec": 12
+  }
  },
  {
   "id": "Bent_Over_Two-Dumbbell_Row",
@@ -1117,7 +1479,15 @@
    "img/ex/Bent_Over_Two-Dumbbell_Row/0.jpg",
    "img/ex/Bent_Over_Two-Dumbbell_Row/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20con%20due%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Rematore%20con%20due%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "--gDUDFKx6Q",
+   "t": "Bent Over Two Dumbbell Row - Back Exercise - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Superman",
@@ -1137,7 +1507,13 @@
    "img/ex/Superman/0.jpg",
    "img/ex/Superman/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Superman%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Superman%20tecnica%20corretta",
+  "yt": {
+   "id": "z6PJMT2y8GQ",
+   "t": "Exercise Tutorial - Superman",
+   "ch": "XHIT Daily",
+   "sec": 42
+  }
  },
  {
   "id": "Reverse_Flyes",
@@ -1157,7 +1533,13 @@
    "img/ex/Reverse_Flyes/0.jpg",
    "img/ex/Reverse_Flyes/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20posteriori%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Alzate%20posteriori%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "3MKmYlhxgOo",
+   "t": "Reverse Fly Tutorial - Proper Form and Technique",
+   "ch": "Runna",
+   "sec": 37
+  }
  },
  {
   "id": "Dumbbell_Shrug",
@@ -1177,7 +1559,13 @@
    "img/ex/Dumbbell_Shrug/0.jpg",
    "img/ex/Dumbbell_Shrug/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Scrollate%20con%20manubri%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Scrollate%20con%20manubri%20tecnica%20corretta",
+  "yt": {
+   "id": "_t3lrPI6Ns4",
+   "t": "Dumbbell Shrug",
+   "ch": "Renaissance Periodization",
+   "sec": 11
+  }
  },
  {
   "id": "Bench_Dips",
@@ -1197,7 +1585,13 @@
    "img/ex/Bench_Dips/0.jpg",
    "img/ex/Bench_Dips/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Dip%20su%20sedia%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Dip%20su%20sedia%20tecnica%20corretta",
+  "yt": {
+   "id": "larQGD02ndE",
+   "t": "Bench Dips",
+   "ch": "Team Training Day",
+   "sec": 10
+  }
  },
  {
   "id": "Tricep_Dumbbell_Kickback",
@@ -1217,7 +1611,13 @@
    "img/ex/Tricep_Dumbbell_Kickback/0.jpg",
    "img/ex/Tricep_Dumbbell_Kickback/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Kickback%20tricipiti%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Kickback%20tricipiti%20tecnica%20corretta",
+  "yt": {
+   "id": "m_UlDFNX4mk",
+   "t": "Dumbbell Tricep Kickback",
+   "ch": "OPEX Fitness",
+   "sec": 11
+  }
  },
  {
   "id": "Side_Bridge",
@@ -1237,7 +1637,13 @@
    "img/ex/Side_Bridge/0.jpg",
    "img/ex/Side_Bridge/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Plank%20laterale%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Plank%20laterale%20tecnica%20corretta",
+  "yt": {
+   "id": "7ytbYd4CK3o",
+   "t": "How to Do：SIDE BRIDGES",
+   "ch": "Leap Fitness",
+   "sec": 45
+  }
  },
  {
   "id": "Reverse_Crunch",
@@ -1257,7 +1663,13 @@
    "img/ex/Reverse_Crunch/0.jpg",
    "img/ex/Reverse_Crunch/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20inverso%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Crunch%20inverso%20tecnica%20corretta",
+  "yt": {
+   "id": "XY8KzdDcMFg",
+   "t": "How To Do A Reverse Crunch",
+   "ch": "PureGym",
+   "sec": 21
+  }
  },
  {
   "id": "Air_Bike",
@@ -1277,7 +1689,15 @@
    "img/ex/Air_Bike/0.jpg",
    "img/ex/Air_Bike/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Bicicletta%20per%20addome%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Bicicletta%20per%20addome%20tecnica%20corretta",
+  "yt": {
+   "id": "i6mPCVUrtNk",
+   "t": "Air Bike - Ab Exercises - Bodybuilding.com",
+   "ch": "Bodybuilding.com",
+   "sec": 45,
+   "start": 1,
+   "end": 45
+  }
  },
  {
   "id": "Flutter_Kicks",
@@ -1297,7 +1717,13 @@
    "img/ex/Flutter_Kicks/0.jpg",
    "img/ex/Flutter_Kicks/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flutter%20kick%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Flutter%20kick%20tecnica%20corretta",
+  "yt": {
+   "id": "ZB1SwBRVLCc",
+   "t": "How to do Flutter Kicks by Wodstar",
+   "ch": "Wodstar",
+   "sec": 17
+  }
  },
  {
   "id": "Mountain_Climbers",
@@ -1317,7 +1743,13 @@
    "img/ex/Mountain_Climbers/0.jpg",
    "img/ex/Mountain_Climbers/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Mountain%20climber%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Mountain%20climber%20tecnica%20corretta",
+  "yt": {
+   "id": "kLh-uczlPLg",
+   "t": "How To Do Mountain Climbers",
+   "ch": "PureGym",
+   "sec": 17
+  }
  },
  {
   "id": "Star_Jump",
@@ -1337,7 +1769,13 @@
    "img/ex/Star_Jump/0.jpg",
    "img/ex/Star_Jump/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Star%20jump%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Star%20jump%20tecnica%20corretta",
+  "yt": {
+   "id": "TnQJ6LB6f0g",
+   "t": "How to do Star Jumps | Better Exercise Videos | Better",
+   "ch": "Better",
+   "sec": 15
+  }
  },
  {
   "id": "Freehand_Jump_Squat",
@@ -1357,6 +1795,12 @@
    "img/ex/Freehand_Jump_Squat/0.jpg",
    "img/ex/Freehand_Jump_Squat/1.jpg"
   ],
-  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20jump%20tecnica%20corretta"
+  "video": "https://www.youtube.com/results?search_query=come%20fare%20Squat%20jump%20tecnica%20corretta",
+  "yt": {
+   "id": "PbMZtjtXpXM",
+   "t": "Freehand Jump Squat   Exercise Videos & Guides   Bodybuilding com",
+   "ch": "how to lose weight with the keto diet",
+   "sec": 17
+  }
  }
 ]
