@@ -30,6 +30,10 @@ export function icon(name) {
     promemoria: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
     sicurezza: '<rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
     avanzate: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+    risveglio: '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+    play: '<path d="M7 4l13 8-13 8z"/>',
+    pause: '<path d="M8 5v14M16 5v14"/>',
+    chevl: '<path d="M15 6l-6 6 6 6"/>',
     // --- set "tessere": linea + riempimento morbido (.f) ---
     oggi: '<rect class="f" x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M9 15.2l2.2 2.2 4.3-4.4"/>',
     scheda: '<rect class="f" x="5" y="4" width="14" height="17" rx="3"/><rect x="9" y="2.5" width="6" height="3.5" rx="1.2"/><path d="M9 11h6M9 15h4"/>',
@@ -71,7 +75,7 @@ export function icon(name) {
 }
 
 // Tessera colorata con la scintilla del logo: ogni funzione ha il suo colore
-const TILES = {aspetto:['#a6ff2e','#4d9a0a'],promemoria:['#ff9a3c','#e0431f'],sicurezza:['#2dd4bf','#0f766e'],avanzate:['#8d99b0','#3a4658'],trophy:['#fde047','#ca8a04'],gambe:['#2dd4bf','#0f766e'],petto:['#f472b6','#be185d'],schiena:['#60a5fa','#1d4ed8'],spalle:['#fde047','#ca8a04'],braccia:['#a78bfa','#6d28d9'],core:['#ff9a3c','#e0431f'],cardio:['#ff6b6b','#b91c1c'],casa:['#2dd4bf','#0f766e'],palestra:['#818cf8','#4338ca'],tempo:['#38bdf8','#0369a1'],kcal:['#ff9a3c','#e0431f'],peso:['#f472b6','#be185d'],salute:['#ff6b6b','#b91c1c'],pillola:['#a78bfa','#6d28d9'],idea:['#fde047','#ca8a04'],fatto:['#4ade80','#15803d'],aiuto:['#60a5fa','#1d4ed8'],oggi:['#a6ff2e','#4d9a0a'],scheda:['#60a5fa','#1d4ed8'],coach:['#c084fc','#7e22ce'],prog:['#ff9a3c','#e0431f']};
+const TILES = {risveglio:['#fde047','#f59e0b'],aspetto:['#a6ff2e','#4d9a0a'],promemoria:['#ff9a3c','#e0431f'],sicurezza:['#2dd4bf','#0f766e'],avanzate:['#8d99b0','#3a4658'],trophy:['#fde047','#ca8a04'],gambe:['#2dd4bf','#0f766e'],petto:['#f472b6','#be185d'],schiena:['#60a5fa','#1d4ed8'],spalle:['#fde047','#ca8a04'],braccia:['#a78bfa','#6d28d9'],core:['#ff9a3c','#e0431f'],cardio:['#ff6b6b','#b91c1c'],casa:['#2dd4bf','#0f766e'],palestra:['#818cf8','#4338ca'],tempo:['#38bdf8','#0369a1'],kcal:['#ff9a3c','#e0431f'],peso:['#f472b6','#be185d'],salute:['#ff6b6b','#b91c1c'],pillola:['#a78bfa','#6d28d9'],idea:['#fde047','#ca8a04'],fatto:['#4ade80','#15803d'],aiuto:['#60a5fa','#1d4ed8'],oggi:['#a6ff2e','#4d9a0a'],scheda:['#60a5fa','#1d4ed8'],coach:['#c084fc','#7e22ce'],prog:['#ff9a3c','#e0431f']};
 export function tile(name, size = 20) {
   const [a, b] = TILES[name] || TILES.oggi, s = Math.round(size * 1.7);
   const g = icon(name); g.setAttribute('class', 'glyph'); g.style.setProperty('--g', size + 'px');

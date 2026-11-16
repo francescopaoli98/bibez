@@ -1,0 +1,321 @@
+{
+ "items": [
+  {
+   "id": "Cat_Stretch",
+   "nome": "Gatto (schiena rotonda)",
+   "muscoli": "Schiena",
+   "sec": 30,
+   "passi": [
+    "Mettiti a quattro zampe, mani sotto le spalle.",
+    "Porta la pancia in dentro e arrotonda la schiena, testa morbida verso il basso.",
+    "Respira piano e resta lì."
+   ],
+   "consiglio": "Respira lentamente, senza forzare.",
+   "img": [
+    "img/ex/Cat_Stretch/0.jpg",
+    "img/ex/Cat_Stretch/1.jpg"
+   ]
+  },
+  {
+   "id": "Hug_Knees_To_Chest",
+   "nome": "Ginocchia al petto",
+   "muscoli": "Zona lombare e glutei",
+   "sec": 30,
+   "passi": [
+    "Sdraiati sulla schiena.",
+    "Porta le ginocchia al petto e abbraccia le gambe sotto le ginocchia.",
+    "Tira piano verso le spalle e respira."
+   ],
+   "consiglio": "Abbraccia sotto le ginocchia, non sopra.",
+   "img": [
+    "img/ex/Hug_Knees_To_Chest/0.jpg",
+    "img/ex/Hug_Knees_To_Chest/1.jpg"
+   ]
+  },
+  {
+   "id": "Standing_Hip_Circles",
+   "nome": "Cerchi con l'anca",
+   "muscoli": "Anche",
+   "sec": 30,
+   "passi": [
+    "In piedi, tieniti a un appoggio (muro o sedia).",
+    "Alza un ginocchio a 90 gradi.",
+    "Apri l'anca disegnando un grande cerchio col ginocchio, piano. Poi cambia gamba."
+   ],
+   "consiglio": "Movimenti lenti e grandi.",
+   "img": [
+    "img/ex/Standing_Hip_Circles/0.jpg",
+    "img/ex/Standing_Hip_Circles/1.jpg"
+   ]
+  },
+  {
+   "id": "Shoulder_Circles",
+   "nome": "Cerchi con le spalle",
+   "muscoli": "Spalle",
+   "sec": 30,
+   "passi": [
+    "In piedi o seduto, braccia rilassate.",
+    "Porta le spalle avanti, in alto, indietro e in basso, a cerchio.",
+    "Dopo un po' cambia direzione."
+   ],
+   "consiglio": "Spalle morbide, lontane dalle orecchie.",
+   "img": [
+    "img/ex/Shoulder_Circles/0.jpg",
+    "img/ex/Shoulder_Circles/1.jpg"
+   ]
+  },
+  {
+   "id": "Standing_Lateral_Stretch",
+   "nome": "Inclinazione laterale",
+   "muscoli": "Fianchi e addominali",
+   "sec": 30,
+   "passi": [
+    "Gambe un po' più larghe delle anche, ginocchia morbide.",
+    "Una mano sul fianco, l'altro braccio in alto dietro la testa.",
+    "Inclina il busto di lato, poi cambia lato."
+   ],
+   "consiglio": "Non spingere il bacino di lato.",
+   "img": [
+    "img/ex/Standing_Lateral_Stretch/0.jpg",
+    "img/ex/Standing_Lateral_Stretch/1.jpg"
+   ]
+  },
+  {
+   "id": "Standing_Toe_Touches",
+   "nome": "Tocca le punte",
+   "muscoli": "Dietro le cosce",
+   "sec": 30,
+   "passi": [
+    "In piedi, con spazio davanti.",
+    "Piegati in avanti dalla vita, gambe quasi dritte, braccia e testa morbide.",
+    "Lascia pendere il busto e respira."
+   ],
+   "consiglio": "Ginocchia morbide, nessun rimbalzo.",
+   "img": [
+    "img/ex/Standing_Toe_Touches/0.jpg",
+    "img/ex/Standing_Toe_Touches/1.jpg"
+   ]
+  },
+  {
+   "id": "Worlds_Greatest_Stretch",
+   "nome": "Affondo con rotazione",
+   "muscoli": "Anche, cosce e schiena",
+   "sec": 40,
+   "passi": [
+    "Fai un passo avanti in affondo, piede davanti ben appoggiato.",
+    "Mano a terra accanto al piede, gomito verso il basso.",
+    "Ruota il busto e porta il braccio in alto. Poi cambia lato."
+   ],
+   "consiglio": "È il più completo: vai piano.",
+   "img": [
+    "img/ex/Worlds_Greatest_Stretch/0.jpg",
+    "img/ex/Worlds_Greatest_Stretch/1.jpg"
+   ]
+  },
+  {
+   "id": "Ankle_Circles",
+   "nome": "Cerchi con la caviglia",
+   "muscoli": "Caviglie",
+   "sec": 20,
+   "passi": [
+    "Tieniti a un appoggio.",
+    "Alza un piede di poco da terra.",
+    "Disegna cerchi grandi con la punta del piede, poi cambia piede."
+   ],
+   "consiglio": "Cerchi grandi, uno per verso.",
+   "img": [
+    "img/ex/Ankle_Circles/0.jpg",
+    "img/ex/Ankle_Circles/1.jpg"
+   ]
+  },
+  {
+   "id": "Knee_Circles",
+   "nome": "Cerchi con le ginocchia",
+   "muscoli": "Ginocchia",
+   "sec": 20,
+   "passi": [
+    "In piedi, gambe unite, mani sulle ginocchia.",
+    "Muovi le ginocchia a cerchio, piano, respirando.",
+    "Dopo qualche giro cambia verso."
+   ],
+   "consiglio": "Piccoli cerchi, senza dolore.",
+   "img": [
+    "img/ex/Knee_Circles/0.jpg",
+    "img/ex/Knee_Circles/1.jpg"
+   ]
+  },
+  {
+   "id": "Kneeling_Hip_Flexor",
+   "nome": "Anca in ginocchio",
+   "muscoli": "Davanti all'anca",
+   "sec": 30,
+   "passi": [
+    "In ginocchio su un tappetino: un ginocchio davanti, piede a terra.",
+    "Gamba dietro distesa, appoggiata a terra.",
+    "Spingi il bacino in avanti finché senti tirare. Poi cambia lato."
+   ],
+   "consiglio": "Schiena dritta, addome attivo.",
+   "img": [
+    "img/ex/Kneeling_Hip_Flexor/0.jpg",
+    "img/ex/Kneeling_Hip_Flexor/1.jpg"
+   ]
+  },
+  {
+   "id": "Knee_Across_The_Body",
+   "nome": "Ginocchio di lato",
+   "muscoli": "Glutei",
+   "sec": 30,
+   "passi": [
+    "Sdraiato sulla schiena, una gamba dritta.",
+    "Piega l'altra e portala di lato sopra il corpo, tenendo il ginocchio con la mano opposta.",
+    "Respira e lascia andare. Poi cambia lato."
+   ],
+   "consiglio": "Il ginocchio non deve toccare terra.",
+   "img": [
+    "img/ex/Knee_Across_The_Body/0.jpg",
+    "img/ex/Knee_Across_The_Body/1.jpg"
+   ]
+  },
+  {
+   "id": "Standing_Gastrocnemius_Calf_Stretch",
+   "nome": "Polpaccio",
+   "muscoli": "Polpacci",
+   "sec": 30,
+   "passi": [
+    "Appoggia il tallone su un gradino, gamba dritta.",
+    "Piegati in avanti e tira la punta del piede verso di te.",
+    "Senti tirare il polpaccio. Poi cambia gamba."
+   ],
+   "consiglio": "Tieni la schiena dritta.",
+   "img": [
+    "img/ex/Standing_Gastrocnemius_Calf_Stretch/0.jpg",
+    "img/ex/Standing_Gastrocnemius_Calf_Stretch/1.jpg"
+   ]
+  },
+  {
+   "id": "Arm_Circles",
+   "nome": "Cerchi con le braccia",
+   "muscoli": "Spalle",
+   "sec": 30,
+   "passi": [
+    "In piedi, braccia aperte ai lati, all'altezza delle spalle.",
+    "Fai piccoli cerchi con le braccia tese.",
+    "Dopo 10 secondi cambia verso."
+   ],
+   "consiglio": "Cerchi piccoli, braccia tese.",
+   "img": [
+    "img/ex/Arm_Circles/0.jpg",
+    "img/ex/Arm_Circles/1.jpg"
+   ]
+  },
+  {
+   "id": "Dynamic_Chest_Stretch",
+   "nome": "Apri il petto",
+   "muscoli": "Petto",
+   "sec": 30,
+   "passi": [
+    "In piedi, braccia tese davanti, mani unite.",
+    "Porta le braccia indietro il più possibile, poi di nuovo avanti.",
+    "Ripeti, sempre un po' più veloce."
+   ],
+   "consiglio": "Petto in fuori, spalle basse.",
+   "img": [
+    "img/ex/Dynamic_Chest_Stretch/0.jpg",
+    "img/ex/Dynamic_Chest_Stretch/1.jpg"
+   ]
+  },
+  {
+   "id": "Upper_Back_Stretch",
+   "nome": "Schiena alta",
+   "muscoli": "Parte alta della schiena",
+   "sec": 30,
+   "passi": [
+    "In piedi o seduto, intreccia le dita con i pollici in giù.",
+    "Allunga le braccia in avanti e arrotonda le spalle.",
+    "Respira e senti la schiena allungarsi."
+   ],
+   "consiglio": "Spingi le mani lontano da te.",
+   "img": [
+    "img/ex/Upper_Back_Stretch/0.jpg",
+    "img/ex/Upper_Back_Stretch/1.jpg"
+   ]
+  },
+  {
+   "id": "Triceps_Stretch",
+   "nome": "Dietro al braccio",
+   "muscoli": "Tricipiti",
+   "sec": 30,
+   "passi": [
+    "Porta una mano dietro la testa e afferra il gomito con l'altra.",
+    "Tira piano il gomito.",
+    "Resta fermo e respira. Poi cambia braccio."
+   ],
+   "consiglio": "Non spingere la testa in avanti.",
+   "img": [
+    "img/ex/Triceps_Stretch/0.jpg",
+    "img/ex/Triceps_Stretch/1.jpg"
+   ]
+  },
+  {
+   "id": "Side_Neck_Stretch",
+   "nome": "Collo di lato",
+   "muscoli": "Collo",
+   "sec": 30,
+   "passi": [
+    "Spalle rilassate.",
+    "Inclina piano la testa verso una spalla.",
+    "Poi cambia lato. Non forzare."
+   ],
+   "consiglio": "Mai strattoni al collo.",
+   "img": [
+    "img/ex/Side_Neck_Stretch/0.jpg",
+    "img/ex/Side_Neck_Stretch/1.jpg"
+   ]
+  }
+ ],
+ "presets": [
+  {
+   "id": "completo",
+   "nome": "Risveglio completo",
+   "breve": "Tutto il corpo",
+   "items": [
+    "Cat_Stretch",
+    "Hug_Knees_To_Chest",
+    "Standing_Hip_Circles",
+    "Shoulder_Circles",
+    "Standing_Lateral_Stretch",
+    "Standing_Toe_Touches",
+    "Worlds_Greatest_Stretch",
+    "Ankle_Circles"
+   ]
+  },
+  {
+   "id": "gambe",
+   "nome": "Anche e caviglie",
+   "breve": "Prima di un giorno di gambe",
+   "items": [
+    "Ankle_Circles",
+    "Knee_Circles",
+    "Standing_Hip_Circles",
+    "Kneeling_Hip_Flexor",
+    "Knee_Across_The_Body",
+    "Standing_Gastrocnemius_Calf_Stretch",
+    "Standing_Toe_Touches"
+   ]
+  },
+  {
+   "id": "alto",
+   "nome": "Spalle e schiena",
+   "breve": "Prima di un giorno di petto, schiena o spalle",
+   "items": [
+    "Cat_Stretch",
+    "Shoulder_Circles",
+    "Arm_Circles",
+    "Dynamic_Chest_Stretch",
+    "Upper_Back_Stretch",
+    "Triceps_Stretch",
+    "Side_Neck_Stretch"
+   ]
+  }
+ ]
+}

@@ -14,6 +14,7 @@ import { initInstall } from './install.js';
 import * as Sal from './salute.js';
 import { viewProgressi } from './progress.js';
 import { remindersCard } from './reminders.js';
+import { loadRisveglio, viewRisveglio, risvegliPresets, routine, routineMin, autoPreset, presetName, defaultPreset, doneToday } from './risveglio.js';
 import * as Chats from './chats.js';
 import { voiceMode, startVoice } from './voice.js';
 import { coachSystem, parseReply, normChanges, applyChanges, undoChanges, addMemory } from './coach.js';
@@ -61,6 +62,7 @@ const LIVELLI = [['principiante', 'Principiante'], ['intermedio', 'Un po\' di es
 async function boot() {
   applyTheme(); initSound();                      // colori e suoni scelti, subito
   fetch('sw.js').then(r => r.text()).then(t => { APP_VERSION = /VERSION = '([^']+)'/.exec(t)?.[1] || '?'; }).catch(() => {});
+  loadRisveglio();
   try { LIB = await (await fetch('data/exercises.json')).json(); setLib(LIB); }
   catch { render(h('p', { class: 'err' }, 'Impossibile caricare gli esercizi.')); return; }
   if ('serviceWorker' in navigator) {
@@ -121,12 +123,13 @@ async function accessFlow() {
 function rememberDevice0(r) { if (r?.password) keepSignedIn().catch(() => {}); }
 
 const ROUTES = { oggi: viewOggi, scheda: viewScheda, esercizi: viewEsercizi, coach: viewCoach, progressi: () => viewProgressi({ render, LIB, go }),
-                 profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding, guida: viewGuida };
+                 profilo: viewProfilo, allenamento: viewAllenamento, benvenuto: viewOnboarding, guida: viewGuida,
+                 risveglio: (preset, day) => viewRisveglio({ render, go, keepAwake, presetId: preset || defaultPreset(), dayIdx: day }) };
 const TAB_OF = { oggi: 'oggi', profilo: 'oggi', progressi: 'progressi', scheda: 'scheda', esercizi: 'scheda', coach: 'coach' };
 
 function route() {
   closeSheet();
-  let [name, sub] = (location.hash.replace(/^#\/?/, '') || 'oggi').split('/');
+  let [name, sub, sub2] = (location.hash.replace(/^#\/?/, '') || 'oggi').split('/');
   if ((!S.profile || !S.plan) && name !== 'benvenuto') return go('#/benvenuto');
   if (!ROUTES[name]) name = 'oggi';
   const tab = TAB_OF[name];
@@ -136,7 +139,7 @@ function route() {
   renderTabs(tab);
   if (needReload && !S.session && (name === 'oggi' || name === 'scheda' || name === 'coach' || name === 'progressi')) { needReload = false; location.reload(); return; }
   window.scrollTo(0, 0);
-  ROUTES[name](sub || null);
+  ROUTES[name](sub || null, sub2);
   countUps(view);                                 // i numeri salgono da 0
 }
 
@@ -421,6 +424,21 @@ function reminderCards() {
   return out;
 }
 
+// Il giorno ha il risveglio "prima dell'allenamento"? Restituisce il tipo (id) oppure null
+function dayRisveglio(i) {
+  const d = S.plan.giorni[i], v = d?.risveglio;
+  if (!v) return null;
+  if (v !== 'auto') return v;
+  return autoPreset([...new Set(adaptDay(d, S.luogo).map(e => EX(e.id)?.gruppo))].filter(Boolean));
+}
+// Avvia il giorno: con il risveglio prima, se è acceso
+function startDay(i, short = false) {
+  const rv = !short && !S.session && dayRisveglio(i);
+  S.seen = { ...(S.seen || {}), start: true };
+  if (rv) return go(`#/risveglio/${rv}/${i}`);
+  if (!S.session) startSession(i, short);
+  go('#/allenamento');
+}
 // Titolo semplice al posto del nome tecnico ("Full body A"): dice solo cosa si allena
 const GRP = { gambe: 'Gambe', petto: 'Petto', schiena: 'Schiena', spalle: 'Spalle', braccia: 'Braccia', core: 'Addome', cardio: 'Cardio' };
 function friendlyTitle(exs) {
@@ -435,22 +453,37 @@ function livelloTxt(exs) {
   return ['Facile', 'Medio', 'Impegnativo'][Math.min(2, base + big)];
 }
 
+// Carta "Risveglio muscolare" in Oggi (facoltativa, separata dall'allenamento)
+function risvegliCard() {
+  if (S.session || S.settings.risveglio === false || !routine(defaultPreset()).length) return null;
+  const id = defaultPreset(), done = doneToday();
+  return h('div', { class: 'rv' + (done ? ' done' : '') },
+    h('div', { class: 'rvh' }, tile('risveglio', 20), h('div', { class: 'grow' }, h('b', {}, 'Risveglio muscolare'),
+      h('span', {}, done ? 'Fatto oggi ✓' : `${presetName(id)} · ${routine(id).length} esercizi · ${routineMin(id)} min`)),
+      h('button', { class: 'linkbtn rvchg', onclick: () => presetSheet() }, 'Cambia')),
+    h('button', { class: 'rvb', onclick: () => go(`#/risveglio/${id}`) }, done ? 'Rifai il risveglio' : 'Inizia il risveglio'));
+}
+// Scelta del tipo di risveglio (da solo)
+function presetSheet() {
+  openSheet(h('div', { class: 'stack' }, h('h2', {}, 'Che risveglio vuoi?'),
+    risvegliPresets().map(p => h('button', { class: 'ex-item' + (p.id === defaultPreset() ? ' on' : ''), onclick: () => { S.settings.risvegliPreset = p.id; save(); closeSheet(); route(); } },
+      h('div', { class: 'grow' }, h('h3', {}, p.nome), h('div', { class: 'muted small' }, `${p.breve} · ${p.items.length} esercizi · ${routineMin(p.id)} min`)))),
+    h('button', { class: 'btn ghost block', onclick: closeSheet }, 'Chiudi')));
+}
+
 function viewOggi() {
   const day = S.plan.giorni[S.nextDay % S.plan.giorni.length];
   const wk = weekCount(), target = S.profile.giorni;
   const exs = adaptDay(day, S.luogo);
   const kcalWeek = Math.round(thisWeek().reduce((a, w) => a + (w.kcal || 0), 0) / 10) * 10;
   const first = !S.seen?.start && !S.history.length && !S.session;      // la prima volta: invito a toccare il pulsante giusto
-  const startBtn = h('button', { class: 'btn big block start' + (first ? ' pulse' : ''), onclick: () => {
-    S.seen = { ...(S.seen || {}), start: true };
-    if (!S.session) startSession(S.nextDay % S.plan.giorni.length);
-    go('#/allenamento');
-  } }, S.session ? '▶ RIPRENDI L\'ALLENAMENTO' : '▶ INIZIA L\'ALLENAMENTO');
+  const startBtn = h('button', { class: 'btn big block start' + (first ? ' pulse' : ''), onclick: () => startDay(S.nextDay % S.plan.giorni.length) }, S.session ? '▶ RIPRENDI L\'ALLENAMENTO' : '▶ INIZIA L\'ALLENAMENTO');
   render(
     h('div', { class: 'row between' },
       h('div', {}, h('div', { class: 'eyebrow' }, `${saluto()} · ${oggiTxt()}`), h('h1', { class: 'hi' }, utente() ? 'Ciao ' + utente() : 'Ciao')),
       h('div', { class: 'row', style: 'gap:8px' }, helpBtn('oggi'), gear())),
     ...(!S.session ? reminderCards() : []),
+    new Date().getHours() < 12 && risvegliCard(),
     !S.session && luogoSwitch(viewOggi),
     !S.session && homeHint(),
     h('div', { class: 'hero photo' },
@@ -463,9 +496,9 @@ function viewOggi() {
       !S.session && h('button', { class: 'linkbtn', onclick: () => {
         const sh = shortList(exs);
         if (!confirm(`Versione corta: ${sh.length} esercizi, circa ${estMin(sh)} minuti. Iniziamo?`)) return;
-        S.seen = { ...(S.seen || {}), start: true };
-        startSession(S.nextDay % S.plan.giorni.length, true); go('#/allenamento');
+        startDay(S.nextDay % S.plan.giorni.length, true);
       } }, 'Poco tempo? ', h('b', {}, 'Versione da 15 minuti'))),
+    new Date().getHours() >= 12 && risvegliCard(),
     h('div', { class: 'card stack' },
       h('div', { class: 'row between' }, h('h3', {}, 'Questa settimana'), h('span', { class: 'muted small' }, `${wk} / ${target}${kcalWeek ? ' · ~' + kcalWeek + ' kcal' : ''}`)),
       weekDots(),
@@ -497,7 +530,7 @@ function viewScheda() {
   const titles = S.plan.giorni.map(d => friendlyTitle(adaptDay(d, S.luogo)));
   const dup = (i) => titles.filter(t => t === titles[i]).length > 1;            // più giorni con lo stesso titolo: in grande "Giorno N"
 
-  const d = S.plan.giorni[schedaDay], exs = adaptDay(d, S.luogo);
+  const d = S.plan.giorni[schedaDay], exs = adaptDay(d, S.luogo), rvId = dayRisveglio(schedaDay);
   render(
     h('div', { class: 'row between' }, h('div', {}, h('div', { class: 'eyebrow', style: 'text-transform:none' }, `${n} giorni a settimana`), h('h1', { class: 'hi' }, 'La tua scheda')),
       h('div', { class: 'row', style: 'gap:8px' }, helpBtn('scheda'), gear())),
@@ -505,6 +538,10 @@ function viewScheda() {
     h('div', { class: 'daytabs' }, S.plan.giorni.map((_, i) => h('button', { class: 'dtab' + (i === schedaDay ? ' on' : ''), onclick: () => { schedaDay = i; viewScheda(); } },
       h('small', {}, dup(i) ? titles[i] : `Giorno ${i + 1}`), h('b', {}, dup(i) ? `Giorno ${i + 1}` : titles[i])))),
     h('div', { class: 'dmeta' }, h('span', {}, tile('tempo', 12), estMin(exs) + ' min'), h('span', {}, tile('kcal', 12), kcalTxt(exs)), h('span', {}, exs.length + ' esercizi')),
+    dayRvCard(schedaDay, d),
+    rvId && h('div', { class: 'grp2' }, `☀ RISVEGLIO · ${routineMin(rvId)} MIN`),
+    rvId && h('div', { class: 'exlist' }, routine(rvId).map(r => h('div', { class: 'mr' }, h('img', { src: r.img[0], alt: '', loading: 'lazy' }), h('b', {}, r.nome), h('span', {}, r.sec + ' s')))),
+    rvId && h('div', { class: 'grp2' }, `ALLENAMENTO · ${estMin(exs)} MIN`),
     h('div', { class: 'exlist' }, exs.map(e => {
       const ex = EX(e.id);
       return h('button', { class: 'exr', onclick: () => showExercise(e.id) },
@@ -517,7 +554,21 @@ function viewScheda() {
     h('div', { style: 'height:72px' }),
     h('div', { class: 'startday' }, h('button', { class: 'btn big block', onclick: () => {
       if (S.session && !confirm('Hai un allenamento in corso. Vuoi iniziarne un altro?')) return;
-      startSession(schedaDay); go('#/allenamento'); } }, '▶ Inizia questo giorno')));
+      if (S.session) { S.session = null; save(); }
+      startDay(schedaDay); } }, rvId ? '▶ Inizia (risveglio + allenamento)' : '▶ Inizia questo giorno')));
+}
+
+// Interruttore "Risveglio prima dell'allenamento" per un giorno, con la scelta del tipo
+function dayRvCard(i, d) {
+  const on = !!d.risveglio, id = dayRisveglio(i);
+  const set = (v) => { d.risveglio = v; save(); viewScheda(); };
+  const opts = [['auto', 'Scelto dal coach'], ...risvegliPresets().map(p => [p.id, p.nome])];
+  return h('div', { class: 'rvt' },
+    h('div', { class: 'rvx' }, tile('risveglio', 16),
+      h('div', { class: 'grow' }, h('b', {}, 'Risveglio prima dell\'allenamento'), h('span', {}, on ? `${presetName(id)} · ${routineMin(id)} min` : 'Spento: tocca per accenderlo')),
+      h('button', { class: 'sw2' + (on ? ' on' : ''), role: 'switch', 'aria-checked': String(on), 'aria-label': 'Risveglio prima dell\'allenamento', onclick: () => set(on ? false : 'auto') })),
+    on && h('div', { class: 'rvs' }, opts.map(([v, t]) => h('button', { class: v === d.risveglio ? 'on' : '', onclick: () => set(v) }, t))),
+    on && d.risveglio === 'auto' && h('div', { class: 'sug' }, 'Scelto dal coach in base a cosa alleni oggi'));
 }
 
 /* ---------------------------- libreria esercizi ---------------------------- */
@@ -550,7 +601,8 @@ async function keepAwake(on) {
   } catch { wakeLock = null; }
 }
 
-function viewAllenamento() {
+function viewAllenamento(startDay) {
+  if (!S.session && startDay != null && startDay !== '' && !isNaN(+startDay) && S.plan.giorni[+startDay]) startSession(+startDay);
   const s = S.session;
   if (!s) return go('#/oggi');
   keepAwake(true);
@@ -1146,6 +1198,16 @@ function helpCard() {
 }
 
 /* ---------------------------- impostazioni ---------------------------- */
+// Impostazioni del Risveglio: mostrarlo in Oggi e quale tipo usare da solo
+function risvegliSettings() {
+  const on = S.settings.risveglio !== false;
+  return h('div', { class: 'card stack' }, h('h2', {}, 'Risveglio muscolare'),
+    h('p', { class: 'muted small' }, 'Pochi minuti di mobilità e stretching, senza attrezzi: ideale al mattino. Si può fare da solo oppure prima di un giorno di allenamento (dalla tab Scheda).'),
+    h('div', { class: 'row between' }, h('b', {}, 'Mostra in Oggi'),
+      h('button', { class: 'sw2' + (on ? ' on' : ''), role: 'switch', 'aria-checked': String(on), 'aria-label': 'Mostra il risveglio in Oggi', onclick: () => { S.settings.risveglio = !on; save(); viewProfilo(); } })),
+    h('h3', {}, 'Tipo (quando lo fai da solo)'),
+    h('div', { class: 'chips' }, risvegliPresets().map(p => h('button', { class: 'chip lg' + (p.id === defaultPreset() ? ' on' : ''), onclick: () => { S.settings.risvegliPreset = p.id; save(); viewProfilo(); } }, p.nome))));
+}
 let taps = 0, lastTap = 0, profiloSection = null;
 const footBox = () => h('p', { class: 'muted small center' }, 'Immagini esercizi: free-exercise-db (pubblico dominio).');
 function viewProfilo(sec) {
@@ -1236,7 +1298,7 @@ function viewProfilo(sec) {
     peso: ['Peso e misure', () => [bodyCard()]],
     promemoria: ['Promemoria', () => [remindersCard()]],
     guida: ['Aiuto', () => [helpCard()]],
-    obiettivo: ['Obiettivo e scheda', () => [rifaiCard, casaCard]],
+    obiettivo: ['Obiettivo e scheda', () => [rifaiCard, casaCard, risvegliSettings()]],
     ia: ['Coach IA', () => [aiCard]],
     avanzate: ['Avanzate', () => [avCard]],
   };
